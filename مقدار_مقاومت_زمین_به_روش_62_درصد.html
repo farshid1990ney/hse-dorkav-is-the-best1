@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محاسبه مقاومت زمین به روش 62 درصد</title>
+    <style>
+        :root {
+            --primary: #ff6208;
+            --primary-hover: #e05300;
+            --secondary: #f39c12;
+            --success: #27ae60;
+            --safety: #2c6e4e;
+            --danger: #c0392b;
+            --dark-blue: #1e3c5c;
+            --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #dfe7f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --text-main: #1e2a2e;
+            --text-muted: #64748b;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .main-container {
+            max-width: 800px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            background: var(--dark-blue);
+            padding: 30px 20px;
+            color: white;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        .header h1 .icon {
+            margin-left: 10px;
+        }
+        .header p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        /* استایل کارت‌ها */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+        .card:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        }
+        .card-title {
+            color: var(--dark-blue);
+            font-size: 1.15rem;
+            font-weight: bold;
+            border-right: 4px solid var(--primary);
+            padding-right: 12px;
+            margin-bottom: 15px;
+        }
+        .card-title .icon {
+            margin-left: 8px;
+        }
+
+        /* فرم */
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--dark-blue);
+        }
+        .form-group label .unit {
+            font-weight: normal;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius-sm);
+            font-size: 1rem;
+            transition: var(--transition);
+            background: var(--card-bg);
+            color: var(--text-main);
+            text-align: center;
+        }
+        .form-group input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255, 98, 8, 0.15);
+        }
+        .form-group input::placeholder {
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+
+        .datetime-display {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: var(--border-radius-sm);
+        }
+
+        .btn-row-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 5px;
+        }
+        .btn-action {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            flex: 1;
+            min-width: 100px;
+        }
+        .btn-action:hover {
+            transform: translateY(-2px);
+        }
+        .btn-calculate {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-calculate:hover {
+            background: var(--primary-hover);
+            box-shadow: 0 5px 15px rgba(255, 98, 8, 0.3);
+        }
+        .btn-reset {
+            background: var(--text-muted);
+            color: white;
+        }
+        .btn-reset:hover {
+            background: #4a5568;
+        }
+        .btn-export {
+            background: var(--success);
+            color: white;
+        }
+        .btn-export:hover {
+            background: #1e8449;
+        }
+
+        /* جدول نتایج */
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 0.95rem;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        .results-table.show {
+            display: table;
+        }
+        .results-table th,
+        .results-table td {
+            padding: 12px 15px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        .results-table th {
+            background: var(--dark-blue);
+            color: white;
+            font-weight: bold;
+        }
+        .results-table tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .results-table .value-highlight {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        /* وضعیت خطا */
+        .error-status {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: var(--border-radius-sm);
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        .error-status.show {
+            display: block;
+        }
+        .error-status.success {
+            background: rgba(39, 174, 96, 0.08);
+            border: 2px solid var(--success);
+        }
+        .error-status.warning {
+            background: rgba(243, 156, 18, 0.08);
+            border: 2px solid var(--secondary);
+        }
+        .error-status.danger {
+            background: rgba(192, 57, 43, 0.08);
+            border: 2px solid var(--danger);
+        }
+        .error-status .error-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        .error-status .error-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* راهنما */
+        .guide-section {
+            background: rgba(44, 110, 78, 0.04);
+            border-radius: var(--border-radius-sm);
+            padding: 18px;
+            margin-top: 15px;
+            border-right: 4px solid var(--safety);
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .guide-section.show {
+            display: block;
+        }
+        .guide-section h3 {
+            color: var(--safety);
+            margin-bottom: 12px;
+        }
+        .guide-section ul {
+            padding-right: 20px;
+            margin: 10px 0;
+        }
+        .guide-section ul li {
+            margin-bottom: 6px;
+        }
+        .guide-section .formula-box {
+            background: rgba(0, 0, 0, 0.03);
+            padding: 12px 15px;
+            border-radius: var(--border-radius-sm);
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            margin: 10px 0;
+            direction: ltr;
+            border: 1px dashed rgba(0, 0, 0, 0.1);
+        }
+        .guide-section .example-box {
+            background: rgba(243, 156, 18, 0.06);
+            padding: 12px 15px;
+            border-radius: var(--border-radius-sm);
+            border-right: 3px solid var(--secondary);
+            margin: 10px 0;
+        }
+
+        /* دکمه‌ها */
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn-guide {
+            background: var(--safety);
+            color: white;
+        }
+        .btn-guide:hover {
+            background: #1e4f3a;
+        }
+        .btn-back {
+            background: var(--danger);
+            color: white;
+        }
+        .btn-back:hover {
+            background: #a93226;
+        }
+
+        /* فوتر */
+        .footer {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .footer .highlight {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media(max-width:600px) {
+            .content {
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            .btn-row-actions {
+                flex-direction: column;
+            }
+            .btn-action {
+                width: 100%;
+            }
+            .btn-row {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            .results-table {
+                font-size: 0.8rem;
+            }
+            .results-table th,
+            .results-table td {
+                padding: 8px 6px;
+            }
+            .error-status .error-value {
+                font-size: 1.6rem;
+            }
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Toast */
+        #toastContainer {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            width: 90%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+        .toast-item {
+            background: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            margin-bottom: 10px;
+            font-weight: 500;
+            animation: slideDown 0.3s ease;
+            direction: rtl;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1><span class="icon">🧲</span> محاسبه مقاومت زمین به روش ۶۲ درصد</h1>
+            <p>اندازه‌گیری مقاومت زمین با روش FOP و محاسبه درصد خطا</p>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <!-- فرم ورودی -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📝</span> اطلاعات پروژه و مقاومت‌ها</div>
+
+                <div class="form-group">
+                    <label>نام پروژه</label>
+                    <input type="text" id="projectName" placeholder="مثال: پروژه برق ساختمان شماره ۳">
+                </div>
+
+                <div class="datetime-display" id="datetime">—</div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>مقاومت اول <span class="unit">(۶۲%) R1 — اهم</span></label>
+                        <input type="text" id="R1" placeholder="مثال: 2.5">
+                    </div>
+                    <div class="form-group">
+                        <label>مقاومت دوم <span class="unit">(۷۲%) R2 — اهم</span></label>
+                        <input type="text" id="R2" placeholder="مثال: 2.8">
+                    </div>
+                    <div class="form-group">
+                        <label>مقاومت سوم <span class="unit">(۵۲%) R3 — اهم</span></label>
+                        <input type="text" id="R3" placeholder="مثال: 2.3">
+                    </div>
+                </div>
+
+                <div class="btn-row-actions">
+                    <button class="btn-action btn-calculate" id="calculateBtn">🔢 محاسبه</button>
+                    <button class="btn-action btn-reset" onclick="resetForm()">🔄 ریست</button>
+                    <button class="btn-action btn-export" onclick="exportCSV()">📤 خروجی CSV</button>
+                </div>
+            </div>
+
+            <!-- نتایج -->
+            <div class="card" id="resultsCard">
+                <div class="card-title"><span class="icon">📊</span> نتایج اندازه‌گیری</div>
+
+                <table class="results-table" id="resultsTable">
+                    <thead>
+                        <tr>
+                            <th>مقدار</th>
+                            <th>نتیجه</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>نام پروژه</td>
+                            <td id="projectNameResult">—</td>
+                        </tr>
+                        <tr>
+                            <td>تاریخ و ساعت</td>
+                            <td id="dateTimeResult">—</td>
+                        </tr>
+                        <tr>
+                            <td>روش اندازه‌گیری</td>
+                            <td><strong>FOP</strong> (Fall of Potential)</td>
+                        </tr>
+                        <tr>
+                            <td>میانگین مقاومت (R<sub>av</sub>)</td>
+                            <td id="Rav" class="value-highlight">—</td>
+                        </tr>
+                        <tr>
+                            <td>بزرگترین اختلاف (F)</td>
+                            <td id="F" class="value-highlight">—</td>
+                        </tr>
+                        <tr>
+                            <td>درصد خطا (E)</td>
+                            <td id="E" class="value-highlight">—</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="error-status" id="errorStatus">
+                    <div class="error-value" id="errorValue">—</div>
+                    <div class="error-label" id="errorLabel">—</div>
+                </div>
+            </div>
+
+            <!-- راهنما -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📖</span> راهنمای روش ۶۲ درصد</div>
+                <button class="btn btn-guide" onclick="toggleGuide()">📋 نمایش / مخفی کردن راهنما</button>
+
+                <div class="guide-section" id="guideSection">
+                    <h3>📖 راهنمای روش ۶۲ درصد (FOP)</h3>
+
+                    <p><strong>روش افت پتانسیل (Fall of Potential)</strong> یکی از دقیق‌ترین روش‌های اندازه‌گیری مقاومت زمین است.</p>
+
+                    <h4 style="color:var(--dark-blue); margin-top:12px;">🔹 فرمول‌های محاسبه:</h4>
+                    <div class="formula-box">
+                        R<sub>av</sub> = (R1 + R2 + R3) ÷ 3
+                    </div>
+                    <div class="formula-box">
+                        F = max(|R<sub>av</sub> − R1|, |R<sub>av</sub> − R2|, |R<sub>av</sub> − R3|)
+                    </div>
+                    <div class="formula-box">
+                        E = (120 × F) ÷ R<sub>av</sub>
+                    </div>
+
+                    <h4 style="color:var(--dark-blue); margin-top:12px;">🔹 معیار پذیرش:</h4>
+                    <ul>
+                        <li><strong>E &lt; 5%</strong> — ✅ اندازه‌گیری دقیق و قابل قبول</li>
+                        <li><strong>5% ≤ E ≤ 10%</strong> — ⚠️ خطای قابل قبول، اما نیاز به دقت بیشتر</li>
+                        <li><strong>E &gt; 10%</strong> — ❌ خطای بالا، نیاز به اندازه‌گیری مجدد</li>
+                    </ul>
+
+                    <h4 style="color:var(--dark-blue); margin-top:12px;">🔹 مراحل اندازه‌گیری:</h4>
+                    <ol style="padding-right:20px;">
+                        <li>الکترود کمکی جریان (C1) را در فاصله مناسب از الکترود زمین قرار دهید.</li>
+                        <li>الکترود کمکی پتانسیل (P1) را در ۶۲% فاصله بین دو الکترود قرار دهید.</li>
+                        <li>مقاومت R1 را در این موقعیت بخوانید.</li>
+                        <li>الکترود P1 را به ۷۲% و سپس ۵۲% فاصله منتقل کنید.</li>
+                        <li>مقادیر R2 و R3 را بخوانید.</li>
+                        <li>با استفاده از فرمول‌های بالا، مقاومت واقعی و درصد خطا را محاسبه کنید.</li>
+                    </ol>
+
+                    <div class="example-box">
+                        <strong>📌 مثال:</strong>
+                        <p>R1 = 2.5 Ω, R2 = 2.8 Ω, R3 = 2.3 Ω</p>
+                        <div class="formula-box" style="direction:ltr; text-align:center; font-size:0.9rem;">
+                            Rav = (2.5 + 2.8 + 2.3) ÷ 3 = 2.53 Ω<br>
+                            F = max(|2.53-2.5|, |2.53-2.8|, |2.53-2.3|) = 0.23<br>
+                            E = (120 × 0.23) ÷ 2.53 = 10.91%
+                        </div>
+                        <p><strong>نتیجه:</strong> E = 10.91% &gt; 10% ❌ نیاز به اندازه‌گیری مجدد</p>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+        تهیه شده توسط <span class="highlight">شرکت معدنی و صنایع معدنی درکاو</span> &nbsp;|&nbsp;
+            <span style="direction:ltr; display:inline-block;">📞 09178680173</span>
+        </div>
+    </div>
+
+    <div id="toastContainer"></div>
+
+    <script>
+        // آپدیت زمان
+        function updateDateTime() {
+            const now = new Date();
+            const datetimeString = now.toLocaleDateString('fa-IR') + ' — ' + now.toLocaleTimeString('fa-IR');
+            document.getElementById('datetime').textContent = '🕐 ' + datetimeString;
+        }
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
+        // محاسبه
+        document.getElementById('calculateBtn').addEventListener('click', function() {
+            calculate();
+        });
+
+        function calculate() {
+            const projectName = document.getElementById('projectName').value.trim();
+            const R1 = parseFloat(document.getElementById('R1').value);
+            const R2 = parseFloat(document.getElementById('R2').value);
+            const R3 = parseFloat(document.getElementById('R3').value);
+
+            // اعتبارسنجی
+            if (!projectName) {
+                showToast('⚠️ لطفاً نام پروژه را وارد کنید.', '#f39c12');
+                return;
+            }
+            if (isNaN(R1) || isNaN(R2) || isNaN(R3)) {
+                showToast('⚠️ لطفاً هر سه مقدار مقاومت را وارد کنید.', '#f39c12');
+                return;
+            }
+            if (R1 <= 0 || R2 <= 0 || R3 <= 0) {
+                showToast('⚠️ مقادیر مقاومت باید بزرگتر از صفر باشند.', '#f39c12');
+                return;
+            }
+
+            // محاسبات
+            const Rav = (R1 + R2 + R3) / 3;
+            const diff1 = Math.abs(Rav - R1);
+            const diff2 = Math.abs(Rav - R2);
+            const diff3 = Math.abs(Rav - R3);
+            const F = Math.max(diff1, diff2, diff3);
+            const E = (120 * F) / Rav;
+
+            // نمایش نتایج در جدول
+            document.getElementById('projectNameResult').textContent = projectName;
+            document.getElementById('dateTimeResult').textContent = new Date().toLocaleString('fa-IR');
+            document.getElementById('Rav').textContent = Rav.toFixed(3) + ' Ω';
+            document.getElementById('F').textContent = F.toFixed(3) + ' Ω';
+            document.getElementById('E').textContent = E.toFixed(2) + '%';
+
+            const table = document.getElementById('resultsTable');
+            table.classList.add('show');
+
+            // نمایش وضعیت خطا
+            const statusDiv = document.getElementById('errorStatus');
+            const errorValue = document.getElementById('errorValue');
+            const errorLabel = document.getElementById('errorLabel');
+
+            errorValue.textContent = E.toFixed(2) + '%';
+            statusDiv.classList.add('show');
+
+            if (E < 5) {
+                statusDiv.className = 'error-status show success';
+                errorLabel.textContent = '✅ اندازه‌گیری دقیق — نتیجه قابل قبول است';
+                showToast('✅ اندازه‌گیری دقیق و قابل قبول است.', '#27ae60');
+            } else if (E <= 10) {
+                statusDiv.className = 'error-status show warning';
+                errorLabel.textContent = '⚠️ خطای قابل قبول — توصیه به دقت بیشتر در اندازه‌گیری';
+                showToast('⚠️ خطای قابل قبول، اما دقت بیشتر توصیه می‌شود.', '#f39c12');
+            } else {
+                statusDiv.className = 'error-status show danger';
+                errorLabel.textContent = '❌ خطای بالا — نیاز به اندازه‌گیری مجدد';
+                showToast('❌ خطای بالا — نیاز به اندازه‌گیری مجدد.', '#c0392b');
+            }
+
+            // اسکرول به نتایج
+            setTimeout(() => {
+                document.getElementById('resultsCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 200);
+        }
+
+        // ریست
+        function resetForm() {
+            document.getElementById('projectName').value = '';
+            document.getElementById('R1').value = '';
+            document.getElementById('R2').value = '';
+            document.getElementById('R3').value = '';
+            document.getElementById('resultsTable').classList.remove('show');
+            document.getElementById('errorStatus').classList.remove('show');
+            document.getElementById('errorStatus').className = 'error-status';
+            showToast('🔄 تمام مقادیر پاک شدند.', '#3498db');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // خروجی CSV
+        function exportCSV() {
+            const table = document.getElementById('resultsTable');
+            if (!table.classList.contains('show')) {
+                showToast('⚠️ ابتدا محاسبات را انجام دهید.', '#f39c12');
+                return;
+            }
+
+            const rows = table.querySelectorAll('tr');
+            let csv = '';
+            rows.forEach(row => {
+                const cols = row.querySelectorAll('th, td');
+                const rowData = [];
+                cols.forEach(col => rowData.push(col.textContent.trim()));
+                csv += rowData.join(',') + '\n';
+            });
+
+            // اضافه کردن وضعیت خطا
+            const statusDiv = document.getElementById('errorStatus');
+            if (statusDiv.classList.contains('show')) {
+                const errorText = statusDiv.textContent.trim();
+                csv += '\nوضعیت خطا,' + errorText;
+            }
+
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'نتایج_مقاومت_زمین.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showToast('✅ فایل CSV با موفقیت دانلود شد.', '#27ae60');
+        }
+
+        // راهنما
+        function toggleGuide() {
+            const guide = document.getElementById('guideSection');
+            guide.classList.toggle('show');
+            if (guide.classList.contains('show')) {
+                setTimeout(() => {
+                    guide.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 200);
+            }
+        }
+
+        // بازگشت
+        function goBack() {
+            window.history.back();
+        }
+
+        // Toast
+        function showToast(message, color = '#3498db') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast-item';
+            toast.style.borderRight = `5px solid ${color}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-20px)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // پشتیبانی از Enter
+        document.querySelectorAll('#R1, #R2, #R3, #projectName').forEach(input => {
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('calculateBtn').click();
+                }
+            });
+        });
+
+        console.log('✅ ماشین حساب مقاومت زمین بارگذاری شد.');
+        console.log('📌 روش اندازه‌گیری: FOP (Fall of Potential)');
+    </script>
+
+<script src="hse-common.js"></script>
+
+</body>
+</html>

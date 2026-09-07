@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محاسبه بار مجاز سیم بکسل</title>
+    <style>
+        :root {
+            --primary: #ff6208;
+            --primary-hover: #e05300;
+            --secondary: #f39c12;
+            --success: #27ae60;
+            --safety: #2c6e4e;
+            --danger: #c0392b;
+            --dark-blue: #1e3c5c;
+            --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #dfe7f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --text-main: #1e2a2e;
+            --text-muted: #64748b;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .main-container {
+            max-width: 800px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            background: var(--dark-blue);
+            padding: 30px 20px;
+            color: white;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        .header h1 .icon {
+            margin-left: 10px;
+        }
+        .header p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        /* استایل کارت‌ها */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+        .card:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        }
+        .card-title {
+            color: var(--dark-blue);
+            font-size: 1.15rem;
+            font-weight: bold;
+            border-right: 4px solid var(--primary);
+            padding-right: 12px;
+            margin-bottom: 15px;
+        }
+        .card-title .icon {
+            margin-left: 8px;
+        }
+
+        /* کنترل‌ها */
+        .controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .controls .size-slider {
+            flex: 1;
+            min-width: 150px;
+        }
+        .controls input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #dfe6e9;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .controls input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(255, 98, 8, 0.3);
+        }
+        .controls input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+        .controls input[type="range"]::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+        }
+
+        .size-display {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 10px 0;
+        }
+        .size-display .unit-label {
+            font-size: 1rem;
+            color: var(--text-muted);
+            font-weight: normal;
+        }
+
+        .unit-btn {
+            background: var(--dark-blue);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: bold;
+            font-size: 0.95rem;
+            white-space: nowrap;
+        }
+        .unit-btn:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* نتایج */
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .result-item {
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: var(--border-radius-sm);
+            padding: 16px;
+            text-align: center;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+        .result-item:hover {
+            border-color: var(--primary);
+        }
+        .result-item .label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        .result-item .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--dark-blue);
+        }
+        .result-item .value.fiber {
+            color: #2980b9;
+        }
+        .result-item .value.steel {
+            color: #e67e22;
+        }
+        .result-item .unit {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .result-item .icon-badge {
+            font-size: 1.5rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* جدول کامل */
+        .full-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 0.85rem;
+        }
+        .full-table th,
+        .full-table td {
+            padding: 8px 10px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        .full-table th {
+            background: var(--dark-blue);
+            color: white;
+            font-weight: bold;
+        }
+        .full-table tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .full-table tr:hover {
+            background: rgba(255, 98, 8, 0.04);
+        }
+        .full-table .highlight-row {
+            background: rgba(255, 98, 8, 0.06);
+            font-weight: bold;
+        }
+        .full-table .highlight-row td {
+            border-color: var(--primary);
+        }
+
+        .table-note {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        /* دکمه‌ها */
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn-back {
+            background: var(--danger);
+            color: white;
+        }
+        .btn-back:hover {
+            background: #a93226;
+        }
+        .btn-reset {
+            background: var(--text-muted);
+            color: white;
+        }
+        .btn-reset:hover {
+            background: #4a5568;
+        }
+
+        /* فوتر */
+        .footer {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .footer .highlight {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .safety-tip {
+            background: rgba(192, 57, 43, 0.04);
+            border-right: 3px solid var(--danger);
+            padding: 12px 15px;
+            border-radius: var(--border-radius-sm);
+            margin-top: 10px;
+        }
+        .safety-tip strong {
+            color: var(--danger);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media(max-width:600px) {
+            .content {
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            .controls {
+                flex-direction: column;
+            }
+            .unit-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            .btn-row {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            .size-display {
+                font-size: 1.4rem;
+            }
+            .result-item .value {
+                font-size: 1.6rem;
+            }
+            .full-table {
+                font-size: 0.7rem;
+            }
+            .full-table th,
+            .full-table td {
+                padding: 4px 5px;
+            }
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1><span class="icon">🪢</span> محاسبه بار مجاز سیم بکسل</h1>
+            <p>تعیین ظرفیت بار مجاز سیم بکسل بر اساس سایز و نوع مغز</p>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <!-- کنترل‌ها -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🎚️</span> انتخاب سایز سیم بکسل</div>
+
+                <div class="controls">
+                    <div class="size-slider">
+                        <input type="range" id="sizeSlider" min="0" max="13" value="0" step="1">
+                    </div>
+                    <button class="unit-btn" id="unitBtn">🔄 تبدیل واحد</button>
+                </div>
+
+                <div class="size-display">
+                    <span id="sizeValue">12</span>
+                    <span class="unit-label" id="unitDisplay">میلی‌متر</span>
+                </div>
+            </div>
+
+            <!-- نتایج -->
+            <div class="card">
+                <div class="card-title"><span class="icon">⚖️</span> بار مجاز سیم بکسل</div>
+
+                <div class="results-grid">
+                    <div class="result-item">
+                        <span class="icon-badge">🔵</span>
+                        <div class="label">مغز کنفی (Fiber Core)</div>
+                        <div class="value fiber" id="fiberCore">1.71</div>
+                        <div class="unit">تن</div>
+                    </div>
+                    <div class="result-item">
+                        <span class="icon-badge">🟠</span>
+                        <div class="label">مغز فولادی (Steel Core)</div>
+                        <div class="value steel" id="steelCore">1.84</div>
+                        <div class="unit">تن</div>
+                    </div>
+                </div>
+
+                <div class="safety-tip">
+                    <strong>⚠️ نکته ایمنی:</strong> بار مجاز اعلام شده برای سیم بکسل‌های نو و سالم است. در صورت مشاهده هرگونه ساییدگی، پارگی یا تغییر شکل، ظرفیت بار کاهش می‌یابد.
+                </div>
+            </div>
+
+            <!-- جدول کامل -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📋</span> جدول کامل بار مجاز سیم بکسل</div>
+
+                <table class="full-table" id="fullTable">
+                    <thead>
+                        <tr>
+                            <th>سایز (mm)</th>
+                            <th>مغز کنفی (تن)</th>
+                            <th>مغز فولادی (تن)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- توسط JS پر می‌شود -->
+                    </tbody>
+                </table>
+                <div class="table-note">📌 بارهای مجاز بر اساس استانداردهای بین‌المللی محاسبه شده‌اند.</div>
+            </div>
+
+            <!-- دکمه‌ها -->
+            <div class="btn-row">
+                <button class="btn btn-reset" onclick="resetSlider()">🔄 بازنشانی به ۱۲ میلی‌متر</button>
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+        تهیه شده توسط <span class="highlight">شرکت معدنی و صنایع معدنی درکاو</span> &nbsp;|&nbsp;
+            <span style="direction:ltr; display:inline-block;">📞 09178680173</span>
+        </div>
+    </div>
+
+    <script>
+        // داده‌های سیم بکسل
+        const sizes = [12, 14, 16, 18, 20, 22, 24, 26, 28, 32, 36, 40, 44, 48];
+        const loadData = {
+            12: { fiber: 1.71, steel: 1.84 },
+            14: { fiber: 2.32, steel: 2.52 },
+            16: { fiber: 3.04, steel: 3.28 },
+            18: { fiber: 3.84, steel: 4.16 },
+            20: { fiber: 4.76, steel: 5.12 },
+            22: { fiber: 5.74, steel: 6.20 },
+            24: { fiber: 6.84, steel: 7.38 },
+            26: { fiber: 8.02, steel: 8.66 },
+            28: { fiber: 9.32, steel: 10.06 },
+            32: { fiber: 12.16, steel: 13.14 },
+            36: { fiber: 15.40, steel: 16.62 },
+            40: { fiber: 19.00, steel: 20.00 },
+            44: { fiber: 23.00, steel: 24.80 },
+            48: { fiber: 27.40, steel: 29.60 }
+        };
+
+        let currentUnit = 'mm';
+        const unitNames = { mm: 'میلی‌متر', m: 'متر', in: 'اینچ' };
+        const unitFactors = { mm: 1, m: 0.001, in: 0.0393701 };
+
+        // پر کردن جدول کامل
+        function populateTable() {
+            const tbody = document.getElementById('tableBody');
+            let html = '';
+            sizes.forEach((size, index) => {
+                const data = loadData[size];
+                const isHighlight = index === parseInt(document.getElementById('sizeSlider').value);
+                html += `<tr class="${isHighlight ? 'highlight-row' : ''}">
+                    <td><strong>${size}</strong></td>
+                    <td>${data.fiber.toFixed(2)}</td>
+                    <td>${data.steel.toFixed(2)}</td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // بروزرسانی مقادیر
+        function updateValues() {
+            const slider = document.getElementById('sizeSlider');
+            const sizeIndex = parseInt(slider.value);
+            const originalSize = sizes[sizeIndex];
+
+            let displaySize = originalSize * unitFactors[currentUnit];
+            let displayUnit = unitNames[currentUnit];
+
+            // فرمت نمایش
+            let sizeStr;
+            if (currentUnit === 'mm') {
+                sizeStr = originalSize.toString();
+            } else if (currentUnit === 'm') {
+                sizeStr = (originalSize / 1000).toFixed(3);
+            } else {
+                sizeStr = (originalSize * 0.0393701).toFixed(2);
+            }
+
+            document.getElementById('sizeValue').textContent = sizeStr;
+            document.getElementById('unitDisplay').textContent = displayUnit;
+            document.getElementById('fiberCore').textContent = loadData[originalSize].fiber.toFixed(2);
+            document.getElementById('steelCore').textContent = loadData[originalSize].steel.toFixed(2);
+
+            // بروزرسانی هایلایت در جدول
+            populateTable();
+        }
+
+        // تغییر واحد
+        function toggleUnit() {
+            const units = ['mm', 'm', 'in'];
+            currentUnit = units[(units.indexOf(currentUnit) + 1) % 3];
+            document.getElementById('unitBtn').textContent = `🔄 تبدیل واحد (${unitNames[currentUnit]})`;
+            updateValues();
+        }
+
+        // بازنشانی به ۱۲ میلی‌متر
+        function resetSlider() {
+            document.getElementById('sizeSlider').value = 0;
+            currentUnit = 'mm';
+            document.getElementById('unitBtn').textContent = '🔄 تبدیل واحد (میلی‌متر)';
+            updateValues();
+            showToast('🔄 سایز به ۱۲ میلی‌متر بازنشانی شد.', '#3498db');
+        }
+
+        // بازگشت
+        function goBack() {
+            window.history.back();
+        }
+
+        // Toast
+        function showToast(message, color = '#3498db') {
+            const container = document.getElementById('toastContainer') || createToastContainer();
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                background: white;
+                padding: 12px 20px;
+                border-radius: 12px;
+                border-right: 5px solid ${color};
+                box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+                margin-bottom: 10px;
+                font-weight: 500;
+                animation: slideDown 0.3s ease;
+                direction: rtl;
+            `;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-20px)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        function createToastContainer() {
+            const container = document.createElement('div');
+            container.id = 'toastContainer';
+            container.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 9999;
+                width: 90%;
+                max-width: 500px;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                pointer-events: none;
+            `;
+            document.body.appendChild(container);
+            return container;
+        }
+
+        // رویدادها
+        document.getElementById('sizeSlider').addEventListener('input', updateValues);
+        document.getElementById('unitBtn').addEventListener('click', toggleUnit);
+
+        // اضافه کردن استایل انیمیشن
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideDown {
+                from { opacity: 0; transform: translateY(-20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // مقداردهی اولیه
+        populateTable();
+        updateValues();
+
+        console.log('✅ ماشین حساب سیم بکسل بارگذاری شد.');
+        console.log('📊 تعداد سایزهای موجود:', sizes.length);
+    </script>
+
+<script src="hse-common.js"></script>
+
+</body>
+</html>

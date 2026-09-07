@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محاسبه ضریب شدت تکرار حادثه (FSI)</title>
+    <style>
+        :root {
+            --primary: #ff6208;
+            --primary-hover: #e05300;
+            --secondary: #f39c12;
+            --success: #27ae60;
+            --safety: #2c6e4e;
+            --danger: #c0392b;
+            --dark-blue: #1e3c5c;
+            --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #dfe7f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --text-main: #1e2a2e;
+            --text-muted: #64748b;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .main-container {
+            max-width: 800px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            background: var(--dark-blue);
+            padding: 30px 20px;
+            color: white;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        .header h1 .icon {
+            margin-left: 10px;
+        }
+        .header p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        /* استایل کارت‌ها */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+        .card:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        }
+        .card-title {
+            color: var(--dark-blue);
+            font-size: 1.15rem;
+            font-weight: bold;
+            border-right: 4px solid var(--primary);
+            padding-right: 12px;
+            margin-bottom: 15px;
+        }
+        .card-title .icon {
+            margin-left: 8px;
+        }
+
+        /* فرم */
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--dark-blue);
+        }
+        .form-group label .unit {
+            font-weight: normal;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius-sm);
+            font-size: 1rem;
+            transition: var(--transition);
+            background: var(--card-bg);
+            color: var(--text-main);
+            text-align: center;
+        }
+        .form-group input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255, 98, 8, 0.15);
+        }
+        .form-group input::placeholder {
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+
+        .calculate-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 5px;
+        }
+        .calculate-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 98, 8, 0.3);
+        }
+        .calculate-btn:active {
+            transform: translateY(0);
+        }
+
+        /* جدول نتایج */
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 0.95rem;
+        }
+        .results-table th,
+        .results-table td {
+            padding: 12px 15px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        .results-table th {
+            background: var(--dark-blue);
+            color: white;
+            font-weight: bold;
+        }
+        .results-table tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .results-table .sr-row td:first-child { border-right: 4px solid #3498db; }
+        .results-table .fr-row td:first-child { border-right: 4px solid var(--secondary); }
+        .results-table .fsi-row td:first-child { border-right: 4px solid var(--primary); }
+
+        .results-table .status-pass {
+            color: var(--success);
+            font-weight: bold;
+        }
+        .results-table .status-fail {
+            color: var(--danger);
+            font-weight: bold;
+        }
+        .results-table .status-medium {
+            color: var(--secondary);
+            font-weight: bold;
+        }
+
+        /* فرمول‌ها */
+        .formula-box {
+            background: rgba(0, 0, 0, 0.03);
+            padding: 12px 15px;
+            border-radius: var(--border-radius-sm);
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            margin: 8px 0;
+            direction: ltr;
+            border: 1px dashed rgba(0, 0, 0, 0.1);
+        }
+        .formula-box sub {
+            font-size: 0.75rem;
+        }
+
+        .fsi-result-box {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: var(--border-radius-sm);
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        .fsi-result-box.show {
+            display: block;
+        }
+        .fsi-result-box.success {
+            background: rgba(39, 174, 96, 0.08);
+            border: 2px solid var(--success);
+        }
+        .fsi-result-box.danger {
+            background: rgba(192, 57, 43, 0.08);
+            border: 2px solid var(--danger);
+        }
+        .fsi-result-box .fsi-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--dark-blue);
+            margin: 8px 0;
+        }
+        .fsi-result-box .fsi-status {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        /* راهنما */
+        .guide-section {
+            background: rgba(44, 110, 78, 0.04);
+            border-radius: var(--border-radius-sm);
+            padding: 18px;
+            margin-top: 15px;
+            border-right: 4px solid var(--safety);
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .guide-section.show {
+            display: block;
+        }
+        .guide-section h3 {
+            color: var(--safety);
+            margin-bottom: 12px;
+        }
+        .guide-section ul {
+            padding-right: 20px;
+            margin: 10px 0;
+        }
+        .guide-section ul li {
+            margin-bottom: 6px;
+        }
+        .guide-section .example-box {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 12px 15px;
+            border-radius: var(--border-radius-sm);
+            margin: 10px 0;
+            border-right: 3px solid var(--secondary);
+        }
+        .guide-section .example-box pre {
+            direction: ltr;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            background: rgba(0, 0, 0, 0.03);
+            padding: 10px;
+            border-radius: 6px;
+            margin: 5px 0;
+            white-space: pre-wrap;
+        }
+
+        /* دکمه‌ها */
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn-guide {
+            background: var(--safety);
+            color: white;
+        }
+        .btn-guide:hover {
+            background: #1e4f3a;
+        }
+        .btn-back {
+            background: var(--danger);
+            color: white;
+        }
+        .btn-back:hover {
+            background: #a93226;
+        }
+        .btn-reset {
+            background: var(--text-muted);
+            color: white;
+        }
+        .btn-reset:hover {
+            background: #4a5568;
+        }
+
+        /* فوتر */
+        .footer {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .footer .highlight {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media(max-width:600px) {
+            .content {
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            .btn-row {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            .fsi-result-box .fsi-value {
+                font-size: 2rem;
+            }
+            .results-table {
+                font-size: 0.8rem;
+            }
+            .results-table th,
+            .results-table td {
+                padding: 8px 6px;
+            }
+            .formula-box {
+                font-size: 0.8rem;
+                padding: 8px 10px;
+            }
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Toast */
+        #toastContainer {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            width: 90%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+        .toast-item {
+            background: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            margin-bottom: 10px;
+            font-weight: 500;
+            animation: slideDown 0.3s ease;
+            direction: rtl;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1><span class="icon">📊</span> محاسبه ضریب شدت تکرار حادثه</h1>
+            <p>محاسبه SR، FR و FSI برای ارزیابی عملکرد ایمنی</p>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <!-- فرم ورودی -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📝</span> اطلاعات ورودی</div>
+
+                <div class="form-group">
+                    <label>کل روزهای از دست رفته <span class="unit">(روز)</span></label>
+                    <input type="number" id="lostDays" step="0.5" min="0" placeholder="مثال: 100">
+                </div>
+
+                <div class="form-group">
+                    <label>کل ساعات کار شده <span class="unit">(ساعت)</span></label>
+                    <input type="number" id="totalHours" step="1" min="1" placeholder="مثال: 500000">
+                </div>
+
+                <div class="form-group">
+                    <label>تعداد کل حوادث <span class="unit">(عدد)</span></label>
+                    <input type="number" id="totalIncidents" step="1" min="0" placeholder="مثال: 10">
+                </div>
+
+                <button class="calculate-btn" id="calculateBtn">🔢 محاسبه SR، FR، FSI</button>
+            </div>
+
+            <!-- جدول نتایج -->
+            <div class="card" id="resultsCard" style="display:none;">
+                <div class="card-title"><span class="icon">📊</span> نتایج محاسبه</div>
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>نوع ضریب</th>
+                            <th>مقدار</th>
+                            <th>تحلیل</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="sr-row">
+                            <td><strong>SR</strong> (ضریب شدت حادثه)</td>
+                            <td id="severity-result">—</td>
+                            <td id="severity-analysis">—</td>
+                        </tr>
+                        <tr class="fr-row">
+                            <td><strong>FR</strong> (ضریب تکرار حادثه)</td>
+                            <td id="frequency-result">—</td>
+                            <td id="frequency-analysis">—</td>
+                        </tr>
+                        <tr class="fsi-row">
+                            <td><strong>FSI</strong> (ضریب شدت تکرار حادثه)</td>
+                            <td id="fsi-result">—</td>
+                            <td id="fsi-analysis">—</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="fsi-result-box" id="fsiResultBox">
+                    <div class="fsi-value" id="fsiDisplay">—</div>
+                    <div class="fsi-status" id="fsiStatus">—</div>
+                    <p style="color:var(--text-muted); font-size:0.9rem; margin-top:5px;" id="fsiRecommendation"></p>
+                </div>
+            </div>
+
+            <!-- فرمول‌ها -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📐</span> فرمول‌های محاسبه</div>
+
+                <div class="formula-box">
+                    SR = (کل روزهای از دست رفته ÷ کل ساعات کار شده) × 1,000
+                </div>
+                <div class="formula-box">
+                    FR = (تعداد کل حوادث ÷ کل ساعات کار شده) × 1,000,000
+                </div>
+                <div class="formula-box">
+                    FSI = √(FR × SR ÷ 1,000)
+                </div>
+
+                <div style="margin-top:10px; padding:10px; background:rgba(39,174,96,0.06); border-radius:var(--border-radius-sm); border-right:3px solid var(--success);">
+                    <strong>✅ معیار پذیرش FSI:</strong>
+                    اگر FSI &lt; 0.1 باشد، سطح عملکرد ایمنی <span style="color:var(--success);">قابل قبول</span> است.
+                    <br>
+                    اگر FSI ≥ 0.1 باشد، سطح عملکرد ایمنی <span style="color:var(--danger);">غیر قابل قبول</span> است.
+                </div>
+            </div>
+
+            <!-- راهنما -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📖</span> راهنمای استفاده</div>
+                <button class="btn btn-guide" onclick="toggleGuide()">📋 نمایش / مخفی کردن راهنما</button>
+
+                <div class="guide-section" id="guideSection">
+                    <h3>📖 راهنمای کامل</h3>
+
+                    <h4 style="color:var(--dark-blue); margin-top:12px;">🔹 تعریف ضرایب:</h4>
+                    <ul>
+                        <li><strong>SR (Severity Rate):</strong> ضریب شدت حادثه — نشان‌دهنده شدت حوادث رخ داده</li>
+                        <li><strong>FR (Frequency Rate):</strong> ضریب تکرار حادثه — نشان‌دهنده تعداد حوادث</li>
+                        <li><strong>FSI (Frequency Severity Index):</strong> ضریب شدت تکرار حادثه — شاخص ترکیبی برای ارزیابی عملکرد ایمنی</li>
+                    </ul>
+
+                    <h4 style="color:var(--dark-blue); margin-top:12px;">🔹 نحوه استفاده:</h4>
+                    <ul>
+                        <li>کل روزهای از دست رفته ناشی از حوادث را وارد کنید.</li>
+                        <li>کل ساعات کار شده در بازه مورد نظر را وارد کنید.</li>
+                        <li>تعداد کل حوادث رخ داده را وارد کنید.</li>
+                        <li>دکمه "محاسبه" را بزنید.</li>
+                    </ul>
+
+                    <h4 style="color:var(--dark-blue); margin-top:12px;">📌 مثال:</h4>
+                    <div class="example-box">
+                        <p><strong>فرض کنید:</strong></p>
+                        <ul>
+                            <li>کل روزهای از دست رفته: 100 روز</li>
+                            <li>کل ساعات کار شده: 500,000 ساعت</li>
+                            <li>تعداد کل حوادث: 10 حادثه</li>
+                        </ul>
+                        <pre>
+SR = (100 ÷ 500,000) × 1,000 = 0.2
+FR = (10 ÷ 500,000) × 1,000,000 = 20
+FSI = √(20 × 0.2 ÷ 1,000) = √(0.004) ≈ 0.063</pre>
+                        <p><strong>نتیجه:</strong> FSI = 0.063 &lt; 0.1 ✅ عملکرد ایمنی قابل قبول است.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- دکمه‌ها -->
+            <div class="btn-row">
+                <button class="btn btn-reset" onclick="resetForm()">🔄 پاک کردن مقادیر</button>
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+        تهیه شده توسط <span class="highlight">شرکت معدنی و صنایع معدنی درکاو</span> &nbsp;|&nbsp;
+            <span style="direction:ltr; display:inline-block;">📞 09178680173</span>
+        </div>
+    </div>
+
+    <div id="toastContainer"></div>
+
+    <script>
+        function calculateMetrics() {
+            const lostDays = parseFloat(document.getElementById('lostDays').value);
+            const totalHours = parseFloat(document.getElementById('totalHours').value);
+            const totalIncidents = parseFloat(document.getElementById('totalIncidents').value);
+
+            // اعتبارسنجی
+            if (isNaN(lostDays) || lostDays < 0) {
+                showToast('⚠️ لطفاً تعداد روزهای از دست رفته را به درستی وارد کنید.', '#f39c12');
+                return;
+            }
+            if (isNaN(totalHours) || totalHours <= 0) {
+                showToast('⚠️ لطفاً کل ساعات کار شده را به درستی وارد کنید.', '#f39c12');
+                return;
+            }
+            if (isNaN(totalIncidents) || totalIncidents < 0) {
+                showToast('⚠️ لطفاً تعداد حوادث را به درستی وارد کنید.', '#f39c12');
+                return;
+            }
+
+            // محاسبات
+            const severityRate = (lostDays / totalHours) * 1000;
+            const frequencyRate = (totalIncidents / totalHours) * 1000000;
+            const severityFrequencyIndex = Math.sqrt((frequencyRate * severityRate) / 1000);
+
+            // نمایش نتایج
+            document.getElementById('severity-result').textContent = severityRate.toFixed(4);
+            document.getElementById('frequency-result').textContent = frequencyRate.toFixed(4);
+            document.getElementById('fsi-result').textContent = severityFrequencyIndex.toFixed(4);
+
+            // تحلیل‌ها
+            document.getElementById('severity-analysis').innerHTML = analyzeSeverityRate(severityRate);
+            document.getElementById('frequency-analysis').innerHTML = analyzeFrequencyRate(frequencyRate);
+            document.getElementById('fsi-analysis').innerHTML = analyzeFSI(severityFrequencyIndex);
+
+            // نمایش کارت نتایج
+            document.getElementById('resultsCard').style.display = 'block';
+
+            // نمایش FSI باکس
+            const fsiBox = document.getElementById('fsiResultBox');
+            const fsiDisplay = document.getElementById('fsiDisplay');
+            const fsiStatus = document.getElementById('fsiStatus');
+            const fsiRecommendation = document.getElementById('fsiRecommendation');
+
+            fsiDisplay.textContent = severityFrequencyIndex.toFixed(4);
+
+            if (severityFrequencyIndex < 0.1) {
+                fsiBox.className = 'fsi-result-box show success';
+                fsiStatus.textContent = '✅ عملکرد ایمنی قابل قبول';
+                fsiStatus.style.color = 'var(--success)';
+                fsiRecommendation.textContent = 'سطح عملکرد ایمنی مطلوب است. ادامه روند فعلی توصیه می‌شود.';
+                showToast('✅ عملکرد ایمنی قابل قبول است.', '#27ae60');
+            } else {
+                fsiBox.className = 'fsi-result-box show danger';
+                fsiStatus.textContent = '❌ عملکرد ایمنی غیر قابل قبول';
+                fsiStatus.style.color = 'var(--danger)';
+                fsiRecommendation.textContent = 'نیاز به بررسی و بهبود سیستم ایمنی وجود دارد. اقدامات اصلاحی فوری توصیه می‌شود.';
+                showToast('❌ عملکرد ایمنی نیاز به بهبود دارد.', '#c0392b');
+            }
+
+            // اسکرول به نتایج
+            setTimeout(() => {
+                document.getElementById('resultsCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 200);
+        }
+
+        function analyzeSeverityRate(sr) {
+            if (sr < 10) {
+                return '<span class="status-pass">✅ پایین — وضعیت ایمنی نسبتاً مناسب</span>';
+            } else if (sr <= 50) {
+                return '<span class="status-medium">⚠️ متوسط — نیاز به بررسی و بهبود</span>';
+            } else {
+                return '<span class="status-fail">❌ بالا — وضعیت بحرانی، اقدام فوری لازم</span>';
+            }
+        }
+
+        function analyzeFrequencyRate(fr) {
+            if (fr < 50) {
+                return '<span class="status-pass">✅ پایین — وضعیت ایمنی نسبتاً مناسب</span>';
+            } else if (fr <= 200) {
+                return '<span class="status-medium">⚠️ متوسط — نیاز به بررسی و بهبود</span>';
+            } else {
+                return '<span class="status-fail">❌ بالا — وضعیت بحرانی، اقدام فوری لازم</span>';
+            }
+        }
+
+        function analyzeFSI(fsi) {
+            if (fsi < 0.1) {
+                return '<span class="status-pass">✅ قابل قبول — عملکرد ایمنی مطلوب</span>';
+            } else if (fsi < 0.2) {
+                return '<span class="status-medium">⚠️ مرزی — نیاز به بررسی دقیق‌تر</span>';
+            } else {
+                return '<span class="status-fail">❌ غیر قابل قبول — نیاز به اصلاح اساسی</span>';
+            }
+        }
+
+        // دکمه محاسبه
+        document.getElementById('calculateBtn').addEventListener('click', calculateMetrics);
+
+        // پشتیبانی از Enter
+        document.querySelectorAll('.form-group input').forEach(input => {
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    calculateMetrics();
+                }
+            });
+        });
+
+        function toggleGuide() {
+            const guide = document.getElementById('guideSection');
+            guide.classList.toggle('show');
+            if (guide.classList.contains('show')) {
+                setTimeout(() => {
+                    guide.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 200);
+            }
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function resetForm() {
+            document.getElementById('lostDays').value = '';
+            document.getElementById('totalHours').value = '';
+            document.getElementById('totalIncidents').value = '';
+            document.getElementById('resultsCard').style.display = 'none';
+            document.getElementById('fsiResultBox').className = 'fsi-result-box';
+            showToast('🔄 مقادیر با موفقیت پاک شدند.', '#3498db');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Toast
+        function showToast(message, color = '#3498db') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast-item';
+            toast.style.borderRight = `5px solid ${color}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-20px)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // مقداردهی اولیه
+        document.addEventListener('DOMContentLoaded', function() {
+            // نمونه‌های پیش‌فرض برای نمایش
+            document.getElementById('lostDays').placeholder = 'مثال: 100';
+            document.getElementById('totalHours').placeholder = 'مثال: 500000';
+            document.getElementById('totalIncidents').placeholder = 'مثال: 10';
+        });
+    </script>
+
+<script src="hse-common.js"></script>
+
+</body>
+</html>
