@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+
+<script>
+/* ============================================================
+   ★ امنیت: گیت احراز هویت (سمت کلاینت)
+   هیچ صفحه‌ای بدون ورود به سامانه باز نمی‌شود. محتوای صفحه
+   مخفی می‌ماند و کاربر به صفحه ورود هدایت می‌شود.
+   (لایه نمایشی؛ لایه امنیتی واقعی در بکاند اعمال می‌شود.)
+   ============================================================ */
+(function(){
+  var ok = false;
+  try {
+    var _u = JSON.parse(localStorage.getItem('hse_user_activated') || 'null');
+    ok = !!(_u && _u.personnel && _u.fullname);
+  } catch(e) { ok = false; }
+  if (ok) return; // مجاز - ادامه می‌دهد
+
+  // پنهان‌کردن کل محتوا و نمایش قفل
+  var hide = function(){
+    try {
+      var d = document;
+      // مخفی کردن همه عناصر
+      var all = d.body ? d.body.children : [];
+      for (var i=0;i<all.length;i++){ all[i].style.display='none'; }
+      var lock = d.createElement('div');
+      lock.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#0f172a;color:#f8fafc;'
+        +'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+        +'font-family:Tahoma,sans-serif;text-align:center;padding:20px;direction:rtl;';
+      lock.innerHTML = '<div style="font-size:60px;margin-bottom:10px;">🔒</div>'
+        +'<h2 style="margin:0 0 8px;">دسترسی محدود است</h2>'
+        +'<p style="margin:0 0 20px;color:#94a3b8;">لطفاً ابتدا از صفحه اصلی وارد سامانه شوید.</p>'
+        +'<a href="index.html" style="background:#ff6208;color:#fff;padding:10px 26px;'
+        +'border-radius:10px;text-decoration:none;font-weight:bold;">بازگشت به صفحه ورود</a>';
+      d.body.appendChild(lock);
+    } catch(e){}
+  };
+  if (document.body) hide(); else document.addEventListener('DOMContentLoaded', hide);
+  setTimeout(function(){ try{ location.replace('index.html'); }catch(e){} }, 2500);
+})();
+</script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#1e3c5c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HSE درکاو" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+    <title>ایمنی جرثقیل و باربرداری - آژند همت توس</title>
+
+    <style>
+        :root {
+            --primary: #ff6208;
+            --primary-hover: #e05300;
+            --secondary: #f39c12;
+            --success: #27ae60;
+            --safety: #2c6e4e;
+            --danger: #c0392b;
+            --dark-blue: #1e3c5c;
+            --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #dfe7f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --text-main: #1e2a2e;
+            --text-muted: #64748b;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body { padding-bottom: 75px !important;
+            background: var(--bg-gradient);
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text-main);
+            line-height: 1.8;
+        }
+
+        .main-container {
+            max-width: 1000px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            background: var(--dark-blue);
+            padding: 35px 20px;
+            color: white;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+            position: relative;
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        .header h1 .icon {
+            margin-left: 10px;
+        }
+        .header p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        .header .back-home {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .header .back-home:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+        .card:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        }
+        .card-title {
+            color: var(--dark-blue);
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-right: 4px solid var(--primary);
+            padding-right: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title .icon {
+            font-size: 1.5rem;
+        }
+        .card-subtitle {
+            color: var(--primary);
+            font-size: 1.05rem;
+            font-weight: bold;
+            margin: 18px 0 10px 0;
+            border-bottom: 2px solid rgba(255, 98, 8, 0.15);
+            padding-bottom: 6px;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .tips-grid .tip-item {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 10px 14px;
+            border-radius: var(--border-radius-sm);
+            border-right: 3px solid var(--safety);
+            font-size: 0.9rem;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .tips-grid .tip-item:hover {
+            background: rgba(44, 110, 78, 0.04);
+            transform: translateX(-3px);
+        }
+        .tips-grid .tip-item.danger-tip {
+            border-right-color: var(--danger);
+        }
+        .tips-grid .tip-item.warning-tip {
+            border-right-color: var(--secondary);
+        }
+        .tips-grid .tip-item.primary-tip {
+            border-right-color: var(--primary);
+        }
+        .tips-grid .tip-item.info-tip {
+            border-right-color: #3498db;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+        .spec-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .spec-table th,
+        .spec-table td {
+            padding: 10px 12px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        .spec-table th {
+            background: var(--dark-blue);
+            color: white;
+            font-weight: bold;
+        }
+        .spec-table tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .spec-table tr:hover {
+            background: rgba(255, 98, 8, 0.04);
+        }
+
+        .btn-back {
+            background: #cbd5e1;
+            border: none;
+            padding: 10px 24px;
+            border-radius: var(--border-radius-sm);
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 12px;
+            color: #334155;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .btn-back:hover {
+            background: #b0bec5;
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .footer .highlight {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .badge-standard {
+            display: inline-block;
+            background: var(--safety);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-danger {
+            display: inline-block;
+            background: var(--danger);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-warning {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-info {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+
+        .safety-alert {
+            background: rgba(192, 57, 43, 0.04);
+            border-right: 4px solid var(--danger);
+            padding: 15px;
+            border-radius: var(--border-radius-sm);
+            margin: 10px 0;
+        }
+        .safety-alert strong {
+            color: var(--danger);
+        }
+        .safety-alert ul {
+            padding-right: 20px;
+            margin-top: 5px;
+        }
+        .safety-alert ul li {
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .highlight-box {
+            background: rgba(44, 110, 78, 0.04);
+            padding: 15px 18px;
+            border-radius: var(--border-radius-sm);
+            border-right: 4px solid var(--safety);
+            margin: 10px 0;
+        }
+        .highlight-box.danger {
+            background: rgba(192, 57, 43, 0.04);
+            border-right-color: var(--danger);
+        }
+        .highlight-box.gold {
+            background: rgba(243, 156, 18, 0.04);
+            border-right-color: var(--secondary);
+        }
+
+        .measure-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .measure-item {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 10px 16px;
+            border-radius: var(--border-radius-sm);
+            border-right: 4px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.92rem;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .measure-item:hover {
+            background: rgba(255, 98, 8, 0.04);
+        }
+        .measure-item .icon {
+            color: var(--primary);
+            font-size: 1.1rem;
+            min-width: 28px;
+        }
+
+        .formula-box {
+            background: rgba(0, 0, 0, 0.03);
+            padding: 12px 18px;
+            border-radius: var(--border-radius-sm);
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            margin: 8px 0;
+            direction: ltr;
+            border: 1px dashed rgba(0, 0, 0, 0.1);
+        }
+        .formula-box .label {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            display: block;
+            margin-bottom: 4px;
+            direction: rtl;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+
+        .item-box {
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: var(--border-radius-sm);
+            padding: 14px 16px;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .item-box:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+        }
+        .item-box .icon {
+            color: var(--primary);
+            font-size: 1.3rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .item-box .title {
+            color: var(--dark-blue);
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .item-box .desc {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            margin-top: 2px;
+        }
+
+        @media(max-width:700px) {
+            .content {
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            .header .back-home {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+                left: 10px;
+                top: 15px;
+            }
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            .spec-table {
+                font-size: 0.75rem;
+            }
+            .spec-table th,
+            .spec-table td {
+                padding: 6px 4px;
+            }
+            .tips-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <a href="index.html" class="back-home" title="بازگشت به صفحه اصلی">🏠</a>
+            <h1><span class="icon">🏗️</span> ایمنی جرثقیل و باربرداری</h1>
+            <p>دوره کامل تخصصی — مفاهیم، استانداردها، خطرات و نکات ایمنی</p>
+            <div style="margin-top:8px; display:flex; flex-wrap:wrap; justify-content:center; gap:8px;">
+                <span class="badge-standard">✅ مجوز فنی حرفه‌ای</span>
+                <span class="badge-standard">✅ مجوز نظام صنفی رایانه‌ای</span>
+                <span class="badge-standard">✅ مجوز دانشگاه آزاد</span>
+            </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <!-- ===== 1. مقدمه ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📖</span> آشنایی با بلند کردن بار</div>
+                <p style="margin-bottom:10px;">
+                    انسان‌ها از دیرباز برای جابجایی بارهای سنگین از اهرم، قرقره و بعدها جرثقیل‌های پیچیده استفاده کرده‌اند. امروزه با سیستم‌های هیدرولیک، الکترونیک و مکانیک پیشرفته، عملیات باربرداری با ایمنی و دقت بالا انجام می‌شود.
+                </p>
+                <div class="highlight-box">
+                    <i style="color:var(--success);">💡</i> <strong>قوانین فیزیکی حاکم:</strong> جرثقیل‌ها از دو قانون اصلی <strong>اهرم</strong> و <strong>قرقره</strong> پیروی می‌کنند.
+                </div>
+            </div>
+
+            <!-- ===== 2. اهداف افسر ایمنی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🎯</span> اهداف تربیت افسر ایمنی</div>
+                <div class="grid-2">
+                    <div class="item-box">
+                        <span class="icon">📋</span>
+                        <span class="title">نظارت بر استانداردها</span>
+                        <span class="desc">اجرای مطابق با OSHA، ASME، ISO و سایر استانداردهای بین‌المللی</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">🛡️</span>
+                        <span class="title">تضمین ایمنی</span>
+                        <span class="desc">حفظ جان کارکنان و جلوگیری از آسیب‌های جسمی و مالی</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">📊</span>
+                        <span class="title">مدیریت ریسک</span>
+                        <span class="desc">تحلیل محیط عملیاتی، وضعیت زمین، باد، خطوط برق و اعمال تدابیر کنترلی</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">🎓</span>
+                        <span class="title">آموزش و توسعه</span>
+                        <span class="desc">آموزش پرسنل در شناسایی خطرات، برنامه‌ریزی ایمن و واکنش اضطراری</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== 3. انواع جرثقیل ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🔧</span> انواع جرثقیل‌ها (دسته‌بندی کامل)</div>
+
+                <div class="card-subtitle">دسته‌بندی کلی</div>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr>
+                                <th>نوع جرثقیل</th>
+                                <th>توضیح</th>
+                                <th>کاربرد</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>سقفی (Overhead)</strong></td>
+                                <td>حرکت روی ریل‌های سقف کارخانه</td>
+                                <td>انبارها، خطوط تولید</td>
+                            </tr>
+                            <tr>
+                                <td><strong>دروازه‌ای (Gantry)</strong></td>
+                                <td>پایه‌های روی زمین یا ریل</td>
+                                <td>محوطه‌های باز، بنادر</td>
+                            </tr>
+                            <tr>
+                                <td><strong>برجی (Tower)</strong></td>
+                                <td>برج عمودی مشبک + بازوی افقی</td>
+                                <td>ساختمان‌های بلند</td>
+                            </tr>
+                            <tr>
+                                <td><strong>بازویی (Jib)</strong></td>
+                                <td>بازوی افقی/مایل روی ستون یا دیوار</td>
+                                <td>کارگاه‌های کوچک</td>
+                            </tr>
+                            <tr>
+                                <td><strong>سیار (Mobile)</strong></td>
+                                <td>روی کامیون یا شاسی چرخ‌دار</td>
+                                <td>پروژه‌های مختلف، جابجایی سریع</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card-subtitle">انواع جرثقیل‌های موبایل (Mobile Cranes)</div>
+                <ul>
+                    <li><strong>جرثقیل کارگاهی (Rough Terrain):</strong> شاسی‌های با قابلیت حرکت در زمین‌های ناهموار، تک‌کابین، توانایی لقمه کردن بار</li>
+                    <li><strong>جرثقیل ماشینی (Truck Mounted):</strong> نصب روی کامیون، دو کابین، نیاز به گواهینامه رانندگی</li>
+                    <li><strong>جرثقیل بوم‌تراک (Boom Truck):</strong> بوم تلسکوپی، سبک و سریع، مناسب برای کارهای شهری</li>
+                    <li><strong>جرثقیل بوم خشک (Crawler):</strong> با شنی (کاترپیلار)، ظرفیت بالا، پایداری عالی، بدون نیاز به پایه‌های تعادلی (Outrigger)</li>
+                </ul>
+
+                <div class="grid-2" style="margin-top:12px;">
+                    <div class="item-box">
+                        <span class="icon">⚙️</span>
+                        <span class="title">ویژگی‌های جرثقیل بوم خشک</span>
+                        <span class="desc">چرخ‌های بزرگ، تک‌کابین، حرکت خرچنگی، بدون نیاز به پایه‌های تعادلی، بدون پلاک راهنمایی</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">🚛</span>
+                        <span class="title">ویژگی‌های جرثقیل ماشینی</span>
+                        <span class="desc">چرخ‌های کوچک‌تر، دو کابین، نیاز به پایه‌های تعادلی، نیاز به پلاک راهنمایی</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== 4. اجزای جرثقیل ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">⚙️</span> اجزای اصلی جرثقیل‌ها</div>
+                <div class="grid-3">
+                    <div class="item-box">
+                        <span class="icon">📏</span>
+                        <span class="title">بوم (Boom)</span>
+                        <span class="desc">بازوی اصلی جرثقیل که بار را بالا می‌برد (تلسکوپی یا مشبک)</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">🚪</span>
+                        <span class="title">کابین (Cab)</span>
+                        <span class="desc">محل قرارگیری اپراتور با کلیه کنترل‌ها و نمایشگرها</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">🪝</span>
+                        <span class="title">قلاب (Hook)</span>
+                        <span class="desc">قطعه انتهایی که بار به آن متصل می‌شود</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">🔗</span>
+                        <span class="title">سیم‌بکسل (Wire Rope)</span>
+                        <span class="desc">کابل فولادی برای بلند کردن و پایین آوردن بار</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">⚙️</span>
+                        <span class="title">بلوک قرقره (Sheave Block)</span>
+                        <span class="desc">مجموعه قرقره‌ها برای افزایش نیروی بالابری</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">🔩</span>
+                        <span class="title">پایه‌های تعادلی (Outriggers)</span>
+                        <span class="desc">پایه‌های هیدرولیک برای تثبیت جرثقیل و جلوگیری از واژگونی</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">📊</span>
+                        <span class="title">بارسنج (Load Indicator)</span>
+                        <span class="desc">سیستم نمایش وزن بار برای جلوگیری از اضافه‌بار</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">🔄</span>
+                        <span class="title">کنترل‌های هیدرولیک</span>
+                        <span class="desc">سیستم‌های هیدرولیک برای حرکت بوم، چرخش و بالابری</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">🛡️</span>
+                        <span class="title">سیستم‌های ایمنی</span>
+                        <span class="desc">شامل آنتی دو بلوک، محدودکننده بار، زنگ‌های هشدار</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== 5. چالش‌ها و خطرات ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">⚠️</span> چالش‌ها و خطرات رایج (تحلیل تخصصی)</div>
+                <div class="grid-3">
+                    <div class="safety-alert" style="border-right-color:var(--danger);">
+                        <strong>⚡ برخورد با خطوط برق (Electrical Contact)</strong>
+                        <p style="font-size:0.9rem; margin-top:4px;">برخورد بوم یا سیم‌بکسل با خطوط برق ولتاژ بالا باعث شوک الکتریکی و مرگ فوری می‌شود. <span class="badge-danger">حداقل فاصله ایمنی:</span> ۳ متر برای خطوط زیر ۵۰ کیلوولت و ۶ متر برای بالای ۵۰ کیلوولت.</p>
+                    </div>
+                    <div class="safety-alert" style="border-right-color:var(--danger);">
+                        <strong>⚖️ سقوط بار (Load Drop)</strong>
+                        <p style="font-size:0.9rem; margin-top:4px;">ناشی از پارگی سیم‌بکسل فرسوده، اشتباه در مهار بار (Rigging)، استفاده از اسلینگ نامناسب یا اتصالات معیوب. جان افراد زیر بار را تهدید می‌کند.</p>
+                    </div>
+                    <div class="safety-alert" style="border-right-color:var(--danger);">
+                        <strong>⚖️ واژگونی (Overturn)</strong>
+                        <p style="font-size:0.9rem; margin-top:4px;">به دلیل بار بیش‌ازحد، عدم تراز Outriggers، یا عملیات روی زمین نرم و نامناسب. معمولاً فاجعه‌بار است.</p>
+                    </div>
+                </div>
+                <div class="highlight-box" style="border-right-color:var(--success);">
+                    <i style="color:var(--success);">✅</i> تمامی این خطرات با <strong>ارزیابی ریسک دقیق</strong>، <strong>آموزش مستمر</strong> و <strong>رعایت استانداردها</strong> قابل پیشگیری هستند.
+                </div>
+            </div>
+
+            <!-- ===== 6. تمهیدات ایمنی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📋</span> تمهیدات ایمنی قبل از باربرداری</div>
+                <div class="measure-list">
+                    <div class="measure-item"><span class="icon">📍</span> <strong>بررسی موقعیت باربرداری:</strong> محل قرارگیری بار، مسیر حرکت، محل نصب نهایی</div>
+                    <div class="measure-item"><span class="icon">👥</span> <strong>جلسه هماهنگی (Toolbox Meeting):</strong> با تمامی عوامل درگیر (اپراتور، سیگنال‌دهنده، ریگر، HSE)</div>
+                    <div class="measure-item"><span class="icon">📊</span> <strong>ارزیابی ریسک (FMEA):</strong> شناسایی حالات بالقوه خرابی و اثرات آن</div>
+                    <div class="measure-item"><span class="icon">📄</span> <strong>ریگینگ پلن (Rigging Plan) + لیفتینگ پلن (Lifting Plan):</strong> همراه با دفترچه محاسباتی و نقشه دقیق</div>
+                    <div class="measure-item"><span class="icon">⛰️</span> <strong>بررسی خاک و فشار زمین:</strong> محاسبه فشار وارده (Ground Bearing Pressure) و اطمینان از تحمل زمین</div>
+                    <div class="measure-item"><span class="icon">📝</span> <strong>صدور پرمیت (Permit):</strong> پرمیت اصلی + پرمیت ویژه (با رعایت قانون 4W: Who, What, When, Where) + چک‌لیست کامل</div>
+                    <div class="measure-item"><span class="icon">👁️</span> <strong>کنترل عملیات (Supervision):</strong> نظارت مستمر توسط واحد HSE و افسر ایمنی</div>
+                </div>
+            </div>
+
+            <!-- ===== 7. اسلینگ‌ها ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🔗</span> اسلینگ‌ها (Sling) – انواع، کاربردها و محاسبات</div>
+                <p style="margin-bottom:10px;">
+                    <strong>اسلینگ (Sling)</strong> وسیله‌ای انعطاف‌پذیر برای اتصال بار به قلاب جرثقیل است. انتخاب صحیح اسلینگ بر اساس <strong>وزن بار، زاویه، جنس بار و شرایط محیطی</strong> انجام می‌شود.
+                </p>
+
+                <div class="card-subtitle">انواع اسلینگ از نظر جنس</div>
+                <div class="grid-3">
+                    <div class="item-box">
+                        <span class="icon">🔘</span>
+                        <span class="title">اسلینگ فولادی (Wire Rope Sling)</span>
+                        <span class="desc">مقاوم در برابر حرارت، سایش و برش. مناسب برای بارهای سنگین و تیز.</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">🔘</span>
+                        <span class="title">اسلینگ نساجی (Synthetic Web Sling)</span>
+                        <span class="desc">سبک، انعطاف‌پذیر، آسیب‌ناپذیر به بار. مقاوم در برابر ضربه.</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">🔘</span>
+                        <span class="title">اسلینگ زنجیری (Chain Sling)</span>
+                        <span class="desc">بسیار مقاوم، مناسب برای بارهای داغ و شرایط سخت.</span>
+                    </div>
+                </div>
+
+                <div class="card-subtitle">انواع اسلینگ از نظر تعداد شاخه (Leg)</div>
+                <ul>
+                    <li><strong>تک‌شاخه (Single Leg):</strong> ساده‌ترین نوع، برای بارهای سبک و متقارن</li>
+                    <li><strong>دو‌شاخه (Two Leg):</strong> برای بارهای کشیده و نامتقارن</li>
+                    <li><strong>سه‌شاخه (Three Leg) و چهارشاخه (Four Leg):</strong> برای بارهای حجیم و سنگین، توزیع یکنواخت نیرو</li>
+                </ul>
+
+                <div class="card-subtitle">نحوه بازرسی و ریجکت (رد) اسلینگ</div>
+                <div class="grid-2">
+                    <div class="item-box" style="border-right:3px solid var(--danger);">
+                        <span class="icon">❌</span>
+                        <span class="title" style="color:var(--danger);">ریجکت اسلینگ فولادی</span>
+                        <span class="desc">
+                            • پارگی یا شکستگی در هر رشته<br>
+                            • ساییدگی بیش از ۳۰٪ قطر<br>
+                            • گره‌خوردگی یا تاب‌خوردگی شدید<br>
+                            • تغییر شکل دائم (کمانش)<br>
+                            • خوردگی و زنگ‌زدگی عمیق
+                        </span>
+                    </div>
+                    <div class="item-box" style="border-right:3px solid var(--danger);">
+                        <span class="icon">❌</span>
+                        <span class="title" style="color:var(--danger);">ریجکت اسلینگ نساجی</span>
+                        <span class="desc">
+                            • بریدگی یا پارگی در لبه‌ها<br>
+                            • ساییدگی و نخ‌شدگی<br>
+                            • رنگ‌پریدگی ناشی از UV یا مواد شیمیایی<br>
+                            • گره یا اتصال غیرمجاز<br>
+                            • سوختگی یا ذوب‌شدگی
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-subtitle">محاسبه فشار وارده به اسلینگ سه‌شاخه</div>
+                <p><strong>مثال عملی:</strong> بار ۱۰۰۰ کیلوگرم، ارتفاع ۲ متر، طول هر شاخه ۳ متر</p>
+                <div class="formula-box">
+                    <span class="label">گام ۱: محاسبه زاویه θ</span>
+                    L = √(3² − 2²) = √5 ≈ 2.236 متر<br>
+                    θ = arctan(2 / 2.236) ≈ 41.81°
+                </div>
+                <div class="formula-box">
+                    <span class="label">گام ۲: محاسبه تنش در هر شاخه (T)</span>
+                    T = W / (n × sin θ) = 1000 / (3 × sin 41.81°) ≈ 500.5 کیلوگرم
+                </div>
+                <div class="highlight-box" style="border-right-color:var(--success);">
+                    <i style="color:var(--success);">✅</i> <strong>نتیجه:</strong> هر شاخه اسلینگ تقریباً <strong>۵۰۰ کیلوگرم</strong> نیرو تحمل می‌کند. ضریب اطمینان معمولاً <strong>۵:۱</strong> در نظر گرفته می‌شود.
+                </div>
+            </div>
+
+            <!-- ===== 8. سیم‌بکسل ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🔗</span> سیم‌بکسل (Wire Rope) – ساختار، بازرسی و ریجکت</div>
+                <p style="margin-bottom:10px;">
+                    <strong>سیم‌بکسل</strong> از چندین رشته سیم فولادی به دور یک مغزی (مرکزی) تابیده می‌شود. انواع مختلف بر اساس <strong>تعداد رشته، جهت تاب، جنس مغزی</strong> و ...
+                </p>
+
+                <div class="card-subtitle">انواع سیم‌بکسل از نظر مغزی (Core)</div>
+                <ul>
+                    <li><strong>مغزی فولادی (IWRC – Independent Wire Rope Core):</strong> مقاوم‌ترین، مناسب برای بارهای سنگین و دماهای بالا</li>
+                    <li><strong>مغزی فیبری (Fiber Core):</strong> انعطاف‌پذیرتر، اما مقاومت حرارتی کمتر</li>
+                </ul>
+
+                <div class="card-subtitle">نحوه بازرسی و ریجکت سیم‌بکسل</div>
+                <div class="grid-2">
+                    <div class="item-box" style="border-right:3px solid var(--danger);">
+                        <span class="icon">❌</span>
+                        <span class="title" style="color:var(--danger);">علائم ریجکت سیم‌بکسل</span>
+                        <span class="desc">
+                            • شکستگی سیم‌ها در طول معین (طبق استاندارد)<br>
+                            • ساییدگی و کاهش قطر بیش از ۱۰٪<br>
+                            • خوردگی، زنگ‌زدگی و پوسته‌پوسته‌شدن<br>
+                            • تاب‌خوردگی، گره یا کمانش<br>
+                            • تغییر شکل قرقره‌ها یا قلاب
+                        </span>
+                    </div>
+                    <div class="item-box" style="border-right:3px solid var(--success);">
+                        <span class="icon">✅</span>
+                        <span class="title" style="color:var(--success);">نکات بازرسی دوره‌ای</span>
+                        <span class="desc">
+                            • بازرسی چشمی روزانه قبل از شروع کار<br>
+                            • بازرسی دقیق هفتگی توسط فرد ماهر<br>
+                            • تست بار (Proof Test) سالیانه<br>
+                            • ثبت نتایج در دفترچه بازرسی
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== 9. لود چارت ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📊</span> لود چارت (Load Chart) – جدول ظرفیت بار جرثقیل</div>
+                <p style="margin-bottom:10px;">
+                    <strong>لود چارت</strong> جدولی است که حداکثر ظرفیت بار جرثقیل را در <strong>زاویه‌های مختلف بوم، طول‌های مختلف بوم و شعاع‌های کاری مختلف</strong> نشان می‌دهد. <span class="badge-danger">استفاده نادرست از لود چارت یکی از علل اصلی واژگونی است.</span>
+                </p>
+
+                <div class="card-subtitle">پارامترهای کلیدی در لود چارت</div>
+                <ul>
+                    <li><strong>شعاع کاری (Radius):</strong> فاصله افقی از مرکز چرخش جرثقیل تا مرکز ثقل بار</li>
+                    <li><strong>طول بوم (Boom Length):</strong> طول بازوی جرثقیل (تلسکوپی یا مشبک)</li>
+                    <li><strong>زاویه بوم (Boom Angle):</strong> زاویه بین بوم و سطح افقی</li>
+                    <li><strong>ظرفیت بار (Load Capacity):</strong> حداکثر وزنی که جرثقیل در آن شرایط می‌تواند بلند کند</li>
+                    <li><strong>ضریب پایداری (Stability Factor):</strong> معمولاً ۱.۲۵ تا ۱.۵ برای جرثقیل‌های متحرک</li>
+                </ul>
+
+                <div class="card-subtitle">نمونه لود چارت برای جرثقیل ۵۰ تنی (بوم تلسکوپی)</div>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr>
+                                <th>شعاع (متر)</th>
+                                <th>طول بوم ۱۰ متر</th>
+                                <th>طول بوم ۲۰ متر</th>
+                                <th>طول بوم ۳۰ متر</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>۳</td><td>۵۰,۰۰۰</td><td>—</td><td>—</td></tr>
+                            <tr><td>۵</td><td>۴۲,۰۰۰</td><td>۳۵,۰۰۰</td><td>—</td></tr>
+                            <tr><td>۱۰</td><td>۲۵,۰۰۰</td><td>۲۲,۰۰۰</td><td>۱۵,۰۰۰</td></tr>
+                            <tr><td>۱۵</td><td>۱۲,۰۰۰</td><td>۱۱,۰۰۰</td><td>۸,۵۰۰</td></tr>
+                            <tr><td>۲۰</td><td>۵,۰۰۰</td><td>۴,۵۰۰</td><td>۳,۸۰۰</td></tr>
+                            <tr><td>۳۰</td><td>—</td><td>—</td><td>۱,۵۰۰</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="safety-alert">
+                    <strong>⚠️ نکته بسیار مهم:</strong> با افزایش <strong>شعاع کاری</strong> و افزایش <strong>طول بوم</strong>، ظرفیت بار به شدت کاهش می‌یابد. <strong>هیچ‌گاه</strong> از لود چارت تجاوز نکنید!
+                </div>
+
+                <div class="card-subtitle">نحوه محاسبه ضریب ایمنی در لود چارت</div>
+                <div class="formula-box">
+                    <span class="label">ضریب ایمنی = (حداکثر بار تست شده) / (حداکثر بار کاری)</span>
+                    ضریب ایمنی معمولاً بین <strong>۳ تا ۵</strong> برای سیم‌بکسل‌ها و <strong>۱.۲۵ تا ۱.۵</strong> برای پایداری جرثقیل است.
+                </div>
+            </div>
+
+            <!-- ===== 10. استانداردها ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📚</span> استانداردهای مرتبط با جرثقیل</div>
+                <div class="grid-2">
+                    <div class="item-box">
+                        <span class="icon">📜</span>
+                        <span class="title">ASME B30</span>
+                        <span class="desc">مجموعه استانداردهای انجمن مهندسان مکانیک آمریکا برای ایمنی جرثقیل‌ها، بالابرها و تجهیزات وابسته.</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">🛡️</span>
+                        <span class="title">OSHA 1926.1400</span>
+                        <span class="desc">مقررات اداره ایمنی و بهداشت شغلی آمریکا برای جرثقیل‌های ساختمانی (آموزش اپراتور، بازرسی، سیگنال‌دهی).</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">🌍</span>
+                        <span class="title">ISO 4302</span>
+                        <span class="desc">استاندارد بین‌المللی برای ارزیابی بار و پایداری جرثقیل‌ها.</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">⚖️</span>
+                        <span class="title">BS 7121</span>
+                        <span class="desc">استاندارد بریتانیا برای عملیات ایمن جرثقیل‌ها (شامل برنامه‌ریزی، نظارت و بازرسی).</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">🏁</span>
+                        <span class="title">CMMA (USA)</span>
+                        <span class="desc">انجمن سازندگان جرثقیل‌های متحرک آمریکا – مشخصات فنی و استانداردهای عملکرد.</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">💻</span>
+                        <span class="title">API RP 2D</span>
+                        <span class="desc">استاندارد موسسه نفت آمریکا برای عملیات بالابری در سکوهای دریایی.</span>
+                    </div>
+                </div>
+                <div class="highlight-box" style="border-right-color:var(--success);">
+                    <i style="color:var(--success);">💡</i> <strong>نکته:</strong> انطباق با این استانداردها، تضمین‌کننده ایمنی و کاهش ریسک‌های عملیاتی است.
+                </div>
+            </div>
+
+            <!-- ===== 11. اصطلاحات تخصصی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🎓</span> اصطلاحات تخصصی و مخفف‌ها</div>
+                <div class="grid-3">
+                    <div class="item-box"><span class="title">SWL</span><span class="desc">Safe Working Load – بار کاری مجاز</span></div>
+                    <div class="item-box"><span class="title">WLL</span><span class="desc">Working Load Limit – حد بار کاری</span></div>
+                    <div class="item-box"><span class="title">MBL</span><span class="desc">Minimum Breaking Load – حداقل بار گسیختگی</span></div>
+                    <div class="item-box"><span class="title">FOS</span><span class="desc">Factor of Safety – ضریب ایمنی (معمولاً ۳ تا ۵)</span></div>
+                    <div class="item-box"><span class="title">RIG</span><span class="desc">Rigging – مهار و اتصال بار</span></div>
+                    <div class="item-box"><span class="title">HSE</span><span class="desc">Health, Safety, Environment – ایمنی، بهداشت و محیط زیست</span></div>
+                    <div class="item-box"><span class="title">FMEA</span><span class="desc">Failure Mode and Effects Analysis – تحلیل حالات خرابی و اثرات</span></div>
+                    <div class="item-box"><span class="title">LMI</span><span class="desc">Load Moment Indicator – نشانگر ممان بار</span></div>
+                    <div class="item-box"><span class="title">ATB</span><span class="desc">Anti Two-Block – سیستم جلوگیری از برخورد بلوک قرقره</span></div>
+                    <div class="item-box"><span class="title">GPS</span><span class="desc">Global Positioning System – موقعیت‌یابی ماهواره‌ای</span></div>
+                    <div class="item-box"><span class="title">PLC</span><span class="desc">Programmable Logic Controller – کنترل‌کننده منطقی برنامه‌پذیر</span></div>
+                    <div class="item-box"><span class="title">EOT</span><span class="desc">Electric Overhead Traveling – جرثقیل سقفی برقی</span></div>
+                </div>
+            </div>
+
+            <!-- ===== 12. لود چارت پیشرفته ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📈</span> لود چارت پیشرفته – توضیح کامل</div>
+                <p style="margin-bottom:10px;">
+                    <strong>لود چارت</strong> نه تنها شامل ظرفیت بار است، بلکه اطلاعات حیاتی دیگری نیز دارد:
+                </p>
+                <ul>
+                    <li><strong>زاویه بوم (Boom Angle):</strong> معمولاً بین ۲۰ تا ۸۰ درجه</li>
+                    <li><strong>سرعت باد (Wind Speed):</strong> در بادهای بیش از ۲۰ گره (۳۷ کیلومتر بر ساعت) عملیات باید متوقف شود</li>
+                    <li><strong>تعداد لایه‌های وینچ (Winch Layers):</strong> با افزایش لایه‌ها، ظرفیت کاهش می‌یابد</li>
+                    <li><strong>موقعیت پایه‌های تعادلی (Outrigger Position):</strong> باز کردن کامل Outriggerها برای پایداری ضروری است</li>
+                    <li><strong>ضریب پایداری (Stability Factor):</strong> نسبت وزن جرثقیل به ممان واژگونی</li>
+                </ul>
+
+                <div class="card-subtitle">مثال لود چارت جرثقیل ۱۰۰ تنی (برجی)</div>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr>
+                                <th>شعاع (متر)</th>
+                                <th>ظرفیت بار (کیلوگرم)</th>
+                                <th>زاویه بوم (درجه)</th>
+                                <th>سرعت باد مجاز (گره)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>۵</td><td>۱۰۰,۰۰۰</td><td>۸۰</td><td>۲۵</td></tr>
+                            <tr><td>۱۰</td><td>۸۰,۰۰۰</td><td>۷۵</td><td>۲۰</td></tr>
+                            <tr><td>۱۵</td><td>۶۰,۰۰۰</td><td>۷۰</td><td>۱۸</td></tr>
+                            <tr><td>۲۰</td><td>۴۵,۰۰۰</td><td>۶۵</td><td>۱۵</td></tr>
+                            <tr><td>۳۰</td><td>۲۵,۰۰۰</td><td>۵۵</td><td>۱۲</td></tr>
+                            <tr><td>۴۰</td><td>۱۲,۰۰۰</td><td>۴۵</td><td>۱۰</td></tr>
+                            <tr><td>۵۰</td><td>۵,۰۰۰</td><td>۳۵</td><td>۸</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="safety-alert">
+                    <strong>🚨 هشدار:</strong> در شعاع‌های بزرگتر، حتی چند کیلوگرم اضافه‌بار می‌تواند باعث واژگونی شود. <strong>همیشه ۲۰٪ کمتر از ظرفیت لود چارت عمل کنید.</strong>
+                </div>
+            </div>
+
+            <!-- ===== 13. نکات تکمیلی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">⭐</span> نکات تکمیلی و بهترین‌ها</div>
+                <ul>
+                    <li>✅ <strong>ارتباط مؤثر:</strong> استفاده از سیگنال‌های استاندارد دستی یا بی‌سیم بین اپراتور و سیگنال‌دهنده</li>
+                    <li>✅ <strong>بازرسی روزانه:</strong> چک‌لیست کامل شامل روغن‌کاری، ترمزها، سیم‌بکسل‌ها و سیستم‌های هیدرولیک</li>
+                    <li>✅ <strong>مدیریت باد:</strong> نصب بادسنج (Anemometer) روی جرثقیل و توقف عملیات در بادهای شدید</li>
+                    <li>✅ <strong>پایش بار:</strong> استفاده از سیستم‌های LMI (Load Moment Indicator) برای نمایش لحظه‌ای بار</li>
+                    <li>✅ <strong>آموزش مداوم:</strong> برگزاری دوره‌های بازآموزی برای اپراتورها و ریگرها هر ۶ ماه یکبار</li>
+                    <li>✅ <strong>مستندسازی:</strong> ثبت تمام عملیات‌ها، بازرسی‌ها و حوادث نزدیک‌به‌وقوع (Near Miss)</li>
+                </ul>
+            </div>
+
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            تهیه شده توسط <span class="highlight">شرکت معدنی و صنایع معدنی درکاو</span><br>
+            <span style="direction:ltr; display:inline-block;">📞 09178680173</span>
+        </div>
+
+    </div>
+
+    <script>
+        // اضافه کردن قابلیت کپی متن با کلیک
+        document.querySelectorAll('.tip-item, .safety-alert, .item-box, .measure-item, .highlight-box, .formula-box, .card ul li, .card ol li').forEach(el => {
+            el.style.cursor = 'pointer';
+            el.addEventListener('click', function(e) {
+                // جلوگیری از کلیک روی لینک‌ها
+                if (e.target.tagName === 'A') return;
+                const text = this.textContent.trim();
+                navigator.clipboard.writeText(text).then(() => {
+                    const origBg = this.style.background;
+                    this.style.background = '#d4edda';
+                    setTimeout(() => {
+                        this.style.background = origBg || '';
+                    }, 400);
+                });
+            });
+        });
+
+        console.log('✅ آموزش ایمنی جرثقیل و باربرداری (کامل) بارگذاری شد.');
+        console.log('📋 کلیک روی هر متن برای کپی کردن');
+        console.log('🏗️ شامل تمام مباحث: انواع جرثقیل، اجزا، اسلینگ، سیم‌بکسل، لود چارت، استانداردها');
+    </script>
+
+<script src="hse-common.js"></script>
+
+<script src="assets/js/sw-register.js"></script>
+</body>
+</html>

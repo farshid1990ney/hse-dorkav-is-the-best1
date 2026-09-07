@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+
+<script>
+/* ============================================================
+   ★ امنیت: گیت احراز هویت (سمت کلاینت)
+   هیچ صفحه‌ای بدون ورود به سامانه باز نمی‌شود. محتوای صفحه
+   مخفی می‌ماند و کاربر به صفحه ورود هدایت می‌شود.
+   (لایه نمایشی؛ لایه امنیتی واقعی در بکاند اعمال می‌شود.)
+   ============================================================ */
+(function(){
+  var ok = false;
+  try {
+    var _u = JSON.parse(localStorage.getItem('hse_user_activated') || 'null');
+    ok = !!(_u && _u.personnel && _u.fullname);
+  } catch(e) { ok = false; }
+  if (ok) return; // مجاز - ادامه می‌دهد
+
+  // پنهان‌کردن کل محتوا و نمایش قفل
+  var hide = function(){
+    try {
+      var d = document;
+      // مخفی کردن همه عناصر
+      var all = d.body ? d.body.children : [];
+      for (var i=0;i<all.length;i++){ all[i].style.display='none'; }
+      var lock = d.createElement('div');
+      lock.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#0f172a;color:#f8fafc;'
+        +'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+        +'font-family:Tahoma,sans-serif;text-align:center;padding:20px;direction:rtl;';
+      lock.innerHTML = '<div style="font-size:60px;margin-bottom:10px;">🔒</div>'
+        +'<h2 style="margin:0 0 8px;">دسترسی محدود است</h2>'
+        +'<p style="margin:0 0 20px;color:#94a3b8;">لطفاً ابتدا از صفحه اصلی وارد سامانه شوید.</p>'
+        +'<a href="index.html" style="background:#ff6208;color:#fff;padding:10px 26px;'
+        +'border-radius:10px;text-decoration:none;font-weight:bold;">بازگشت به صفحه ورود</a>';
+      d.body.appendChild(lock);
+    } catch(e){}
+  };
+  if (document.body) hide(); else document.addEventListener('DOMContentLoaded', hide);
+  setTimeout(function(){ try{ location.replace('index.html'); }catch(e){} }, 2500);
+})();
+</script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#1e3c5c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HSE درکاو" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+    <title>دوره کامل ایمنی و اطفاء حریق</title>
+
+    <style>
+        :root {
+            --primary: #ff6208;
+            --primary-hover: #e05300;
+            --secondary: #f39c12;
+            --success: #27ae60;
+            --safety: #2c6e4e;
+            --danger: #c0392b;
+            --dark-blue: #1e3c5c;
+            --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #dfe7f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --text-main: #1e2a2e;
+            --text-muted: #64748b;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body { padding-bottom: 75px !important;
+            background: var(--bg-gradient);
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text-main);
+            line-height: 1.8;
+        }
+
+        .main-container {
+            max-width: 1100px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            background: var(--dark-blue);
+            padding: 35px 20px;
+            color: white;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+            position: relative;
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        .header h1 .icon {
+            margin-left: 10px;
+        }
+        .header p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        .header .back-home {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .header .back-home:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+        .card:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        }
+        .card-title {
+            color: var(--dark-blue);
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-right: 4px solid var(--primary);
+            padding-right: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title .icon {
+            font-size: 1.5rem;
+        }
+
+        .card-subtitle {
+            color: var(--primary);
+            font-size: 1.05rem;
+            font-weight: bold;
+            margin: 18px 0 10px 0;
+            border-bottom: 2px solid rgba(255, 98, 8, 0.15);
+            padding-bottom: 6px;
+        }
+
+        .highlight-box {
+            background: #e8f0fe;
+            padding: 18px 24px;
+            border-radius: var(--border-radius-sm);
+            margin: 24px 0 12px 0;
+            border-right: 6px solid #2563eb;
+        }
+
+        .warning-box {
+            background: #fffbeb;
+            padding: 18px 24px;
+            border-radius: var(--border-radius-sm);
+            margin: 24px 0 12px 0;
+            border-right: 6px solid var(--secondary);
+        }
+
+        .danger-box {
+            background: #fef2f2;
+            padding: 18px 24px;
+            border-radius: var(--border-radius-sm);
+            margin: 24px 0 12px 0;
+            border-right: 6px solid var(--danger);
+        }
+
+        .success-box {
+            background: #f0fdf4;
+            padding: 18px 24px;
+            border-radius: var(--border-radius-sm);
+            margin: 24px 0 12px 0;
+            border-right: 6px solid var(--success);
+        }
+
+        .info-box {
+            background: #f1f6fa;
+            padding: 18px 24px;
+            border-radius: var(--border-radius-sm);
+            margin: 24px 0 12px 0;
+            border-right: 6px solid #2563eb;
+        }
+
+        .quote {
+            font-style: italic;
+            background: #f1f5f9;
+            padding: 16px 28px;
+            border-radius: 60px 20px 60px 20px;
+            color: #1e293b;
+        }
+
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 12px 0;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+        .spec-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .spec-table th,
+        .spec-table td {
+            padding: 10px 12px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        .spec-table th {
+            background: var(--dark-blue);
+            color: white;
+            font-weight: bold;
+        }
+        .spec-table tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .spec-table tr:hover {
+            background: rgba(255, 98, 8, 0.04);
+        }
+
+        .step-list {
+            counter-reset: step;
+            list-style: none;
+            padding-right: 0;
+        }
+        .step-list li {
+            counter-increment: step;
+            padding-right: 35px;
+            position: relative;
+            margin-bottom: 10px;
+            line-height: 1.8;
+            font-size: 1.02rem;
+        }
+        .step-list li::before {
+            content: counter(step);
+            position: absolute;
+            right: 0;
+            top: 0;
+            background: var(--danger);
+            color: white;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .btn-back {
+            background: #cbd5e1;
+            border: none;
+            padding: 10px 24px;
+            border-radius: var(--border-radius-sm);
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 12px;
+            color: #334155;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .btn-back:hover {
+            background: #b0bec5;
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .footer .highlight {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .contact {
+            background: #eef2f6;
+            border-radius: 40px;
+            padding: 12px 24px;
+            display: inline-block;
+            font-weight: 500;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-red {
+            background: #fecaca;
+            color: #991b1b;
+        }
+        .badge-gold {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .badge-blue {
+            background: #dbeafe;
+            color: #1e4b8a;
+        }
+
+        .material-number {
+            display: inline-block;
+            background: var(--danger);
+            color: white;
+            padding: 2px 12px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-left: 8px;
+        }
+        .material-box {
+            background: #f8fafc;
+            padding: 12px 20px;
+            border-radius: 16px;
+            border-right: 4px solid var(--danger);
+            margin-bottom: 12px;
+        }
+
+        @media(max-width:700px) {
+            .content {
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            .header .back-home {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+                left: 10px;
+            }
+            .grid-2col {
+                grid-template-columns: 1fr;
+            }
+            .spec-table {
+                font-size: 0.75rem;
+            }
+            .spec-table th,
+            .spec-table td {
+                padding: 6px 8px;
+            }
+            .contact {
+                display: block;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <a href="index.html" class="back-home" title="بازگشت به صفحه اصلی">🏠</a>
+            <h1><span class="icon">🔥</span> دوره کامل ایمنی و اطفاء حریق</h1>
+            <p>آموزش جامع — مفاهیم، طبقه‌بندی، تجهیزات اطفاء، سیستم‌های اعلام و پیشگیری</p>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <!-- ============================================================ -->
+            <!-- 1. مقدمه -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📌</span> مقدمه</div>
+                <p><strong>ایمنی حریق</strong> یکی از مهم‌ترین مباحث در محیط‌های کاری و زندگی روزمره است. آتش‌سوزی‌ها سالانه خسارات جانی و مالی فراوانی به بار می‌آورند که بسیاری از آنها با رعایت اصول ایمنی و آگاهی از روش‌های پیشگیری و اطفاء قابل پیشگیری هستند.</p>
+                <p style="margin-top:10px;">این دوره توسط <strong>مهندس علی انبکلی</strong> در <strong>آموزشگاه عماد استوار صنعت</strong> تدوین شده و شامل مباحث تئوری و عملی ایمنی و اطفاء حریق می‌باشد.</p>
+                <div class="quote" style="margin-top:15px;">
+                    "پیشگیری بهتر از درمان است – در مورد آتش‌سوزی، پیشگیری تنها راه مطمئن برای حفظ جان و مال است."
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 2. تعاریف و مفاهیم پایه -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📖</span> تعاریف و مفاهیم پایه</div>
+
+                <div class="card-subtitle">🔸 سوختن</div>
+                <p>سوختن یعنی ترکیب عناصر یک جسم با اکسیژن (اکسیداسیون) که یک فعل و انفعال شیمیایی است.</p>
+
+                <div class="card-subtitle">🔸 احتراق (ایجاد آتش)</div>
+                <p>عبارت است از هر فعل و انفعال شیمیایی که موجب بوجود آمدن حرارت و گرما شود و مستلزم ترکیب سریع اکسیژن با اشیاء قابل سوختن است.</p>
+
+                <div class="card-subtitle">🔸 اشتعال</div>
+                <p>به معنای احتراق همراه با شعله و نور است.</p>
+
+                <div class="card-subtitle">🔸 نقطه اشتعال (Flash Point)</div>
+                <p>پایین‌ترین درجه حرارتی که در آن مایعات سوختنی، بخارانی متصاعد می‌نمایند که قابل اشتعال می‌باشد (شعله برای یک لحظه روشن می‌شود و سپس خاموش می‌شود).</p>
+
+                <div class="card-subtitle">🔸 نقطه احتراق (نقطه آتش – Fire Point)</div>
+                <p>کمترین درجه حرارتی است که قادر است از حرارت حاصل از احتراق گازهای متصاعده، آنقدر بخار قابل اشتعال تولید نماید که عمل احتراق ادامه یابد. درجه حرارت نقطه آتش از درجه حرارت نقطه اشتعال بالاتر است.</p>
+
+                <div class="card-subtitle">🔸 محدوده اشتعال (LEL و UEL)</div>
+                <ul>
+                    <li><strong>LEL (Lower Explosive Limit):</strong> پایین‌ترین درصد حجمی گاز یا بخار در هوا که قابل اشتعال است.</li>
+                    <li><strong>UEL (Upper Explosive Limit):</strong> بالاترین درصد حجمی گاز یا بخار در هوا که قابل اشتعال است.</li>
+                    <li>اگر غلظت کمتر از LEL باشد، مخلوط "ضعیف" (فقیر) و اگر بیشتر از UEL باشد، مخلوط "غنی" (پر) است و در هر دو حالت قابل اشتعال نیست.</li>
+                </ul>
+                <div class="warning-box">
+                    <strong>⚠️ نکته مهم:</strong> محدوده اشتعال برای هر ماده متفاوت است. مثلاً هیدروژن (۴ تا ۷۴.۵ درصد)، متان (۵ تا ۱۵ درصد)، بنزین (۱.۴ تا ۷.۶ درصد).
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 3. انفجار و تفاوت با احتراق -->
+            <!-- ============================================================ -->
+            <div class="card danger-box">
+                <div class="card-title"><span class="icon">💥</span> انفجار و تفاوت با احتراق</div>
+                <p><strong>انفجار:</strong> به مفهوم اشتعال یکباره و حالتی است که انرژی‌های آزاد شده خیلی سریع و ناگهانی با سرعت و در حداقل زمان ممکن خارج شود. هر مخلوط یا ماده شیمیایی که در اثر یک محرک خارجی (ضربه، حرارت و غیره) تغییر شکل ناگهانی داده و از حالت جامد یا مایع به صورت گاز تبدیل شود، ماده منفجره نامیده می‌شود.</p>
+                <div class="highlight-box">
+                    <strong>✅ تفاوت احتراق و انفجار:</strong> مربوط به مقدار انرژی تولید شده نیست، بلکه مربوط به <strong>سرعت تولید</strong> انرژی است. در انفجار، انرژی در کسری از ثانیه آزاد می‌شود.
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 4. مواد قابل اشتعال و منابع اشتعال -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🧪</span> مواد قابل اشتعال</div>
+
+                <div class="card-subtitle">🔸 مواد غیر قابل اشتعال</div>
+                <p>موادی که در شرایط معمولی قابل سوختن نمی‌باشند و با اکسیژن هوا ترکیب نمی‌شوند. مانند: خاک، ماسه، سنگ، سنگ‌های آهکی و مواد معدنی طبیعی.</p>
+
+                <div class="card-subtitle">🔸 مواد قابل اشتعال</div>
+                <p>مواد قابل اشتعال در طبیعت به سه حالت وجود دارند:</p>
+                <ul>
+                    <li><strong>جامد:</strong> چوب، زغال، کاغذ، پارچه، پلاستیک، لاستیک</li>
+                    <li><strong>مایع:</strong> فرآورده‌های نفتی (بنزین، نفت، گازوئیل)، الکل‌ها، مایعات سوزنده (تینر، استون)</li>
+                    <li><strong>گاز:</strong> انواع گازهای قابل اشتعال (بوتان، استیلن، متان، پروپان، هیدروژن)</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 منابع اشتعال</div>
+                <div class="grid-2col">
+                    <div>
+                        <h4 style="color:var(--dark-blue); margin-bottom:8px;">شعله‌ها و گرمای مستقیم</h4>
+                        <ul>
+                            <li>کوره‌ها و مشعل‌ها</li>
+                            <li>جوشکاری و برشکاری</li>
+                            <li>آتش پیلوت</li>
+                            <li>دیگ‌های بخار</li>
+                            <li>دستگاه‌های خشک‌کننده</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="color:var(--dark-blue); margin-bottom:8px;">جرقه‌های مکانیکی</h4>
+                        <ul>
+                            <li>برخوردهای تصادفی فلزات</li>
+                            <li>افتادن اشیاء فلزی</li>
+                            <li>ابزارهای فلزی (چکش، آچار)</li>
+                            <li>حرکت قطعات فلزی</li>
+                            <li>ساییدگی و برش فلزات</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="color:var(--dark-blue); margin-bottom:8px;">اصطکاک</h4>
+                        <ul>
+                            <li>یاتاقان‌های داغ</li>
+                            <li>برشکاری و تراشکاری</li>
+                            <li>ابزارهای الکتریکی</li>
+                            <li>اصطکاک اجزاء ماشین</li>
+                            <li>پرداخت کردن نمد و پارچه</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="color:var(--dark-blue); margin-bottom:8px;">سطوح داغ</h4>
+                        <ul>
+                            <li>لوله‌های بخار</li>
+                            <li>لنت‌های نسوز</li>
+                            <li>دستگاه‌های خشک‌کننده</li>
+                            <li>گرم کننده‌های برفی</li>
+                            <li>نورپردازی (لامپ‌های داغ)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 5. هرم آتش (مثلث آتش) -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🔺</span> هرم آتش (مثلث آتش)</div>
+                <p>هرگاه چهار عامل <strong>اکسیژن</strong>، <strong>حرارت</strong>، <strong>ماده سوختنی</strong> و <strong>واکنش‌های زنجیره‌ای</strong> با مقادیر معین و تحت شرایط مطلوب با یکدیگر ترکیب شوند، حریق ایجاد می‌گردد که این چهار عامل را <strong>هرم آتش</strong> نام‌گذاری می‌کنند.</p>
+                <div class="success-box">
+                    <h4 style="color:var(--success); margin-bottom:10px;">✅ روش‌های خاموش‌کردن حریق</h4>
+                    <p>هرگاه یک یا دو و یا همه چهار عامل ایجاد حریق حذف گردد، آتش خاموش می‌شود.</p>
+                    <ul>
+                        <li><strong>حذف ماده سوختنی:</strong> جداسازی (قطع سوخت، ایجاد آتش‌بر، خارج کردن مواد)</li>
+                        <li><strong>حذف اکسیژن:</strong> خفه کردن (پوشاندن با شن، پتو، فوم، CO2)</li>
+                        <li><strong>حذف حرارت:</strong> سرد کردن (آب، خنک‌کننده‌ها)</li>
+                        <li><strong>قطع واکنش زنجیره‌ای:</strong> مهار شیمیایی (پودرهای شیمیایی، هالوژنه)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 6. طبقه‌بندی حریق بر اساس BS و NFPA -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🏷️</span> طبقه‌بندی حریق‌ها (بر اساس BS و NFPA)</div>
+
+                <div class="card-subtitle">📌 طبقه‌بندی بر اساس استاندارد BS (British Standard)</div>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr><th>کلاس</th><th>نوع ماده</th><th>مثال</th><th>روش اطفاء مناسب</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>کلاس A</strong></td><td>جامدات قابل اشتعال</td><td>چوب، کاغذ، پارچه، پلاستیک، لاستیک</td><td>آب، پودر، فوم</td></tr>
+                            <tr><td><strong>کلاس B</strong></td><td>مایعات قابل اشتعال</td><td>بنزین، نفت، الکل، رنگ، تینر</td><td>پودر، CO2، فوم</td></tr>
+                            <tr><td><strong>کلاس C</strong></td><td>گازهای قابل اشتعال</td><td>متان، پروپان، استیلن، هیدروژن</td><td>پودر، CO2</td></tr>
+                            <tr><td><strong>کلاس D</strong></td><td>فلزات قابل اشتعال</td><td>سدیم، منیزیم، آلومینیوم، تیتانیوم</td><td>پودر خشک مخصوص کلاس D</td></tr>
+                            <tr><td><strong>کلاس E</strong></td><td>تجهیزات الکتریکی</td><td>تابلو برق، موتور، کابل، کامپیوتر</td><td>CO2، پودر (غیر رسانا)</td></tr>
+                            <tr><td><strong>کلاس F</strong></td><td>روغن‌ها و چربی‌های خوراکی</td><td>آشپزخانه‌ها، سرخ‌کن‌های صنعتی</td><td>پودر تر شیمیایی، کپسول مخصوص</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card-subtitle" style="margin-top:20px;">📌 طبقه‌بندی بر اساس استاندارد NFPA (National Fire Protection Association)</div>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr><th>کلاس</th><th>نوع ماده</th><th>مثال</th><th>خاموش‌کننده مناسب</th><th>خاموش‌کننده غیرمجاز</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>کلاس A</strong></td><td>مواد معمولی قابل اشتعال</td><td>چوب، کاغذ، پارچه، لاستیک، پلاستیک</td><td>آب، پودر چندمنظوره، کف</td><td>—</td></tr>
+                            <tr><td><strong>کلاس B</strong></td><td>مایعات و گازهای قابل اشتعال</td><td>بنزین، روغن، گریس، رنگ، حلال‌ها</td><td>CO2، پودر شیمیایی، کف، هالوژنه</td><td>آب (پخش کننده)</td></tr>
+                            <tr><td><strong>کلاس C</strong></td><td>تجهیزات برقی برقدار</td><td>موتورها، تابلوهای برق، ترانسفورماتورها</td><td>CO2، پودر شیمیایی (غیر رسانا)</td><td>آب، کف (رسانا)</td></tr>
+                            <tr><td><strong>کلاس D</strong></td><td>فلزات قابل احتراق</td><td>منیزیم، تیتانیوم، پتاسیم، سدیم</td><td>پودر خشک مخصوص کلاس D</td><td>آب، CO2، پودر معمولی</td></tr>
+                            <tr><td><strong>کلاس K</strong></td><td>روغن‌ها و چربی‌های پخت‌وپز</td><td>آشپزخانه‌ها، رستوران‌ها</td><td>پودر تر شیمیایی (کلاس K)</td><td>آب (انفجار بخار)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="info-box" style="margin-top:15px;">
+                    <strong>📌 تفاوت اصلی BS و NFPA:</strong>
+                    <ul>
+                        <li>استاندارد BS از کلاس <strong>E</strong> برای تجهیزات الکتریکی و کلاس <strong>F</strong> برای روغن‌های خوراکی استفاده می‌کند.</li>
+                        <li>استاندارد NFPA از کلاس <strong>C</strong> برای تجهیزات الکتریکی و کلاس <strong>K</strong> برای روغن‌های خوراکی استفاده می‌کند.</li>
+                        <li>در NFPA، کلاس B شامل گازهای قابل اشتعال نیز می‌شود در حالی که در BS کلاس C جداگانه است.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 7. خاموش‌کننده‌های دستی -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🧯</span> خاموش‌کننده‌های دستی</div>
+
+                <div class="card-subtitle">🔸 تعریف</div>
+                <p>خاموش‌کننده دستی به وسیله‌ای گفته می‌شود که برای مبارزه با آتش‌سوزی طراحی و ساخته شده است و با حداکثر ۱۴ کیلوگرم یا ۱۴ لیتر ظرفیت مواد خاموش‌کن، یک نفر قادر به حمل و استفاده از آن باشد.</p>
+
+                <div class="card-subtitle">🔸 انواع خاموش‌کننده‌ها بر اساس ماده اطفایی</div>
+                <ul>
+                    <li><strong>آبی (Water):</strong> مناسب برای کلاس A. دو نوع: آب تحت فشار و آب و گاز (کارتریج)</li>
+                    <li><strong>پودری (Powder):</strong> مناسب برای کلاس‌های A، B، C (پودر چندمنظوره) و کلاس D (پودر خشک مخصوص)</li>
+                    <li><strong>گاز CO2:</strong> مناسب برای کلاس‌های B، C و تجهیزات الکتریکی (کلاس E)</li>
+                    <li><strong>کف (Foam):</strong> مناسب برای کلاس‌های A و B (مایعات قابل اشتعال)</li>
+                    <li><strong>هالوژنه (Halon):</strong> مناسب برای کلاس‌های B، C و تجهیزات الکتریکی (اکنون به دلیل اثرات زیست‌محیطی محدود شده)</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 نحوه کار با خاموش‌کننده (روش PASS)</div>
+                <ol class="step-list">
+                    <li><strong>P (Pull – کشیدن):</strong> ضامن یا پلمپ را بکشید.</li>
+                    <li><strong>A (Aim – نشانه‌گیری):</strong> نازل را به سمت قاعده آتش بگیرید (نه شعله‌ها).</li>
+                    <li><strong>S (Squeeze – فشار دادن):</strong> دسته را فشار دهید تا ماده خارج شود.</li>
+                    <li><strong>S (Sweep – پاشیدن):</strong> نازل را به صورت افقی از یک طرف به طرف دیگر حرکت دهید تا قاعده آتش را بپوشانید.</li>
+                </ol>
+
+                <div class="card-subtitle">🔸 بازدید و نگهداری</div>
+                <ul>
+                    <li><strong>بازدید ماهیانه (تا ۳ ماه):</strong> بررسی پلمپ، فشارسنج، نازل، شلنگ، محل نصب، عدم ضربه‌خوردگی و زنگ‌زدگی</li>
+                    <li><strong>بازدید سالیانه:</strong> وزن‌کشی (اگر بیش از ۱۰٪ گاز کم شده باشد، نیاز به شارژ مجدد دارد)</li>
+                    <li><strong>آزمایش هیدرواستاتیک:</strong> هر ۵ سال یکبار برای اطمینان از مقاومت بدنه در برابر فشار</li>
+                </ul>
+
+                <div class="warning-box">
+                    <strong>⚠️ نکات ایمنی:</strong>
+                    <ul>
+                        <li>هرگز پشت به درب خروجی با آتش نجنگید.</li>
+                        <li>فاصله مناسب (۲ تا ۷ متر) را رعایت کنید.</li>
+                        <li>در فضای بسته از CO2 با احتیاط استفاده کنید (خطر خفگی).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 8. خاموش‌کننده آب -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">💧</span> خاموش‌کننده آب</div>
+
+                <div class="card-subtitle">🔸 خاموش‌کننده آب تحت فشار</div>
+                <ul>
+                    <li>ظرفیت: معمولاً ۹ لیتری یا بیشتر</li>
+                    <li>مناسب برای کلاس A</li>
+                    <li>فشار: حدود ۱۰ بار (۱۵۰ PSI)</li>
+                    <li>قدرت پرتاب: ۷ متر (استاندارد انگلیس) تا ۱۲ متر (استاندارد آمریکا)</li>
+                    <li>زمان تخلیه: ۵۵ تا ۶۰ ثانیه</li>
+                    <li>مشکل: یخ‌زدگی در دمای زیر ۴ درجه سانتی‌گراد</li>
+                    <li>دارای فشارسنج برای نشان دادن فشار درون سیلندر</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 خاموش‌کننده آب و گاز (کارتریج)</div>
+                <ul>
+                    <li>محتوی: آب یا محلول ضد یخ</li>
+                    <li>فشار: توسط کارتریج گاز CO2 تأمین می‌شود</li>
+                    <li>غیر قابل کنترل (پس از آزاد شدن گاز، تا تخلیه کامل ادامه می‌یابد)</li>
+                    <li>نوع مه‌پاش (دوش مانند): قدرت پرتاب حدود ۴ متر</li>
+                    <li>بازدید: وزن‌کشی کارتریج هر ماه (کمتر از ۱۰٪ وزن مجاز)</li>
+                </ul>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 9. خاموش‌کننده پودری -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🧂</span> خاموش‌کننده پودری</div>
+
+                <div class="card-subtitle">🔸 انواع پودرها</div>
+                <ul>
+                    <li><strong>پودر شیمیایی معمولی:</strong> پایه بی‌کربنات سدیم، پتاسیم، اوره – مناسب برای کلاس‌های B و C</li>
+                    <li><strong>پودر شیمیایی چندمنظوره:</strong> پایه فسفات آمونیوم – مناسب برای کلاس‌های A، B و C</li>
+                    <li><strong>پودر خشک:</strong> ترکیبی از کلرور سدیم، کلرور پتاسیم و کلرور باریم – مناسب برای کلاس D (فلزات)</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 خاموش‌کننده پودر و هوا</div>
+                <ul>
+                    <li>فشار توسط هوای خشک یا نیتروژن (حدود ۱۰ بار / ۱۵۰ PSI)</li>
+                    <li>دارای فشارسنج</li>
+                    <li>احتمال کلوخه‌شدن پودر – نیاز به سر و ته کردن دوره‌ای</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 خاموش‌کننده پودر و گاز (کارتریج)</div>
+                <ul>
+                    <li><strong>کارتریج داخل:</strong> کارتریج CO2 در داخل سیلندر و زیر درپوش قرار دارد</li>
+                    <li><strong>کارتریج بیرون:</strong> کارتریج CO2 خارج از سیلندر قرار دارد</li>
+                </ul>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 10. خاموش‌کننده CO2 -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🧯</span> خاموش‌کننده گاز CO2</div>
+
+                <div class="card-subtitle">🔸 ویژگی‌ها</div>
+                <ul>
+                    <li>گازی غیر قابل اشتعال، بدون بو، خنثی، غیر سمی</li>
+                    <li>۱.۵ برابر هوا سنگین‌تر است</li>
+                    <li>با جایگزینی اکسیژن، آتش را خفه می‌کند</li>
+                    <li>برای کلاس‌های B، C و تجهیزات الکتریکی (کلاس E) مناسب است</li>
+                    <li>بدنه یک تکه و بدون درز، نازل قیفی یا شیپوری شکل</li>
+                    <li>دمای بسیار پایین (حدود ۴۳- درجه سانتی‌گراد)</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 نحوه کار</div>
+                <ul>
+                    <li>ضامن را بکشید، اهرم را فشار دهید</li>
+                    <li>نازل قیفی شکل را به سمت قاعده آتش بگیرید</li>
+                    <li>از تماس دست با نازل خودداری کنید (خطر سرمازدگی)</li>
+                    <li>قابل کنترل (شیر باز و بسته می‌شود)</li>
+                    <li>زمان تخلیه: حداکثر ۲۰ ثانیه</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 ایمنی</div>
+                <ul>
+                    <li>در فضاهای بسته، CO2 باعث کاهش اکسیژن و خفگی می‌شود</li>
+                    <li>قبل از تخلیه، افراد را خارج کنید</li>
+                    <li>غلظت بالای ۱۰٪ بسیار خطرناک است</li>
+                </ul>
+
+                <div class="danger-box">
+                    <strong>⚠️ هشدار:</strong> هرگز از CO2 برای حریق فلزات کلاس D استفاده نکنید.
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 11. خاموش‌کننده کف و هالوژنه -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🧪</span> خاموش‌کننده کف و هالوژنه</div>
+
+                <div class="card-subtitle">🔸 خاموش‌کننده کف (Foam)</div>
+                <ul>
+                    <li>مناسب برای کلاس‌های A و B (مایعات قابل اشتعال)</li>
+                    <li>روی سطح مایع شناور می‌شود (وزن مخصوص کمتر از مایعات)</li>
+                    <li>از بخار شدن مایع و رسیدن اکسیژن جلوگیری می‌کند</li>
+                    <li>قدرت پرتاب: حدود ۵ متر</li>
+                    <li>ظرفیت: ۹ لیتری</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 خاموش‌کننده هالوژنه (Halon)</div>
+                <ul>
+                    <li>مناسب برای کلاس‌های B، C و تجهیزات الکتریکی</li>
+                    <li>با قطع واکنش زنجیره‌ای، آتش را خاموش می‌کند</li>
+                    <li>به دلیل اثرات مخرب بر لایه ازن، تولید و استفاده از آن محدود شده است</li>
+                    <li>جایگزین‌ها: FM-200، Novec 1230</li>
+                </ul>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 12. شناسایی و نصب خاموش‌کننده‌ها -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📌</span> شناسایی و نصب خاموش‌کننده‌ها</div>
+
+                <div class="card-subtitle">🔸 روش‌های شناسایی نوع خاموش‌کننده</div>
+                <ul>
+                    <li><strong>استاندارد:</strong> اطلاعات روی بدنه (نوع، ظرفیت، موارد استفاده)</li>
+                    <li><strong>حروف:</strong> A، B، C روی بدنه نشان‌دهنده کلاس‌های قابل اطفاء</li>
+                    <li><strong>قطعات دستگاه:</strong>
+                        <ul>
+                            <li>CO2: بدنه یک تکه، بدون درز، نازل قیفی شکل</li>
+                            <li>آب: نازل با قطر کم</li>
+                            <li>کف: نازل با سوراخ‌های هواکش</li>
+                            <li>پودر: نازل معمولی</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="card-subtitle">🔸 نصب خاموش‌کننده‌ها</div>
+                <ul>
+                    <li>حداکثر ارتفاع نصب: ۱.۲۰ متر از سطح زمین (برای وزن بیش از ۱۸ کیلوگرم، ۱ متر)</li>
+                    <li>در نزدیکی ورودی و خروجی‌ها</li>
+                    <li>مسیر دسترسی کوتاه و بدون مانع</li>
+                    <li>دور از تابش مستقیم نور خورشید، برف و باران</li>
+                    <li>فاصله بین دو کپسول: حداکثر ۳۰ متر</li>
+                </ul>
+
+                <div class="table-container">
+                    <h4 style="color:var(--dark-blue); margin:10px 0;">جدول پوشش خاموش‌کننده‌ها</h4>
+                    <table class="spec-table">
+                        <thead>
+                            <tr><th>نوع خطر</th><th>خاموش‌کننده ۶ کیلویی</th><th>خاموش‌کننده ۱۲ کیلویی</th><th>فاصله بین کپسول‌ها</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>کم خطر</td><td>۱۵۰ متر مربع</td><td>۳۰۰ متر مربع</td><td>۲۰ متر</td></tr>
+                            <tr><td>پر خطر</td><td>۵۰ متر مربع</td><td>۱۰۰ متر مربع</td><td>۱۵ متر</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 13. سیستم‌های اطفاء اتوماتیک -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">💧</span> سیستم‌های اطفاء اتوماتیک</div>
+
+                <div class="card-subtitle">🔸 سیستم آبفشان (اسپرینکلر)</div>
+                <ul>
+                    <li><strong>سیستم تر (Wet):</strong> لوله‌ها همیشه پر از آب (مناسب ساختمان‌های گرم)</li>
+                    <li><strong>سیستم خشک (Dry):</strong> لوله‌ها پر از هوای فشرده (مناسب ساختمان‌های سرد)</li>
+                    <li><strong>سیستم متناوب:</strong> ترکیبی از تر و خشک (تابستان تر، زمستان خشک)</li>
+                    <li><strong>انواع سر آبفشان:</strong>
+                        <ul>
+                            <li>آویزی (Pendent): آب را به پایین می‌پاشد</li>
+                            <li>عمودی (Upright): آب را به سمت بالا می‌پاشد</li>
+                            <li>دیواری (Sidewall): برای کنار اتاق‌ها و راهروها</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="card-subtitle">🔸 سیستم CO2</div>
+                <ul>
+                    <li><strong>سیستم غرقابی (Total Flooding):</strong> کل فضای بسته را پر می‌کند</li>
+                    <li><strong>سیستم موضعی (Local Application):</strong> فقط روی نقطه حریق</li>
+                    <li>معمولاً در ترانسفورماتورها، موتورخانه‌ها، اتاق‌های برق استفاده می‌شود</li>
+                    <li>زمان تأخیر الکتریکی برای تخلیه افراد</li>
+                    <li>غلظت طراحی: ۳۰٪ حجم</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 سیستم فوم و پودر اتوماتیک</div>
+                <ul>
+                    <li>فوم: مناسب برای حریق مایعات قابل اشتعال (پالایشگاه‌ها، مخازن)</li>
+                    <li>پودر: مناسب برای کلاس‌های مختلف، در سیستم‌های ثابت</li>
+                </ul>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 14. سیستم‌های اعلام حریق -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🔔</span> سیستم‌های اعلام حریق</div>
+
+                <div class="card-subtitle">🔸 اجزای سیستم</div>
+                <ul>
+                    <li><strong>شستی اعلام حریق (Manual Call Point):</strong> نوع شیشه‌ای و نوع فشاری، زمان پاسخ کمتر از ۱ ثانیه</li>
+                    <li><strong>آشکارسازهای دودی:</strong>
+                        <ul>
+                            <li>یونیزاسیون: حساسیت بالا برای آتش‌های سریع</li>
+                            <li>نوری (اپتیکال/فتوالکتریک): حساسیت بالا برای دود غلیظ</li>
+                        </ul>
+                    </li>
+                    <li><strong>آشکارسازهای حرارتی:</strong> دمای ثابت (مثال ۵۵ درجه) و افزایشی (Rate of Rise)</li>
+                    <li><strong>آشکارسازهای شعله‌ای:</strong> مادون قرمز (IR) و ماوراء بنفش (UV)</li>
+                    <li><strong>آشکارساز بیم (Beam):</strong> برای فضاهای بزرگ</li>
+                    <li><strong>آشکارساز گازی:</strong> تشخیص نشت گاز</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 سیستم‌های اعلام</div>
+                <ul>
+                    <li><strong>سیستم متعارف (Conventional):</strong> منطقه‌بندی (زون‌بندی)</li>
+                    <li><strong>سیستم آدرس‌پذیر (Addressable):</strong> هر کاشف آدرس خاص دارد</li>
+                    <li><strong>تابلو کنترل مرکزی:</strong> مرکز پردازش و مدیریت هشدارها</li>
+                </ul>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 15. فایرباکس و هوزریل -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🚒</span> فایرباکس و هوزریل</div>
+
+                <div class="card-subtitle">🔸 فایرباکس (Fire Box)</div>
+                <ul>
+                    <li><strong>سیستم خشک:</strong> بدون آب، توسط ماشین آتش‌نشانی پر می‌شود</li>
+                    <li><strong>سیستم تر:</strong> همیشه پر از آب (متصل به آب شهری)</li>
+                    <li>شعاع پوشش: ۲۰ متر</li>
+                    <li>ارتفاع نصب: ۳۰ تا ۷۰ سانتیمتر از کف</li>
+                    <li>قطر لوله: حداقل ۴ اینچ</li>
+                    <li>فشار آب در بالاترین نقطه: حداقل ۲ اتمسفر</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 هوزریل (Hose Reel)</div>
+                <ul>
+                    <li>برای استفاده عموم (آسان‌تر از فایرباکس)</li>
+                    <li>فشار آب: حداقل پرتاب ۶ متر به صورت جت</li>
+                    <li>دبی آب: ۳۰ لیتر در دقیقه</li>
+                    <li>پوشش: حدود ۸۰۰ متر مربع</li>
+                    <li>ارتفاع نصب: ۳۰ تا ۷۰ سانتیمتر</li>
+                </ul>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 16. پدیده‌های خطرناک -->
+            <!-- ============================================================ -->
+            <div class="card danger-box">
+                <div class="card-title"><span class="icon">🔥</span> پدیده‌های خطرناک حریق</div>
+
+                <div class="card-subtitle">🔸 بک‌درفت (Backdraft)</div>
+                <p>انفجار ناگهانی ناشی از ورود هوا به فضای بسته‌ای که حاوی گازهای داغ و قابل اشتعال است.</p>
+                <ul>
+                    <li><strong>علائم:</strong> دود تحت فشار، عدم وجود بازشو، سیاه شدن شیشه‌ها، پالس‌زدن دود</li>
+                    <li><strong>پیشگیری:</strong> تهویه از بالاترین سطح، خنک‌سازی گازها</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 فلش‌اور (Flashover)</div>
+                <p>اشتعال ناگهانی و همه‌جانبه تمام مواد سوختنی در یک لحظه. زمانی رخ می‌دهد که حرارت به حدود ۶۶۹ تا ۶۹۵ درجه سانتی‌گراد برسد.</p>
+                <ul>
+                    <li><strong>علائم:</strong> حرارت بسیار بالا، دود سفید رنگ، رول‌اور</li>
+                    <li><strong>پیشگیری:</strong> تهویه یا عدم تهویه در شرایط مناسب، خنک‌سازی محیط</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 بلوی (BLEVE)</div>
+                <p>انفجار مخزن تحت فشار در اثر افزایش بیش از حد دما و فشار داخلی. مخازن گاز مایع (LPG) و دیگ‌های بخار در معرض این خطر هستند.</p>
+                <ul>
+                    <li><strong>علت:</strong> افزایش حرارت، انبساط گاز، ضعیف شدن بدنه</li>
+                    <li><strong>اقدام:</strong> خنک‌سازی سیلندر از فاصله ایمن و سپس بستن شیر</li>
+                </ul>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 17. وسایل حفاظت فردی (PPE) -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🛡️</span> وسایل حفاظت فردی (PPE)</div>
+
+                <div class="card-subtitle">🔸 کلاه ایمنی</div>
+                <ul>
+                    <li>پوسته خارجی، سیستم تعلیق، بند چانه</li>
+                    <li>مقاوم در برابر ضربه، نفوذ و برق</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 محافظ چشم و صورت</div>
+                <ul>
+                    <li>عینک ایمنی، محافظ صورت، ماسک تنفسی</li>
+                    <li>برای محافظت در برابر پاشش مواد شیمیایی، گرد و غبار، تشعشعات</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 دستکش ایمنی</div>
+                <ul>
+                    <li><strong>دستکش‌های لاتکس، وینیل، نیتریل:</strong> برای مواد شیمیایی و پزشکی</li>
+                    <li><strong>دستکش‌های مشبک سیمی، جرمی:</strong> برای حرارت، جوشکاری، برش</li>
+                    <li><strong>دستکش‌های آتش‌نشانی (SEIZ):</strong> با روکش NOMEX مقاوم تا ۸۰۰ درجه</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 کفش ایمنی</div>
+                <ul>
+                    <li><strong>کفش ایمنی:</strong> پنجه فولادی، ضد ضربه</li>
+                    <li><strong>کفش نارسانا:</strong> برای کار با تجهیزات ولتاژ بالا</li>
+                    <li><strong>کفش ضد لیز خوردن:</strong> زیره الستیکی یا مصنوعی</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 لباس محافظ</div>
+                <ul>
+                    <li>لباس آتش‌نشانی: مقاوم در برابر شعله، گرما، مواد شیمیایی</li>
+                    <li>جنس: NOMEX، KEVLAR، PBI</li>
+                    <li>چندین الیه برای حفاظت کامل</li>
+                </ul>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 18. استانداردهای NFPA -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📋</span> استانداردهای NFPA</div>
+                <ul>
+                    <li><strong>NFPA 10:</strong> خاموش‌کننده‌های دستی</li>
+                    <li><strong>NFPA 13:</strong> سیستم‌های آبفشان</li>
+                    <li><strong>NFPA 12:</strong> سیستم‌های CO2</li>
+                    <li><strong>NFPA 70:</strong> کد ملی برق (ایمنی الکتریکی)</li>
+                    <li><strong>NFPA 101:</strong> کد ایمنی زندگی (خروجی‌ها، تخلیه)</li>
+                    <li><strong>NFPA 1971:</strong> تجهیزات حفاظتی آتش‌نشانی</li>
+                    <li><strong>NFPA 72:</strong> سیستم‌های اعلام حریق</li>
+                    <li><strong>NFPA 704:</strong> سیستم شناسایی مواد خطرناک</li>
+                </ul>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 19. نکات ایمنی پیشگیری -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🛑</span> نکات ایمنی و پیشگیری از حریق</div>
+
+                <div class="card-subtitle">🔸 نظافت و نگهداری ساختمان</div>
+                <ul>
+                    <li>ظروف محکم برای کاغذ باطله و زباله‌ها</li>
+                    <li>خروج روزانه زباله‌ها در فواصل معین</li>
+                    <li>پارچه‌های آغشته به رنگ و روغن را بلافاصله معدوم کنید</li>
+                    <li>خودداری از ریختن ته سیگار، خاکستر در سطل‌های زباله</li>
+                    <li>بازرسی روزانه انبار قبل از تعطیلی</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 کارکنان</div>
+                <ul>
+                    <li>دستورالعمل‌های خاموش‌کردن آتش در تمام قسمت‌ها نصب شود</li>
+                    <li>شماره تلفن‌های اضطراری (آتش‌نشانی ۱۲۵) در معرض دید نصب شود</li>
+                    <li>وسایل اطفای حریق و دستورالعمل‌ها در فواصل مناسب تعبیه شوند</li>
+                    <li>تمرینات تخلیه و اطفاء حریق به صورت دوره‌ای برگزار شود</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 راه‌های خروجی</div>
+                <ul>
+                    <li>درهای خروج اضطراری قفل نباشند</li>
+                    <li>راهروها و مسیرهای خروجی مرتباً نظافت شوند</li>
+                    <li>خروجی‌ها با چراغ راهنما یا تابلو مشخص شوند</li>
+                    <li>از قرار دادن مواد قابل اشتعال در پله‌ها و زیر پله‌ها خودداری شود</li>
+                </ul>
+
+                <div class="warning-box">
+                    <strong>⚠️ هنگام آتش‌سوزی:</strong>
+                    <ul>
+                        <li>قبل از مبارزه با آتش، آتش‌نشانی را خبر دهید</li>
+                        <li>اگر آتش گسترده است، ساختمان را ترک کنید</li>
+                        <li>همیشه پشت به خروجی با آتش بجنگید</li>
+                        <li>از خاموش‌کننده مناسب استفاده کنید</li>
+                        <li>اگر از توان خود مطمئن نیستید، منطقه را ترک کنید</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 20. نکات سوختگی -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🩹</span> نکات ایمنی در سوختگی</div>
+
+                <div class="card-subtitle">🔸 نبایدها در سوختگی</div>
+                <ul>
+                    <li>پارچه یا لباس چسبیده به ناحیه سوخته را برندارید</li>
+                    <li>از یخ برای سرد کردن محل سوختگی استفاده نکنید</li>
+                    <li>تاول‌های سوختگی را نترکانید</li>
+                    <li>از پنبه، چسب زخم یا هر چیز چسبنده استفاده نکنید</li>
+                    <li>کره، روغن، خمیردندان یا پماد روی محل سوختگی نمالید</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 اقدامات اولیه در سوختگی‌های عمقی</div>
+                <ol>
+                    <li>بررسی ABC (راه هوایی، تنفس، گردش خون)</li>
+                    <li>در صورت لزوم، احیای قلبی-ریوی را شروع کنید</li>
+                    <li>خونریزی را بند آورید</li>
+                    <li>لباس‌ها و زیورآلات را از محل سوختگی دور کنید</li>
+                    <li>محل سوختگی را با آب سرد خنک کنید (۱۰ تا ۴۰ دقیقه)</li>
+                    <li>پانسمان استریل و غیرچسبنده روی آن قرار دهید</li>
+                </ol>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 21. محاسبات تعداد کپسول -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📐</span> محاسبه تعداد خاموش‌کننده‌های مورد نیاز</div>
+
+                <div class="material-box">
+                    <span class="material-number">فرمول</span>
+                    <p><strong>تعداد کپسول‌ها = مساحت کل ÷ حداکثر مساحت پوشش داده شده توسط یک کپسول</strong></p>
+                    <p><strong>مثال:</strong> انبار آرد با مساحت ۶۰۰۰ متر مربع، خاموش‌کننده ۶ کیلویی در منطقه پرخطر:</p>
+                    <p>تعداد = ۶۰۰۰ ÷ ۵۰ = <strong>۱۲۰ عدد</strong></p>
+                    <p>فاصله بین کپسول‌ها: <strong>۱۵ متر</strong></p>
+                    <p>ارتفاع نصب: <strong>۱.۲۰ متر</strong></p>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 22. اهداف ایمنی -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🎯</span> اهداف ایمنی حریق</div>
+                <ul>
+                    <li><strong>حفظ جان انسان‌ها:</strong> اولویت اول در هر آتش‌سوزی</li>
+                    <li><strong>حفاظت از سرمایه‌ها (اموال و دارایی):</strong> کاهش خسارات مالی</li>
+                    <li><strong>پیشگیری از گسترش حریق:</strong> با استفاده از سیستم‌های اعلام و اطفاء</li>
+                    <li><strong>آموزش و آگاهی‌بخشی:</strong> به کارکنان و عموم مردم</li>
+                </ul>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 23. منابع -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📚</span> منابع</div>
+                <ul>
+                    <li>استانداردهای NFPA (National Fire Protection Association)</li>
+                    <li>استانداردهای BS (British Standard)</li>
+                    <li>دستورالعمل‌های سازمان آتش‌نشانی و خدمات ایمنی</li>
+                    <li>آیین‌نامه‌های حفاظت و بهداشت کار</li>
+                </ul>
+            </div>
+
+
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <div class="contact" style="display:inline-block; margin:0 4px;">👨‍🏫 مدرس: علی انبکلی – آموزشگاه عماد استوار صنعت</div>
+            <p style="margin-top:12px;">✅ این دوره بر اساس استانداردهای NFPA و BS و آیین‌نامه‌های حفاظت و بهداشت کار تدوین شده است.</p>
+            <p style="color:#64748b; font-size:0.9rem;">📄 منبع: فایل آموزشی ایمنی و اطفاء حریق</p>
+        </div>
+
+    </div>
+
+    <script>
+        // اضافه کردن قابلیت کپی متن با کلیک
+        document.querySelectorAll('.card ul li, .card ol li, .info-box ul li, .warning-box ul li, .danger-box ul li, .success-box ul li, .highlight-box ul li').forEach(el => {
+            el.style.cursor = 'pointer';
+            el.addEventListener('click', function() {
+                const text = this.textContent.trim();
+                navigator.clipboard.writeText(text).then(() => {
+                    const origBg = this.style.background;
+                    this.style.background = '#d4edda';
+                    setTimeout(() => {
+                        this.style.background = origBg || '';
+                    }, 400);
+                });
+            });
+        });
+
+        console.log('✅ دوره کامل ایمنی و اطفاء حریق بارگذاری شد.');
+        console.log('📋 کلیک روی هر متن برای کپی کردن');
+        console.log('📚 شامل طبقه‌بندی حریق بر اساس BS و NFPA');
+    </script>
+
+<script src="hse-common.js"></script>
+
+
+<script src="assets/js/sw-register.js"></script>
+<div style="text-align:center;padding:15px;font-size:0.85rem;color:#666;border-top:1px solid #eee;margin-top:20px;">تهیه شده توسط <strong>شرکت معدنی و صنایع معدنی درکاو</strong></div>
+</body>
+</html>

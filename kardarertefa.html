@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+
+<script>
+/* ============================================================
+   ★ امنیت: گیت احراز هویت (سمت کلاینت)
+   هیچ صفحه‌ای بدون ورود به سامانه باز نمی‌شود. محتوای صفحه
+   مخفی می‌ماند و کاربر به صفحه ورود هدایت می‌شود.
+   (لایه نمایشی؛ لایه امنیتی واقعی در بکاند اعمال می‌شود.)
+   ============================================================ */
+(function(){
+  var ok = false;
+  try {
+    var _u = JSON.parse(localStorage.getItem('hse_user_activated') || 'null');
+    ok = !!(_u && _u.personnel && _u.fullname);
+  } catch(e) { ok = false; }
+  if (ok) return; // مجاز - ادامه می‌دهد
+
+  // پنهان‌کردن کل محتوا و نمایش قفل
+  var hide = function(){
+    try {
+      var d = document;
+      // مخفی کردن همه عناصر
+      var all = d.body ? d.body.children : [];
+      for (var i=0;i<all.length;i++){ all[i].style.display='none'; }
+      var lock = d.createElement('div');
+      lock.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#0f172a;color:#f8fafc;'
+        +'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+        +'font-family:Tahoma,sans-serif;text-align:center;padding:20px;direction:rtl;';
+      lock.innerHTML = '<div style="font-size:60px;margin-bottom:10px;">🔒</div>'
+        +'<h2 style="margin:0 0 8px;">دسترسی محدود است</h2>'
+        +'<p style="margin:0 0 20px;color:#94a3b8;">لطفاً ابتدا از صفحه اصلی وارد سامانه شوید.</p>'
+        +'<a href="index.html" style="background:#ff6208;color:#fff;padding:10px 26px;'
+        +'border-radius:10px;text-decoration:none;font-weight:bold;">بازگشت به صفحه ورود</a>';
+      d.body.appendChild(lock);
+    } catch(e){}
+  };
+  if (document.body) hide(); else document.addEventListener('DOMContentLoaded', hide);
+  setTimeout(function(){ try{ location.replace('index.html'); }catch(e){} }, 2500);
+})();
+</script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#1e3c5c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HSE درکاو" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+    <title>آموزش جامع کار در ارتفاع - آژند همت توس</title>
+
+    <style>
+        :root {
+            --primary: #ff6208;
+            --primary-hover: #e05300;
+            --secondary: #f39c12;
+            --success: #27ae60;
+            --safety: #2c6e4e;
+            --danger: #c0392b;
+            --dark-blue: #1e3c5c;
+            --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #dfe7f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --text-main: #1e2a2e;
+            --text-muted: #64748b;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body { padding-bottom: 75px !important;
+            background: var(--bg-gradient);
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text-main);
+            line-height: 1.8;
+        }
+
+        .main-container {
+            max-width: 1000px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            background: var(--dark-blue);
+            padding: 35px 20px;
+            color: white;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+            position: relative;
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        .header h1 .icon {
+            margin-left: 10px;
+        }
+        .header p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        .header .back-home {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .header .back-home:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+        .card:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        }
+        .card-title {
+            color: var(--dark-blue);
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-right: 4px solid var(--primary);
+            padding-right: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title .icon {
+            font-size: 1.5rem;
+        }
+        .card-subtitle {
+            color: var(--primary);
+            font-size: 1.05rem;
+            font-weight: bold;
+            margin: 18px 0 10px 0;
+            border-bottom: 2px solid rgba(255, 98, 8, 0.15);
+            padding-bottom: 6px;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .tips-grid .tip-item {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 10px 14px;
+            border-radius: var(--border-radius-sm);
+            border-right: 3px solid var(--safety);
+            font-size: 0.9rem;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .tips-grid .tip-item:hover {
+            background: rgba(44, 110, 78, 0.04);
+            transform: translateX(-3px);
+        }
+        .tips-grid .tip-item.danger-tip {
+            border-right-color: var(--danger);
+        }
+        .tips-grid .tip-item.warning-tip {
+            border-right-color: var(--secondary);
+        }
+        .tips-grid .tip-item.primary-tip {
+            border-right-color: var(--primary);
+        }
+        .tips-grid .tip-item.info-tip {
+            border-right-color: #3498db;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+        .spec-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .spec-table th,
+        .spec-table td {
+            padding: 10px 12px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        .spec-table th {
+            background: var(--dark-blue);
+            color: white;
+            font-weight: bold;
+        }
+        .spec-table tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .spec-table tr:hover {
+            background: rgba(255, 98, 8, 0.04);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+            justify-content: center;
+        }
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn-back {
+            background: var(--danger);
+            color: white;
+        }
+        .btn-back:hover {
+            background: #a93226;
+        }
+        .btn-software {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-software:hover {
+            background: var(--primary-hover);
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .footer .highlight {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .badge-standard {
+            display: inline-block;
+            background: var(--safety);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-danger {
+            display: inline-block;
+            background: var(--danger);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-warning {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-info {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+
+        .safety-alert {
+            background: rgba(192, 57, 43, 0.04);
+            border-right: 4px solid var(--danger);
+            padding: 15px;
+            border-radius: var(--border-radius-sm);
+            margin: 10px 0;
+        }
+        .safety-alert strong {
+            color: var(--danger);
+        }
+        .safety-alert ul {
+            padding-right: 20px;
+            margin-top: 5px;
+        }
+        .safety-alert ul li {
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .highlight-box {
+            background: rgba(44, 110, 78, 0.04);
+            padding: 15px 18px;
+            border-radius: var(--border-radius-sm);
+            border-right: 4px solid var(--safety);
+            margin: 10px 0;
+        }
+        .highlight-box.danger {
+            background: rgba(192, 57, 43, 0.04);
+            border-right-color: var(--danger);
+        }
+        .highlight-box.gold {
+            background: rgba(243, 156, 18, 0.04);
+            border-right-color: var(--secondary);
+        }
+        .highlight-box.green {
+            background: rgba(39, 174, 96, 0.04);
+            border-right-color: var(--success);
+        }
+        .highlight-box.purple {
+            background: rgba(155, 89, 182, 0.04);
+            border-right-color: #9b59b6;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+
+        .item-box {
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: var(--border-radius-sm);
+            padding: 14px 16px;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .item-box:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+        }
+        .item-box .icon {
+            color: var(--primary);
+            font-size: 1.3rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .item-box .title {
+            color: var(--dark-blue);
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .item-box .desc {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            margin-top: 2px;
+        }
+
+        .material-box {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 12px 16px;
+            border-radius: var(--border-radius-sm);
+            border-right: 4px solid var(--danger);
+            margin-bottom: 8px;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .material-box:hover {
+            background: rgba(255, 98, 8, 0.04);
+        }
+        .material-box .mat-num {
+            display: inline-block;
+            background: var(--danger);
+            color: white;
+            padding: 0 10px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.75rem;
+            margin-left: 6px;
+        }
+
+        .step-list {
+            list-style: none;
+            padding: 0;
+        }
+        .step-list li {
+            padding: 6px 35px 6px 0;
+            position: relative;
+            counter-increment: step;
+        }
+        .step-list li::before {
+            content: counter(step);
+            position: absolute;
+            right: 0;
+            top: 4px;
+            background: var(--danger);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+            margin: 10px 0;
+        }
+        .stat-card {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 14px;
+            border-radius: var(--border-radius-sm);
+            text-align: center;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+        .stat-card .number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .stat-card .label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .two-col-list {
+            columns: 2;
+            column-gap: 30px;
+        }
+
+        .quote {
+            font-style: italic;
+            background: rgba(0, 0, 0, 0.02);
+            padding: 16px 24px;
+            border-radius: 60px 20px 60px 20px;
+            color: var(--text-main);
+            border-right: 4px solid var(--secondary);
+        }
+
+        @media(max-width:700px) {
+            .content { padding: 15px; }
+            .header h1 { font-size: 1.3rem; }
+            .header .back-home { width: 36px; height: 36px; font-size: 1rem; left: 10px; top: 15px; }
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .tips-grid { grid-template-columns: 1fr; }
+            .spec-table { font-size: 0.75rem; }
+            .spec-table th, .spec-table td { padding: 6px 4px; }
+            .btn-row { flex-direction: column; }
+            .btn { width: 100%; justify-content: center; }
+            .two-col-list { columns: 1; }
+            .stat-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <a href="index.html" class="back-home" title="بازگشت به صفحه اصلی">🏠</a>
+            <h1><span class="icon">⛑️</span> کار در ارتفاع</h1>
+            <p>دوره تخصصی ایمنی کار در ارتفاع — همراه با آیین‌نامه کامل (۸ فصل · ۱۳۵ ماده)</p>
+            <div style="margin-top:8px; display:flex; flex-wrap:wrap; justify-content:center; gap:8px;">
+                <span class="badge-standard">📜 آیین‌نامه ایمنی کار در ارتفاع</span>
+                <span class="badge-standard">✅ مصوب وزارت کار</span>
+                <span class="badge-standard">📘 ویژه کارگران و ناظران</span>
+            </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <!-- ===== مقدمه ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📌</span> مقدمه</div>
+                <div class="quote">
+                    "و هر کس یک نفر را زنده کند، گویا همه مردم را زنده کرده است" (آیه ۳۲ سوره مائده)
+                </div>
+                <p style="margin-top:10px;">
+                    کار در ارتفاع یکی از پرخطرترین فعالیت‌های شغلی است که سالانه جان بسیاری از کارگران را می‌گیرد. این دوره آموزشی بر اساس <strong>آیین‌نامه ایمنی کار در ارتفاع</strong> وزارت کار و استانداردهای بین‌المللی تدوین شده است.
+                </p>
+            </div>
+
+            <!-- ===== مفاهیم پایه ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🧩</span> مفاهیم پایه ایمنی</div>
+
+                <div class="card-subtitle">🔸 ایمنی</div>
+                <p>یعنی دور بودن از خطر</p>
+
+                <div class="card-subtitle">🔸 خطر (Hazard)</div>
+                <p>خطر شرایطی با توانایی آسیب رسانی است. یک ویژگی فیزیکی یا شیمیایی ذاتی است که احتمال آسیب رساندن به مردم، اموال یا محیط را دارد.</p>
+                <ul>
+                    <li>خطر فیزیکی: لبه‌های تیز، سطوح لغزنده، ارتفاع</li>
+                    <li>خطر شیمیایی: مواد سمی، قابل اشتعال، خورنده</li>
+                    <li>خطر بیولوژیکی: باکتری‌ها، ویروس‌ها، قارچ‌ها</li>
+                    <li>خطر ارگونومیکی: وضعیت نامناسب بدن، بلند کردن سنگین</li>
+                    <li>خطر روانی: استرس، فشار کاری، خستگی</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 خطر قریب (Danger)</div>
+                <p>قرار گرفتن در معرض یک خطر</p>
+
+                <div class="card-subtitle">🔸 حادثه</div>
+                <ul>
+                    <li>یک رویداد ناخواسته و زیان‌آفرین است</li>
+                    <li>ماده ۲ قانون تأمین اجتماعی: <em>"حادثه اتفاقی پیش‌بینی‌نشده است که تحت تأثیر عامل یا عوامل خارجی در اثر عمل یا اتفاق ناگهانی رخ می‌دهد و موجب صدماتی بر جسم یا روان بیمه شده می‌گردد."</em></li>
+                </ul>
+
+                <div class="card-subtitle">🔸 شبه حادثه (Near Miss)</div>
+                <ul>
+                    <li>رویدادی که پتانسیل ایجاد حادثه را دارد اما بدون آسیب پایان می‌یابد.</li>
+                    <li>به ازای هر حادثه جدی، حدود ۳۰۰ شبه‌حادثه رخ می‌دهد.</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 مثلث هاینریش (Heinrich's Triangle)</div>
+                <ul>
+                    <li>۱ حادثه مرگبار</li>
+                    <li>۲۹ حادثه با آسیب جزئی</li>
+                    <li>۳۰۰ شبه‌حادثه (بدون آسیب)</li>
+                </ul>
+            </div>
+
+            <!-- ===== آمار حوادث ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📊</span> تحلیل آماری حوادث کارگاه‌های ساختمانی</div>
+
+                <div class="card-subtitle">🔹 آمار کشوری (دهه ۸۰ شمسی)</div>
+                <ul>
+                    <li>بر اساس سازمان پزشکی قانونی، <strong>بیش از ۱۵۰۰ نفر</strong> بر اثر حوادث کار جان باختند.</li>
+                    <li>بیشترین فوت با <strong>۱۵۰۷</strong> مورد در سال ۱۳۹۰ و کمترین با <strong>۴۶۱</strong> مورد در سال ۱۳۸۱.</li>
+                    <li>حدود <strong>۳۰٪</strong> از حوادث شغلی مربوط به صنعت ساخت‌وساز می‌باشد.</li>
+                </ul>
+
+                <div class="card-subtitle">🔹 آمار سال ۱۳۹۱ (هفت ماهه)</div>
+                <div class="stat-grid">
+                    <div class="stat-card"><span class="number">۴۵۶</span><div class="label">سقوط از ارتفاع</div></div>
+                    <div class="stat-card"><span class="number">۲۲۶</span><div class="label">اصابت اجسام سخت</div></div>
+                    <div class="stat-card"><span class="number">۱۷۲</span><div class="label">برق‌گرفتگی</div></div>
+                    <div class="stat-card"><span class="number">۶۴</span><div class="label">سوختگی</div></div>
+                    <div class="stat-card"><span class="number">۲۴</span><div class="label">کمبود اکسیژن</div></div>
+                </div>
+                <ul>
+                    <li><strong>سقوط از ارتفاع</strong> مرگ‌آورترین حادثه برای کارگران است.</li>
+                    <li>رشد ۲۴ درصدی حوادث حین کار نسبت به سال قبل.</li>
+                </ul>
+            </div>
+
+            <!-- ===== علل سقوط ===== -->
+            <div class="card" style="border-right-color:var(--danger);">
+                <div class="card-title"><span class="icon">🚨</span> علل اصلی سقوط و حوادث در کارگاه‌های ساختمانی</div>
+
+                <div class="card-subtitle">🔸 دسته اول: سقوط در اثر برخورد با مصالح و ابزار</div>
+                <ol>
+                    <li>برخورد با مصالح و ابزارهای رها شده بر روی چوب‌بست داربست</li>
+                    <li>گیر کردن لباس به موانع و بهم خوردن تعادل</li>
+                    <li>جابجایی ناایمن بار و برخورد با کارگران</li>
+                    <li>محدودیت فضای کار بر روی سکوهای داربست</li>
+                    <li>سر خوردن از روی چوب‌بست بدلیل کفش نامناسب</li>
+                    <li>سر خوردن بر اثر روغن، گریس، برف یا باران</li>
+                    <li>فقدان نرده‌های حفاظتی یا کمربند ایمنی</li>
+                </ol>
+
+                <div class="card-subtitle">🔸 دسته دوم: سقوط از داربست و سازه‌ها</div>
+                <ol>
+                    <li>فقدان کمربند ایمنی در کار در ارتفاع</li>
+                    <li>آویزان شدن بر روی قالب جرثقیل</li>
+                    <li>لغزندگی سطوح و برخورد با تیرها یا ستون‌ها</li>
+                    <li>واژگونی داربست بر اثر باد شدید یا اجرای نامناسب</li>
+                    <li>شکستن سکوهای کار بر اثر بارگذاری بیش از حد</li>
+                    <li>ریزش سقف و کف طبقات بر اثر بار اضافی</li>
+                    <li>سقوط در چاه و گودال و کانال‌های حفر شده</li>
+                    <li>ریزش آوار در عملیات تخریب</li>
+                    <li>رها شدن جک‌ها و قالب‌های بتنی</li>
+                    <li>فرسودگی نردبان‌ها و سکوهای موقت</li>
+                </ol>
+
+                <div class="card-subtitle">🔸 دسته سوم: ریزش مصالح و برخورد با اشیاء</div>
+                <ol>
+                    <li>ریزش مصالح دپو شده بدلیل عدم چیدن صحیح و مهار</li>
+                    <li>ریزش ناگهانی آوار در تخریب</li>
+                    <li>جدا شدن قطعات ماشین‌آلات و پرتاب</li>
+                    <li>برخورد با وسایل و مصالح در اثر بی‌نظمی</li>
+                    <li>عدم جمع‌آوری وسایل در پایان کار</li>
+                    <li>تخلیه و جابجایی ناایمن بار</li>
+                </ol>
+
+                <div class="safety-alert">
+                    <strong>⚠️ بیش از ۴۰٪ از حوادث سقوط به دلیل فقدان نرده‌های حفاظتی و کمربند ایمنی رخ می‌دهد.</strong>
+                </div>
+            </div>
+
+            <!-- ===== قوانین ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📜</span> قوانین و آیین‌نامه‌های مرتبط</div>
+
+                <div class="card-subtitle">🔹 قانون کار</div>
+                <ul>
+                    <li><strong>ماده ۵-۱-۴-۱۲:</strong> کاربرد وسایل حفاظت فردی بر اساس آیین‌نامه وسایل حفاظت انفرادی و آیین‌نامه ایمنی کار در ارتفاع</li>
+                    <li><strong>ماده ۱۰-۳-۶-۱۲:</strong> انبار کردن مصالح و مواد خطرناک بر اساس آیین‌نامه‌های پیشگیری از آتش‌سوزی، مواد خطرناک و حمل دستی بار</li>
+                    <li><strong>ماده ۱۲-۳-۶-۱۰:</strong> ایمنی کارگاه‌های ساختمانی</li>
+                    <li><strong>ماده ۱۴-۴-۷-۸:</strong> الزامات استفاده از تجهیزات حفاظت فردی</li>
+                </ul>
+
+                <div class="card-subtitle">🔹 آیین‌نامه‌های تخصصی</div>
+                <ul>
+                    <li>آیین‌نامه حفاظتی کار در ارتفاع (وزارت کار)</li>
+                    <li>آیین‌نامه حفاظتی داربست‌ها</li>
+                    <li>آیین‌نامه حفاظتی نردبان‌ها</li>
+                    <li>آیین‌نامه وسایل حفاظت انفرادی</li>
+                    <li>آیین‌نامه پیشگیری از آتش‌سوزی</li>
+                    <li>آیین‌نامه حمل دستی بار</li>
+                    <li>آیین‌نامه مواد خطرناک و قابل اشتعال</li>
+                    <li>آیین‌نامه علائم ایمنی در کارگاه‌ها</li>
+                </ul>
+
+                <div class="highlight-box">
+                    <strong>✅ کلیه کارگاه‌های ساختمانی موظف به رعایت آیین‌نامه‌های فوق هستند.</strong>
+                </div>
+            </div>
+
+            <!-- ===== فیزیک سقوط ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📐</span> فیزیک سقوط</div>
+                <div style="background:rgba(0,0,0,0.03); padding:12px 20px; border-radius:40px; display:inline-block; font-size:1.3rem; font-weight:600; direction:ltr; text-align:center; width:100%;">
+                    t = √(2h/g) ≈ 0.45√h
+                </div>
+                <ul style="margin-top:10px;">
+                    <li><strong>t</strong> = زمان سقوط (ثانیه) · <strong>h</strong> = ارتفاع (متر) · <strong>g</strong> = ۹.۸ متر بر مجذور ثانیه</li>
+                    <li>از ارتفاع ۱۰ متر، زمان سقوط ≈ ۱.۴ ثانیه، سرعت نهایی ≈ ۵۰ کیلومتر/ساعت</li>
+                    <li>از ارتفاع ۲۰ متر، زمان سقوط ≈ ۲ ثانیه، سرعت نهایی ≈ ۷۲ کیلومتر/ساعت</li>
+                    <li>نیروی وارد بر بدن در سقوط از ۲ متر بدون جاذب شوک ≈ <strong>۶۰۰۰ نیوتن</strong></li>
+                    <li>با جاذب شوک، نیرو به کمتر از <strong>۲۰۰۰ نیوتن</strong> کاهش می‌یابد.</li>
+                </ul>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead><tr><th>ارتفاع (متر)</th><th>زمان سقوط (ثانیه)</th><th>سرعت نهایی (کیلومتر/ساعت)</th></tr></thead>
+                        <tbody>
+                            <tr><td>۲</td><td>۰.۶۴</td><td>۲۲.۷</td></tr>
+                            <tr><td>۵</td><td>۱.۰۱</td><td>۳۵.۶</td></tr>
+                            <tr><td>۱۰</td><td>۱.۴۳</td><td>۵۰.۴</td></tr>
+                            <tr><td>۱۵</td><td>۱.۷۵</td><td>۶۱.۹</td></tr>
+                            <tr><td>۲۰</td><td>۲.۰۲</td><td>۷۱.۳</td></tr>
+                            <tr><td>۳۰</td><td>۲.۴۷</td><td>۸۷.۱</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===== تعریف کار در ارتفاع ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">⛰️</span> تعریف کار در ارتفاع</div>
+                <div style="background:rgba(39,174,96,0.06); padding:16px 22px; border-radius:var(--border-radius-sm); border-right:4px solid var(--success); font-size:1.2rem; font-weight:700;">
+                    هر کاری که موقعیت انجام آن، در ارتفاعی بیش از <strong>۱۲۰ سانتیمتر</strong> نسبت به سطح مبنا انجام گیرد.
+                </div>
+
+                <div class="card-subtitle">🔹 سطح مبنا</div>
+                <p>اولین سطح زیرین جایگاه کار یا سکوی کار که به صورت ایمن گسترش یافته است.</p>
+
+                <div class="card-subtitle">🔹 شرایط کارگر در ارتفاع</div>
+                <ul>
+                    <li>توانایی جسمی و ذهنی انجام کار</li>
+                    <li>نداشتن ترس از ارتفاع</li>
+                    <li>گذراندن دوره‌های آموزشی</li>
+                    <li>داشتن حداقل سن ۱۸ سال</li>
+                    <li>گواهی معاینه پزشکی معتبر</li>
+                </ul>
+
+                <div class="safety-alert">
+                    <strong>⚠️ موارد منع کار در ارتفاع:</strong> بیماری‌های قلبی، سرگیجه، صرع، مشکلات شدید بینایی، مصرف داروهای خواب‌آور، بارداری (سه ماهه آخر)
+                </div>
+            </div>
+
+            <!-- ===== حفاظت از سقوط ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🛡️</span> حفاظت از سقوط</div>
+                <p>مجموعه تدابیر و اقداماتی که به منظور پیشگیری از سقوط یا کاهش عوارض و صدمات ناشی از آن انجام می‌شود.</p>
+
+                <div class="card-subtitle">🔸 روش‌های حفاظت از سقوط</div>
+                <ol>
+                    <li><strong>حفاظت جمعی:</strong> نرده‌های حفاظتی، تورهای ایمنی، پوشش‌های موقت</li>
+                    <li><strong>حفاظت فردی:</strong> کمربند ایمنی، طناب مهار، هارنس کامل بدن</li>
+                    <li><strong>کنترل دسترسی:</strong> محدود کردن دسترسی به مناطق پرخطر</li>
+                    <li><strong>علائم هشدار:</strong> نصب تابلوهای هشدار دهنده</li>
+                </ol>
+
+                <div class="card-subtitle">🔸 سلسله مراتب کنترل خطرات</div>
+                <ol>
+                    <li>حذف (بهترین روش)</li>
+                    <li>جایگزینی</li>
+                    <li>مهندسی (نرده، تور، ...)</li>
+                    <li>مدیریتی (آموزش، علائم)</li>
+                    <li>تجهیزات حفاظت فردی (آخرین خط دفاعی)</li>
+                </ol>
+            </div>
+
+            <!-- ===== نرده‌ها ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🧱</span> نرده‌های حفاظتی</div>
+                <ul>
+                    <li>نرده باید تحمل نیروی متمرکز <strong>۱۰۰ کیلوگرم</strong> را داشته باشد.</li>
+                    <li>ارتفاع نرده‌ها حداقل <strong>۹۰ سانتیمتر</strong>.</li>
+                    <li>دارای سه خط افقی (میله میانی، زانوبند، دست انداز).</li>
+                    <li>فاصله میله‌های عمودی حداکثر <strong>۲ متر</strong>.</li>
+                    <li>رنگ‌آمیزی با رنگ <strong>زرد</strong> برای دیدپذیری بالا.</li>
+                    <li>در محل‌های جابجایی بار، نرده‌ها باید <strong>متحرک</strong> باشند.</li>
+                </ul>
+                <div class="highlight-box">
+                    <strong>✅ استاندارد OSHA:</strong> نرده‌های حفاظتی باید ارتفاع ۹۰ تا ۱۱۰ سانتیمتر داشته باشند.
+                </div>
+            </div>
+
+            <!-- ===== پوشش‌های موقت ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🔲</span> پوشش‌های موقت</div>
+                <ul>
+                    <li>حفره کمتر از ۴۵ سانتیمتر: الوار چوبی با ضخامت <strong>۲۵ میلیمتر</strong></li>
+                    <li>حفره بیشتر از ۴۵ سانتیمتر: الوار چوبی با ضخامت <strong>۵۰ میلیمتر</strong></li>
+                    <li>نشانه‌گذاری روی پوشش‌ها برای هشدار وجود حفره در زیر</li>
+                    <li>پوشش‌ها باید به رنگ هشدار (زرد یا نارنجی) رنگ‌آمیزی شوند.</li>
+                    <li>پوشش‌ها باید روزانه بازرسی و در صورت آسیب تعویض شوند.</li>
+                </ul>
+            </div>
+
+            <!-- ===== هارنس ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🧗</span> کمربند ایمنی و هارنس (حمايل بند ايمني)</div>
+
+                <div class="card-subtitle">🔸 اجزای هارنس</div>
+                <ul>
+                    <li>بندهای شانه، سینه، کمر، ران</li>
+                    <li>حلقه اتصال پشتی (D-Ring) – اصلی‌ترین نقطه اتصال</li>
+                    <li>حلقه اتصال جلویی – برای کار در فضاهای محدود</li>
+                    <li>بندهای تنظیم کننده و اتصالات فلزی</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 طناب مهار Y</div>
+                <p>در جاهایی که نقطه اتصال منقطع می‌شود کاربرد دارد. دو سر آن به نقاط اتصال متصل می‌شود.</p>
+
+                <div class="card-subtitle">🔸 بازرسی هارنس</div>
+                <ul>
+                    <li>بازرسی قبل از پوشیدن <strong>الزامی</strong> است.</li>
+                    <li>بررسی پارگی، سایش، بریدگی در بندها و دوخت‌ها</li>
+                    <li>بررسی سلامت اتصالات فلزی (زنگ‌زدگی، ترک، تغییر شکل)</li>
+                    <li>بررسی جاذب شوک (باز شدن یا پارگی)</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 مراحل پوشیدن هارنس</div>
+                <ol class="step-list">
+                    <li>هارنس را از پشت بگیرید و D-Ring پشتی را در بالا قرار دهید.</li>
+                    <li>هارنس را مانند یک کت روی شانه‌ها قرار دهید.</li>
+                    <li>بند سینه را از جلو ببندید و تنظیم کنید.</li>
+                    <li>بند کمر را ببندید و محکم کنید.</li>
+                    <li>بندهای ران را از بین پاها عبور داده و به هم متصل کنید.</li>
+                    <li>همه بندها را تنظیم کنید تا هارنس کاملاً چسبیده باشد.</li>
+                    <li>طناب مهار را به D-Ring پشتی متصل کنید.</li>
+                    <li>نقطه اتصال را بررسی کنید (حداقل تحمل ۲۲۰۰ کیلوگرم).</li>
+                </ol>
+
+                <div class="card-subtitle">🔸 نکات کلیدی</div>
+                <ul>
+                    <li>وزن مجاز حداکثر <strong>۱۳۰ کیلوگرم</strong> (شامل ابزار).</li>
+                    <li>هارنس هر <strong>۶ ماه</strong> یکبار توسط کارشناس مجرب بازرسی شود.</li>
+                    <li>طول طناب مهار بدون جاذب شوک حداکثر <strong>۲ متر</strong>، با جاذب شوک حداکثر <strong>۶ متر</strong>.</li>
+                    <li>هارنس پس از هر سقوط باید تعویض شود.</li>
+                </ul>
+
+                <div class="safety-alert">
+                    <strong>✅ استفاده از کمربند ایمنی در کار در ارتفاع بالای ۲ متر <span style="color:var(--danger);">الزامی</span> است.</strong>
+                </div>
+            </div>
+
+            <!-- ===== تورهای ایمنی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🥅</span> تورهای ایمنی</div>
+                <ul>
+                    <li>تورها باید استاندارد معتبر داشته باشند (EN 1263-1 یا معادل).</li>
+                    <li>تور ایمنی حداقل <strong>۲.۴ متر</strong> و حداکثر <strong>۴.۶ متر</strong> پایین‌تر از تراز کاری نصب شود.</li>
+                    <li>تور باید <strong>۲.۴ متر</strong> از هر طرف ناحیه کاری ادامه داشته باشد.</li>
+                    <li>قابلیت جذب انرژی سقوط از ارتفاع تا <strong>۶ متر</strong>.</li>
+                    <li>بازرسی منظم و تعویض در صورت آسیب.</li>
+                </ul>
+
+                <div class="card-subtitle">حداقل فاصله افقی تور ایمنی</div>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead><tr><th>فاصله عمودی (متر)</th><th>حداقل فاصله افقی (متر)</th></tr></thead>
+                        <tbody>
+                            <tr><td>۲</td><td>۱.۵</td></tr>
+                            <tr><td>۳</td><td>۲.۰</td></tr>
+                            <tr><td>۴</td><td>۲.۵</td></tr>
+                            <tr><td>۵</td><td>۳.۰</td></tr>
+                            <tr><td>۶</td><td>۳.۵</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===== نردبان‌ها ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🪜</span> نردبان‌ها</div>
+
+                <div style="background:rgba(243,156,18,0.06); padding:12px 18px; border-radius:var(--border-radius-sm); border-right:3px solid var(--secondary); margin-bottom:12px;">
+                    <p><strong>📜 تاریخچه:</strong> قدیمی‌ترین تصویر نردبان در نقاشی سنگی غارهای والنسیا، اسپانیا با قدمت ۱۰۰۰۰ سال.</p>
+                    <p><strong>جان هنری بالسلی (۱۸۶۲):</strong> اولین داربست قابل حمل مدرن را اختراع کرد.</p>
+                </div>
+
+                <div class="card-subtitle">🔸 انواع نردبان</div>
+                <ul>
+                    <li>غیر خودایستا (یک‌طرفه) · خودایستا (A شکل) · ثابت · تلسکوپی · چندکاره · پله مرغی</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 نسبت ۱:۴</div>
+                <p>فاصله پای نردبان از دیوار = یک چهارم ارتفاع تکیه‌گاه</p>
+
+                <div class="card-subtitle">🔸 ممنوعیت‌های استفاده از نردبان (۱۲ مورد)</div>
+                <ul>
+                    <li>روی داربست یا جایگاه کار در ارتفاع</li>
+                    <li>به عنوان الوار و تخته زیرپایی</li>
+                    <li>قرار دادن پایه بر روی بشکه، آجر، جعبه، کیسه</li>
+                    <li>آغشته بودن به چربی، گریس، روغن</li>
+                    <li>معبر و پل بین دو جایگاه کار</li>
+                    <li>نردبان معیوب، شکسته، پوسیده</li>
+                    <li>تکیه‌گاه فوقانی ناایمن</li>
+                    <li>اتصال دو نردبان یک‌طرفه به یکدیگر</li>
+                    <li>کنار درهای باز یا راه‌های عبور</li>
+                    <li>شرایط جوی نامساعد</li>
+                    <li>کارهای سنگین که نیاز به داربست دارند</li>
+                    <li>بدون قرارگیری روی سطح صاف و محکم</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 فاکتورهای ضروری کار با نردبان</div>
+                <ul>
+                    <li>بررسی سلامت نردبان قبل از استفاده</li>
+                    <li>کفش ضد لغزش</li>
+                    <li>رعایت زاویه ۱:۴</li>
+                    <li>سه نقطه تماس (دو پا و یک دست)</li>
+                    <li>همیشه رو به نردبان</li>
+                    <li>هرگز از بالاترین سه پله استفاده نکنید</li>
+                    <li>نردبان حداقل ۱ متر از بالای تکیه‌گاه بیشتر باشد</li>
+                </ul>
+            </div>
+
+            <!-- ===== داربست‌ها ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🏗️</span> داربست‌ها</div>
+
+                <div class="card-subtitle">🔸 موارد استفاده</div>
+                <ul>
+                    <li>نقاشی، تعمیر شیروانی، تخریب، اجرای نما، تعویض پنجره، تأسیسات، بتن‌ریزی، جوشکاری</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 علل اصلی حوادث داربست</div>
+                <ul>
+                    <li>استفاده از قطعات غیر استاندارد</li>
+                    <li>ساختار ناپایدار و اتصالات ضعیف</li>
+                    <li>نرده‌های حفاظتی ناکافی</li>
+                    <li>بالا رفتن از خارج داربست</li>
+                    <li>بارگذاری بیش از حد</li>
+                    <li>استفاده از بست‌های آسیب‌دیده</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 فاکتورهای موثر در ثبات داربست (۱۰ عامل)</div>
+                <ul>
+                    <li>برپایی نادرست و عدم بازرسی منظم</li>
+                    <li>قدرت زمین نگهدارنده</li>
+                    <li>مجاورت با گودبرداری</li>
+                    <li>آب‌های سطحی</li>
+                    <li>تغییر غیرمجاز توسط افراد غیرصالح</li>
+                    <li>استفاده از بست‌های ناصحیح</li>
+                    <li>بارگذاری بیش از حد</li>
+                    <li>شرایط جوی نامساعد</li>
+                    <li>کف‌پوش‌های شل</li>
+                    <li>برخورد وسایل موتوری</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 دستورالعمل برچیدن داربست (۱۲ مرحله)</div>
+                <ol class="step-list">
+                    <li>برچیدن از <strong>بالاترین نقطه</strong></li>
+                    <li>حفظ آرامش</li>
+                    <li>انتقال به همان روش شروع</li>
+                    <li><strong>ممنوعیت پرتاب</strong> ابزار و قطعات</li>
+                    <li>اطمینان از عملکرد کمربند ایمنی</li>
+                    <li>انتقال اتصالات با ظرف مخصوص</li>
+                    <li>کنترل طناب و قرقره</li>
+                    <li>رعایت فاصله ایمن از برق فشار قوی</li>
+                    <li>باز کردن مهار از بالا به پایین</li>
+                    <li>توجه به گذرگاه‌های عابرین</li>
+                    <li>انتقال جداگانه ابزار و تخته‌ها</li>
+                    <li>عدم قرار دادن تخته‌ها در مجاورت حرارت یا برق</li>
+                </ol>
+
+                <div class="safety-alert">
+                    <strong>⚠️ داربست‌های فلزی رسانای الکتریسیته هستند. فاصله ایمن از خطوط برق را رعایت کنید.</strong>
+                </div>
+            </div>
+
+            <!-- ===== سقف‌های شکننده ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🏠</span> کار بر روی سقف‌های شکننده</div>
+                <ul>
+                    <li>استفاده از <strong>نردبان پله مرغی</strong></li>
+                    <li>سقف‌های شکننده: الیاف سیمانی، پلاستیکی، شیشه‌ای، فلزی سبک، کامپوزیتی</li>
+                    <li>استفاده از <strong>تخته‌های پهن</strong> برای توزیع وزن</li>
+                    <li>نصب <strong>تورهای ایمنی</strong> در زیر سقف</li>
+                    <li>استفاده از <strong>کمربند ایمنی</strong> با طناب مهار</li>
+                    <li>حداقل <strong>۲ نفر</strong> برای کار روی سقف‌های شکننده</li>
+                </ul>
+            </div>
+
+            <!-- ===== بازرسی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🔍</span> بازرسی و نگهداری تجهیزات</div>
+
+                <div class="card-subtitle">🔸 بازرسی روزانه</div>
+                <ul>
+                    <li>نردبان‌ها (ترک، خمیدگی، اتصالات)</li>
+                    <li>داربست (بست‌ها، کف‌پوش‌ها، نرده‌ها)</li>
+                    <li>کمربند ایمنی و طناب مهار (پارگی، سایش)</li>
+                    <li>تورهای ایمنی (پارگی، گره‌ها)</li>
+                    <li>کلاه و کفش ایمنی</li>
+                    <li>شرایط جوی</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 بازرسی ماهانه (توسط کارشناس)</div>
+                <ul>
+                    <li>بازرسی کامل داربست‌ها و نردبان‌ها</li>
+                    <li>بازرسی کامل هارنس‌ها (دوخت، بند، اتصالات فلزی)</li>
+                    <li>بازرسی تورهای ایمنی</li>
+                    <li>ثبت نتایج و تعویض تجهیزات آسیب‌دیده</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 بازرسی سالانه</div>
+                <ul>
+                    <li>بازرسی کامل توسط شرکت معتبر</li>
+                    <li>آزمایش مقاومت و تست بارگذاری</li>
+                    <li>تست کشش طناب‌ها و هارنس‌ها</li>
+                    <li>صدور گواهی سلامت</li>
+                </ul>
+            </div>
+
+            <!-- ===== جمع‌بندی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📋</span> جمع‌بندی و توصیه‌های نهایی</div>
+                <ul>
+                    <li><strong>آموزش:</strong> همه کارگران باید دوره‌های ایمنی را گذرانده و گواهی معتبر داشته باشند.</li>
+                    <li><strong>بازرسی:</strong> تجهیزات روزانه بازرسی شوند.</li>
+                    <li><strong>برنامه‌ریزی:</strong> قبل از هر کار، برنامه ایمنی تهیه شود.</li>
+                    <li><strong>شرایط جوی:</strong> در باد بیش از ۴۰ کیلومتر/ساعت، باران، برف، مه غلیظ کار متوقف شود.</li>
+                    <li><strong>کمک‌های اولیه:</strong> جعبه کمک‌های اولیه در دسترس باشد.</li>
+                    <li><strong>گزارش‌دهی:</strong> همه حوادث و شبه‌حوادث گزارش شوند.</li>
+                </ul>
+
+                <div class="safety-alert">
+                    <strong>⚠️ هشدار نهایی:</strong> سقوط از ارتفاع یکی از مرگ‌آورترین حوادث شغلی است. با رعایت اصول ایمنی و استفاده از تجهیزات استاندارد، می‌توان از اکثر این حوادث جلوگیری کرد. ایمنی مسئولیت همگانی است.
+                </div>
+            </div>
+
+            <!-- ===== آیین‌نامه کامل ===== -->
+            <div class="card" style="border:2px solid var(--danger);">
+                <div class="card-title"><span class="icon">📜</span> آیین‌نامه ایمنی کار در ارتفاع</div>
+                <p style="margin-bottom:10px;">
+                    <span class="badge-danger">مصوب ۱۳۸۹/۱۱/۱۷</span>
+                    <span class="badge-standard">به استناد مواد ۸۵ و ۹۱ قانون کار</span>
+                </p>
+
+                <div class="card-subtitle">🔹 کلیات و تعاریف</div>
+
+                <div class="material-box">
+                    <span class="mat-num">هدف</span>
+                    <p>ایمن‌سازی محیط کار و صیانت از نیروی انسانی و منابع مادی کشور و پیشگیری از حوادث ناشی از کار.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">دامنه شمول</span>
+                    <p>کلیه کارگاه‌های مشمول قانون کار جمهوری اسلامی ایران.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">کار در ارتفاع</span>
+                    <p>هر کار یا فعالیتی که موقعیت انجام آن، در ارتفاع بیش از ۱/۲ متر نسبت به سطح مبنا انجام گیرد.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">سطح مبنا</span>
+                    <p>اولین سطح زیرین جایگاه کار یا سکوی کار در ارتفاع، که بصورت ایمن گسترش یافته است.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">مراجع ذی‌صلاح آموزشی</span>
+                    <p>مراکزی که مجوز از سازمان آموزش فنی و حرفه‌ای یا مراکز بین‌المللی معتبر دارند.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">مجری ذی‌صلاح</span>
+                    <p>شخص حقیقی یا حقوقی با صلاحیت، تجربه و مهارت علمی و فنی برای برپایی، تغییرات و جمع‌آوری تجهیزات.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">شخص ذی‌صلاح</span>
+                    <p>متخصص با دانش فنی و مهارت لازم که دوره‌های آموزشی را گذرانده و توانایی سرپرستی و نظارت دارد.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">عامل کار در ارتفاع</span>
+                    <p>فردی که آموزش دیده و گواهینامه معتبر دارد و قادر به انجام کار بصورت ایمن است.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">حفاظت از سقوط</span>
+                    <p>مجموعه تدابیر و اقدامات برای پیشگیری از سقوط یا کاهش عوارض ناشی از آن.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">سامانه محدودکننده</span>
+                    <p>سیستمی که از قرارگیری فرد در وضعیت سقوط جلوگیری می‌کند (نرده، لنیارد، هارنس).</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">سامانه متوقف‌کننده</span>
+                    <p>سیستمی که با جذب انرژی سقوط، شدت صدمات را کاهش می‌دهد (هارنس، طناب ایمنی، تور).</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">دسترسی با طناب</span>
+                    <p>شامل دو طناب مجزا: طناب دسترسی و طناب پشتیبان.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">فاصله ایمن</span>
+                    <p>حداقل فاصله برای جلوگیری از برخورد فرد هنگام سقوط با سطح مبنا.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">لنیارد</span>
+                    <p>طناب یا تسمه برای اتصال عامل کار به تکیه‌گاه.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">کمربند ایمنی</span>
+                    <p>وسیله از جنس الیاف که ناحیه کمر را می‌پوشاند.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">هارنس (حمايل بند كامل بدن)</span>
+                    <p>پوشش از انتهای ران تا کتف با قالب‌های اتصال.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">قالب قفل‌شونده (کارابین)</span>
+                    <p>ابزار حلقه‌ای شکل برای اتصال اجزاء سامانه‌ها.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">شوک‌گیر</span>
+                    <p>ابزاری برای کاهش نیروی ضربه حاصل از سقوط.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">طناب تکیه‌گاهی</span>
+                    <p>طناب انعطاف‌پذیر برای حفاظت و محدودسازی.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">طناب عملیات</span>
+                    <p>طناب تکیه‌گاهی برای حالت معلق و موقعیت‌گیری.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">طناب ایمنی</span>
+                    <p>طناب تکیه‌گاهی که فرد را در حین سقوط متوقف می‌کند.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">طناب دینامیک</span>
+                    <p>طناب با خاصیت کشسانی برای جذب شوک.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">انواع نردبان</span>
+                    <p>یک‌طرفه قابل حمل، دوطرفه، ثابت، ریلی، ثابت سقفی (پله مرغی)، کشویی، طنابی</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">داربست</span>
+                    <p>ساختار موقتی برای ایجاد جایگاه کار در ارتفاع و دسترسی به تراز بالاتر.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">اجزاء داربست</span>
+                    <p>پایه، کفشک، تیر، دستک، اتصالات، راه دسترسی، کف‌پوش، پاخور، تیر میانی و بالایی حفاظتی، بالشک</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">بالشک</span>
+                    <p>صفحه چوبی، فلزی یا بتنی برای گسترش بار به زمین.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">راه دسترسی</span>
+                    <p>برای رسیدن ایمن به تراز مربوطه.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">مهار</span>
+                    <p>قطعه مایل و افقی بر روی داربست به عنوان باربر.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">بادبند</span>
+                    <p>قطعه عمودی یا مورب برای جلوگیری از حرکت جانبی.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">بالابر سیار</span>
+                    <p>ماشین سیار برای انتقال افراد در ارتفاع از داخل سکو.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">ضریب ایمنی</span>
+                    <p>نسبت حداکثر نیروی قابل تحمل به نیروی بهره‌برداری، نباید کمتر از ۲/۴ باشد.</p>
+                </div>
+                <div class="material-box">
+                    <span class="mat-num">حد بار کاری (SWL)</span>
+                    <p>حداکثر بار مجاز در شرایط ایمن.</p>
+                </div>
+
+                <div class="card-subtitle">🔹 فصل اول – الزامات عمومی (ماده ۱۱ تا ۲۴)</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۱</span> استفاده از کارگران دارای گواهینامه مهارت از سازمان فنی و حرفه‌ای.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۲</span> عامل کار و شخص ذی‌صلاح باید گواهینامه مهارت فنی داشته باشند.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۳</span> جلوگیری از ورود افراد متفرقه و نصب علائم هشداری.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۴</span> حمل، نصب، جمع‌آوری و انبار تجهیزات باید بدون خطر باشد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۵</span> پرتاب کردن هرگونه شی در حین کار ممنوع است.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۶</span> طناب‌ها و کابل‌ها باید در برابر سایش، مواد خورنده، گرما مقاوم باشند.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۷</span> رعایت آیین‌نامه‌های خطوط برق‌دار در حریم تجهیزات برقی.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۸</span> لبه سقف‌های شیب‌دار باید تجهیزات جلوگیری از لغزش داشته باشد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۹</span> سقف‌های شیب‌دار بیش از ۲۰ درجه نیاز به سامانه محدودکننده یا متوقف‌کننده دارند.</div>
+                <div class="material-box"><span class="mat-num">ماده ۲۰</span> حضور فرد دوم روی سطح مبنا در جایگاه‌های آویزان و بالابرهای سیار الزامی است.</div>
+                <div class="material-box"><span class="mat-num">ماده ۲۱</span> کارفرما باید وسیله ارتباطی با فرد ثانوی فراهم کند.</div>
+                <div class="material-box"><span class="mat-num">ماده ۲۲</span> نصب تابلو با محتوای «قابل استفاده یا عدم استفاده» روی سامانه‌ها.</div>
+                <div class="material-box"><span class="mat-num">ماده ۲۳</span> کارگر باید مجهز به لباس کار، هارنس، کلاه و کفش ایمنی باشد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۲۴</span> استفاده از کمربند ایمنی فقط به عنوان سامانه محدودکننده مجاز است.</div>
+
+                <div class="card-subtitle">🔹 فصل دوم – نردبان (ماده ۲۵ تا ۴۸)</div>
+                <div class="material-box"><span class="mat-num">ماده ۲۵</span> نوع، جنس، ابعاد و بارگذاری نردبان باید متناسب با شرایط باشد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۲۶</span> استفاده از نردبان در موارد زیر ممنوع است: روی داربست، به عنوان تخته زیرپایی، روی بشکه/آجر/جعبه، آغشته به چربی/روغن، معبر بین دو جایگاه، نردبان معیوب، تکیه‌گاه ناایمن.</div>
+                <div class="material-box"><span class="mat-num">ماده ۲۷</span> طول نردبان قابل حمل حداکثر ۱۰ متر.</div>
+                <div class="material-box"><span class="mat-num">ماده ۲۸</span> پایه‌های نردبان روی سطوح هموار، مقاوم و غیرلغزنده قرار گیرد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۲۹</span> کارگر باید روبه نردبان با سه نقطه اتکاء باشد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۳۰</span> فواصل پله‌ها ۲۵ تا ۳۵ سانتیمتر.</div>
+                <div class="material-box"><span class="mat-num">ماده ۳۱</span> تردد همزمان دو کارگر روی نردبان (به جز ثابت) ممنوع.</div>
+                <div class="material-box"><span class="mat-num">ماده ۳۲</span> جایگاه کار نباید از پله سوم انتهایی بالاتر باشد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۳۳</span> زاویه نردبان با سطح مبنا حدود ۷۵ درجه یا نسبت ۱:۴.</div>
+                <div class="material-box"><span class="mat-num">ماده ۳۴</span> در زاویه ۷۵ تا ۹۰ درجه، نردبان باید به سازه محکم شود.</div>
+                <div class="material-box"><span class="mat-num">ماده ۳۵</span> انتهای فوقانی نردبان ۱ متر از تکیه‌گاه بالاتر و مهار شود.</div>
+                <div class="material-box"><span class="mat-num">ماده ۳۶</span> اتصال دو نردبان یک‌طرفه ممنوع.</div>
+                <div class="material-box"><span class="mat-num">ماده ۳۷</span> همتراز کردن در شیب بیش از ۱۶ درجه ممنوع.</div>
+                <div class="material-box"><span class="mat-num">ماده ۳۸</span> استقرار در امتداد شیب بیش از ۶ درجه ممنوع.</div>
+                <div class="material-box"><span class="mat-num">ماده ۳۹</span> نردبان ثابت بالای ۳ متر نیاز به سامانه متوقف‌کننده و پاگرد دارد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۴۰</span> نردبان ثابت عمودی بالای ۲.۲ متر به حفاظ‌های حلقوی یا مربعی نیاز دارد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۴۱</span> در نردبان‌های ثابت با نرده جانبی، از هارنس و طناب ایمنی استفاده شود.</div>
+                <div class="material-box"><span class="mat-num">ماده ۴۲</span> طول نردبان طنابی حداکثر ۳۰ متر.</div>
+                <div class="material-box"><span class="mat-num">ماده ۴۳</span> نردبان طنابی فقط در صورت عدم امکان استفاده از سایر نردبان‌ها.</div>
+                <div class="material-box"><span class="mat-num">ماده ۴۴</span> استفاده از نردبان با پله طنابی ممنوع.</div>
+                <div class="material-box"><span class="mat-num">ماده ۴۵</span> پله نردبان طنابی باید مقاوم و بدون ترک و پوسیدگی باشد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۴۶</span> نگهدارنده‌ها باید محکم و ایمن بسته شوند.</div>
+                <div class="material-box"><span class="mat-num">ماده ۴۷</span> نردبان پله مرغی روی سقف شیبدار از راس تا لبه ادامه داشته و مهار شود.</div>
+                <div class="material-box"><span class="mat-num">ماده ۴۸</span> پلکان منهول: احاطه شده، عرض ۴۰-۵۰ سانتیمتر، فاصله پله اول تا کف حداکثر ۲۰ سانتیمتر.</div>
+
+                <div class="card-subtitle">🔹 فصل سوم – جایگاه کار (ماده ۴۹ تا ۶۷)</div>
+                <div class="material-box"><span class="mat-num">ماده ۴۹</span> جایگاه کار باید دارای محل استقرار، پاخور، نرده و راه دسترسی ایمن باشد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۵۰</span> اطراف جایگاه کار باید حفاظ متناسب و سامانه متوقف‌کننده داشته باشد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۵۱</span> عرض جایگاه کار نباید از ۶۰ سانتیمتر کمتر باشد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۵۲</span> پوشش کف باید روی حداقل سه تکیه‌گاه نگهداری شود.</div>
+                <div class="material-box"><span class="mat-num">ماده ۵۳</span> فاصله از دیوار باید از سقوط جلوگیری کند.</div>
+                <div class="material-box"><span class="mat-num">ماده ۵۴</span> فضای جایگاه کار عاری از حفره، دست‌انداز و پیش‌آمدگی باشد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۵۵</span> نصب سرپوش حفاظتی در لبه خارجی الزامی است.</div>
+                <div class="material-box"><span class="mat-num">ماده ۵۶</span> تیرهای پیش‌آمده جایگاه آویزان باید به تکیه‌گاه ایمن متصل شوند.</div>
+                <div class="material-box"><span class="mat-num">ماده ۵۷</span> انتهای تیرهای باربر مجهز به قطعه متوقف‌کننده باشد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۵۸</span> طناب جایگاه آویزان: حداقل دو دور روی قرقره، ضریب اطمینان ۱۰، فاصله طناب‌ها حداکثر ۳.۵ متر.</div>
+                <div class="material-box"><span class="mat-num">ماده ۵۹</span> فاصله جایگاه آویزان از سازه به گونه‌ای که برخورد نشود.</div>
+                <div class="material-box"><span class="mat-num">ماده ۶۰</span> در صورت عدم استفاده، جمع‌آوری یا مهار شود.</div>
+                <div class="material-box"><span class="mat-num">ماده ۶۱</span> وینچ‌ها و تجهیزات بالابر باید به تکیه‌گاه متصل و مهار شوند.</div>
+                <div class="material-box"><span class="mat-num">ماده ۶۲</span> بیش از دو نفر در جایگاه آویزان با راه‌انداز دستی ممنوع.</div>
+                <div class="material-box"><span class="mat-num">ماده ۶۳</span> کلیدهای قطع و وصل باید پس از برداشتن فشار، موتور را متوقف کنند.</div>
+                <div class="material-box"><span class="mat-num">ماده ۶۴</span> طناب‌ها به مرکز تیرهای پیش‌آمده متصل و نیرو به قرقره منتقل شود.</div>
+                <div class="material-box"><span class="mat-num">ماده ۶۵</span> جایگاه دیوارکوب: فلز مقاوم، عرض حداکثر ۷۵ سانتیمتر، تحمل ۱۷۵ کیلوگرم.</div>
+                <div class="material-box"><span class="mat-num">ماده ۶۶</span> در صورت وجود آب یا خطر غرق‌شدگی، جلیقه نجات تهیه شود.</div>
+                <div class="material-box"><span class="mat-num">ماده ۶۷</span> جایگاه کار تمیز و عاری از مواد لغزنده باشد.</div>
+
+                <div class="card-subtitle">🔹 فصل چهارم – داربست (ماده ۶۸ تا ۹۳)</div>
+                <div class="material-box"><span class="mat-num">ماده ۶۸</span> نصب تابلو با نام شرکت، مدیر مسئول، مسئول فنی، تلفن، آدرس.</div>
+                <div class="material-box"><span class="mat-num">ماده ۶۹</span> برپایی، جمع‌آوری و تغییرات تحت نظارت شخص ذی‌صلاح.</div>
+                <div class="material-box"><span class="mat-num">ماده ۷۰</span> شخص ذی‌صلاح از استحکام داربست قبل از کار، پس از تغییرات و شرایط جوی نامساعد اطمینان حاصل کند.</div>
+                <div class="material-box"><span class="mat-num">ماده ۷۱</span> داربست روی سطح صاف و هموار با کفشک، نصب پایه روی آجر/بشکه/جعبه ممنوع.</div>
+                <div class="material-box"><span class="mat-num">ماده ۷۲</span> داربست باید دارای کف پایه، پایه، تیر باربر، تیر افقی، میله اتصال، میله بالایی، میله میانی، پاخور، حفاظ، راه دسترسی، کف‌پوش، لوله مهار، بادبند، بالشتک، بست و اتصالات باشد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۷۳</span> دهانه داربست حداکثر ۲.۴ متر.</div>
+                <div class="material-box"><span class="mat-num">ماده ۷۴</span> نصب هرگونه تجهیزات روی داربست نیاز به تایید شخص ذی‌صلاح دارد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۷۵</span> جمع‌آوری تجهیزات در پایان کار، کشیدن میخ‌ها، توزیع یکنواخت بار، بالشتک زیر کابل، عدم کار روی داربست معیوب، تعطیل در شرایط جوی نامساعد، عدم بارگذاری بیش از حد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۷۶</span> داربست باید تحمل ۴ برابر بار وارده را داشته باشد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۷۷</span> داربست سالم و عاری از ترک، زنگ، له‌شدگی، پوسیدگی و مهار شده باشد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۷۸</span> در مسیر حمل بار، نرده‌های عمودی پوشش دهند.</div>
+                <div class="material-box"><span class="mat-num">ماده ۷۹</span> داربست‌ها (به جز نردبانی) باید لوله مهار و بادبند داشته باشند.</div>
+                <div class="material-box"><span class="mat-num">ماده ۸۰</span> استفاده از لوله‌های مهاری و دستک‌ها برای اتصال به سازه الزامی است.</div>
+                <div class="material-box"><span class="mat-num">ماده ۸۱</span> طول دستک‌ها حداکثر ۱۵۰ سانتیمتر.</div>
+                <div class="material-box"><span class="mat-num">ماده ۸۲</span> جایگاه کار حداقل ۱ متر پایین‌تر از انتهای پایه‌های عمودی.</div>
+                <div class="material-box"><span class="mat-num">ماده ۸۳</span> کفشک‌ها: دایره‌ای حداقل ۷۰ سانتیمتر مربع یا مربعی ۱۷۵ سانتیمتر مربع با ضخامت ۵ میلیمتر.</div>
+                <div class="material-box"><span class="mat-num">ماده ۸۴</span> در صورت کار افراد زیر داربست، مسیر عبور با حفاظ‌های مناسب ایمن شود.</div>
+                <div class="material-box"><span class="mat-num">ماده ۸۵</span> برای دسترسی به تراز بالاتر از نردبان ثابت با پاگرد حفاظ‌دار استفاده شود.</div>
+                <div class="material-box"><span class="mat-num">ماده ۸۶</span> راه‌پله: ارتفاع پله ۱۵ سانتیمتر، کف پله ۳۰ سانتیمتر، نرده ۱۱۰ سانتیمتر (۷۵ در سطوح شیب‌دار).</div>
+                <div class="material-box"><span class="mat-num">ماده ۸۷</span> جابجایی داربست متحرک با نفر روی آن ممنوع.</div>
+                <div class="material-box"><span class="mat-num">ماده ۸۸</span> همه داربست‌ها (به جز متحرک) در دو جهت عمودی و افقی مهار شوند.</div>
+                <div class="material-box"><span class="mat-num">ماده ۸۹</span> حداکثر ارتفاع داربست متحرک برجی ۹.۶ متر، بیش از آن مهار شود.</div>
+                <div class="material-box"><span class="mat-num">ماده ۹۰</span> نسبت ارتفاع به عرض در داربست برجی متحرک حداکثر ۳:۱.</div>
+                <div class="material-box"><span class="mat-num">ماده ۹۱</span> چرخ‌ها با قفل مناسب، قطر خارجی حداقل ۱۲.۵ سانتیمتر.</div>
+                <div class="material-box"><span class="mat-num">ماده ۹۲</span> نسبت ارتفاع به عرض در داربست برجی ثابت حداکثر ۴:۱.</div>
+                <div class="material-box"><span class="mat-num">ماده ۹۳</span> به منظور پیشگیری از حوادث، کلیه موارد فوق باید رعایت شود.</div>
+
+                <div class="card-subtitle">🔹 فصل پنجم – روش دسترسی با طناب (ماده ۹۴ تا ۹۸)</div>
+                <div class="material-box"><span class="mat-num">ماده ۹۴</span> شخص ذی‌صلاح نقاط تکیه‌گاهی ایمن برای طناب‌ها ایجاد کند.</div>
+                <div class="material-box"><span class="mat-num">ماده ۹۵</span> قبل از هر شیفت، دستورالعمل و مجوز شروع کار صادر شود.</div>
+                <div class="material-box"><span class="mat-num">ماده ۹۶</span> حضور تیم یا فرد نجات‌دهنده الزامی است.</div>
+                <div class="material-box"><span class="mat-num">ماده ۹۷</span> عامل کار باید حداقل دو نقطه اتکاء مجزا به تکیه‌گاه ایمن داشته باشد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۹۸</span> استفاده همزمان بیش از یک نفر از یک طناب ممنوع.</div>
+
+                <div class="card-subtitle">🔹 فصل ششم – سامانه‌های متوقف‌کننده و محدودکننده (ماده ۹۹ تا ۱۱۲)</div>
+                <div class="material-box"><span class="mat-num">ماده ۹۹</span> سامانه متوقف‌کننده شامل: طناب ایمنی افقی و عمودی، لنیارد، قالب قفل‌شونده، هارنس، شوک‌گیر.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۰۰</span> تحمل ۲۰۰۰ کیلوگرم، طناب افقی محکم، طناب استاتیک تحمل ۲۰۰۰ کیلوگرم.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۰۱</span> بازرسی سامانه قبل از هر شیفت توسط شخص ذی‌صلاح.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۰۲</span> در ارتفاع بالای ۱.۲ متر بدون شوک‌گیر، شوک وارده کمتر از ۴۰۰ کیلوگرم شود.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۰۳</span> فواصل سقوط نباید از فاصله جایگاه کار تا سطح مبنا بیشتر باشد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۰۴</span> پس از سقوط بر روی شوک‌گیر، ابزار از رده خارج شود.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۰۵</span> طناب‌ها نباید بهم تابیده یا گره زده شوند، با پوشش از لبه‌های تیز محافظت شوند، رنگ‌بندی و متصل به سطح ایمن.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۰۶</span> استفاده همزمان از طناب ایمنی عمودی ممنوع.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۰۷</span> فاصله ایمن = ۱.۲ + طول لنیارد + بیشترین ازدیاد طول شوک‌گیر + ۲.۵ متر.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۰۸</span> شکم‌دهی طناب افقی حداکثر ۱.۲ متر.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۰۹</span> نقاط تکیه‌گاهی باید تحمل ۲۲۰۰ کیلوگرم داشته باشند.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۱۰</span> طناب نیمه‌استاتیک: قطر حداقل ۱۳ میلیمتر، پشتیبان عمودی هر ۹ متر، تغییر شکل حداکثر ۴۰ میلیمتر در ۹ متر، پوشش حفاظتی، استاندارد معتبر.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۱۱</span> هارنس در سامانه متوقف‌کننده باید حلقه سینه‌ای یا پشتی داشته باشد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۱۲</span> هارنس در سامانه محدودکننده باید حلقه شکمی داشته باشد.</div>
+
+                <div class="card-subtitle">🔹 فصل هفتم – تور ایمنی (ماده ۱۱۳ تا ۱۱۵)</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۱۳</span> تور ایمنی: ۲.۴ تا ۴.۶ متر پایین‌تر از تراز کار، ۲.۴ متر ادامه از هر طرف، تورهای متصل بهم با توانایی جذب نیروی برابر.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۱۴</span> در صورت خطر سقوط مصالح، تور جمع‌آوری نخاله نصب شود.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۱۵</span> تور بدون مانع بین کارگر و تور نصب شود.</div>
+
+                <div class="card-subtitle">🔹 فصل هشتم – بالابرهای سیار (ماده ۱۱۶ تا ۱۳۵)</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۱۶</span> حداقل چهار چرخ، اهرم ترازکننده، مکانیزم قفل‌شونده و محدودکننده شعاع.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۱۷</span> حس‌گرهای وزن و گشتاور برای جلوگیری از واژگونی.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۱۸</span> پلکان ایمن برای دسترسی به جایگاه کار.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۱۹</span> حس‌گر محدودکننده ارتفاع.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۲۰</span> حس‌گر حرکت در شیب بیش از حد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۲۱</span> دگمه توقف اضطراری در سکو و کنار منبع تغذیه.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۲۲</span> شیرهای قفل‌کننده حفاظتی در سیلندرهای هیدرولیک.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۲۳</span> سیستم کنترل اضطراری برای جمع کردن دستگاه.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۲۴</span> حس‌گر جلوگیری از جمع شدن جک‌ها در حالت بالا بودن سکو.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۲۵</span> تهیه دستورالعمل شرکت سازنده.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۲۶</span> جلوگیری از تردد افراد متفرقه.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۲۷</span> استفاده از نردبان یا زیرپایی در سکو ممنوع.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۲۸</span> جابجایی با فرد در سکو ممنوع.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۲۹</span> در مکان‌های پرتردد: راه‌انداز، فرد در سکو، پرچم‌دار در فاصله ۱۵۰ متری.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۳۰</span> نصب لوح شناسایی و علائم هشدار روی بدنه.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۳۱</span> استفاده از جک‌های تعادلی، ترمز و گوه زیر چرخ.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۳۲</span> بالا و پایین رفتن از مهارها و ستون‌ها ممنوع.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۳۳</span> استقرار با استحکام کافی زیر جک‌ها و رعایت شیب مجاز.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۳۴</span> استفاده از بالابر سیار به عنوان جرثقیل ممنوع.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۳۵</span> مسئولیت رعایت مقررات بر عهده کارفرماست و در صورت حادثه مکلف به جبران خسارت است.</div>
+
+                <div class="highlight-box">
+                    <strong>✅ این آیین‌نامه مشتمل بر ۸ فصل و ۱۳۵ ماده و ۳ تبصره می‌باشد که به استناد مواد ۸۵ و ۹۱ قانون کار در تاریخ ۱۳۸۹/۱۱/۱۷ به تصویب وزیر کار رسیده است.</strong>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            تهیه شده توسط <span class="highlight">شرکت معدنی و صنایع معدنی درکاو</span><br>
+            <span style="direction:ltr; display:inline-block;">📞 09178680173</span>
+        </div>
+
+    </div>
+
+    <script>
+        // اضافه کردن قابلیت کپی متن با کلیک
+        document.querySelectorAll('.tip-item, .item-box, .highlight-box, .card ul li, .card ol li, .spec-table tr, .safety-alert, .material-box').forEach(el => {
+            el.style.cursor = 'pointer';
+            el.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') return;
+                const text = this.textContent.trim();
+                navigator.clipboard.writeText(text).then(() => {
+                    const origBg = this.style.background;
+                    this.style.background = '#d4edda';
+                    setTimeout(() => {
+                        this.style.background = origBg || '';
+                    }, 400);
+                });
+            });
+        });
+
+        console.log('✅ آموزش جامع کار در ارتفاع (کامل) بارگذاری شد.');
+        console.log('📋 کلیک روی هر متن برای کپی کردن');
+        console.log('⛑️ شامل تمام مباحث: تعاریف، آمار، علل سقوط، قوانین، فیزیک سقوط، تجهیزات، آیین‌نامه کامل');
+    </script>
+
+<script src="hse-common.js"></script>
+
+<script src="assets/js/sw-register.js"></script>
+</body>
+</html>

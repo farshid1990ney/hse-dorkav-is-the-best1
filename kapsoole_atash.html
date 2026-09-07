@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+
+<script>
+/* ============================================================
+   ★ امنیت: گیت احراز هویت (سمت کلاینت)
+   هیچ صفحه‌ای بدون ورود به سامانه باز نمی‌شود. محتوای صفحه
+   مخفی می‌ماند و کاربر به صفحه ورود هدایت می‌شود.
+   (لایه نمایشی؛ لایه امنیتی واقعی در بکاند اعمال می‌شود.)
+   ============================================================ */
+(function(){
+  var ok = false;
+  try {
+    var _u = JSON.parse(localStorage.getItem('hse_user_activated') || 'null');
+    ok = !!(_u && _u.personnel && _u.fullname);
+  } catch(e) { ok = false; }
+  if (ok) return; // مجاز - ادامه می‌دهد
+
+  // پنهان‌کردن کل محتوا و نمایش قفل
+  var hide = function(){
+    try {
+      var d = document;
+      // مخفی کردن همه عناصر
+      var all = d.body ? d.body.children : [];
+      for (var i=0;i<all.length;i++){ all[i].style.display='none'; }
+      var lock = d.createElement('div');
+      lock.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#0f172a;color:#f8fafc;'
+        +'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+        +'font-family:Tahoma,sans-serif;text-align:center;padding:20px;direction:rtl;';
+      lock.innerHTML = '<div style="font-size:60px;margin-bottom:10px;">🔒</div>'
+        +'<h2 style="margin:0 0 8px;">دسترسی محدود است</h2>'
+        +'<p style="margin:0 0 20px;color:#94a3b8;">لطفاً ابتدا از صفحه اصلی وارد سامانه شوید.</p>'
+        +'<a href="index.html" style="background:#ff6208;color:#fff;padding:10px 26px;'
+        +'border-radius:10px;text-decoration:none;font-weight:bold;">بازگشت به صفحه ورود</a>';
+      d.body.appendChild(lock);
+    } catch(e){}
+  };
+  if (document.body) hide(); else document.addEventListener('DOMContentLoaded', hide);
+  setTimeout(function(){ try{ location.replace('index.html'); }catch(e){} }, 2500);
+})();
+</script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#1e3c5c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HSE درکاو" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+    <title>طبقه‌بندی انواع حریق - استاندارد NFPA</title>
+    <style>
+        :root {
+            --primary: #ff6208;
+            --primary-hover: #e05300;
+            --secondary: #f39c12;
+            --success: #27ae60;
+            --safety: #2c6e4e;
+            --danger: #c0392b;
+            --dark-blue: #1e3c5c;
+            --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #dfe7f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --text-main: #1e2a2e;
+            --text-muted: #64748b;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body { padding-bottom: 75px !important;
+            background: var(--bg-gradient);
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .main-container {
+            max-width: 900px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            background: var(--dark-blue);
+            padding: 30px 20px;
+            color: white;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        .header h1 .icon {
+            margin-left: 10px;
+        }
+        .header p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+        .card:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        }
+        .card-title {
+            color: var(--dark-blue);
+            font-size: 1.15rem;
+            font-weight: bold;
+            border-right: 4px solid var(--primary);
+            padding-right: 12px;
+            margin-bottom: 15px;
+        }
+        .card-title .icon {
+            margin-left: 8px;
+        }
+
+        /* کلاس‌های حریق */
+        .fire-class-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .fire-class-item {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-md);
+            padding: 18px;
+            border: 2px solid rgba(0, 0, 0, 0.06);
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .fire-class-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 6px;
+            height: 100%;
+            border-radius: 0 4px 4px 0;
+        }
+        .fire-class-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .fire-class-item .class-badge {
+            display: inline-block;
+            font-size: 2rem;
+            font-weight: 900;
+            padding: 4px 14px;
+            border-radius: var(--border-radius-sm);
+            margin-bottom: 8px;
+            color: white;
+        }
+        .fire-class-item .class-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--dark-blue);
+        }
+        .fire-class-item .class-examples {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 6px 0;
+        }
+        .fire-class-item .class-extinguisher {
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: var(--border-radius-sm);
+            background: rgba(39, 174, 96, 0.08);
+            display: inline-block;
+            margin-top: 4px;
+            border-right: 3px solid var(--success);
+        }
+
+        .fire-class-item.class-a::before { background: #2ecc71; }
+        .fire-class-item.class-b::before { background: #f1c40f; }
+        .fire-class-item.class-c::before { background: #e67e22; }
+        .fire-class-item.class-d::before { background: #9b59b6; }
+        .fire-class-item.class-e::before { background: #3498db; }
+        .fire-class-item.class-f::before { background: #e74c3c; }
+
+        .fire-class-item .class-badge.class-a-badge { background: #2ecc71; }
+        .fire-class-item .class-badge.class-b-badge { background: #f1c40f; color: #333; }
+        .fire-class-item .class-badge.class-c-badge { background: #e67e22; }
+        .fire-class-item .class-badge.class-d-badge { background: #9b59b6; }
+        .fire-class-item .class-badge.class-e-badge { background: #3498db; }
+        .fire-class-item .class-badge.class-f-badge { background: #e74c3c; }
+
+        /* جزئیات بازشونده */
+        .class-detail {
+            display: none;
+            margin-top: 12px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: var(--border-radius-sm);
+            border-top: 2px solid rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.3s ease;
+        }
+        .class-detail.show {
+            display: block;
+        }
+        .class-detail h4 {
+            color: var(--dark-blue);
+            margin-bottom: 6px;
+            font-size: 1rem;
+        }
+        .class-detail ul {
+            padding-right: 20px;
+            margin: 6px 0;
+        }
+        .class-detail ul li {
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+        .class-detail .extinguisher-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px;
+        }
+        .class-detail .extinguisher-list span {
+            background: rgba(39, 174, 96, 0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(39, 174, 96, 0.2);
+        }
+
+        /* جدول خلاصه */
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .summary-table th,
+        .summary-table td {
+            padding: 10px 12px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        .summary-table th {
+            background: var(--dark-blue);
+            color: white;
+            font-weight: bold;
+        }
+        .summary-table tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .summary-table tr:hover {
+            background: rgba(255, 98, 8, 0.04);
+        }
+
+        .color-dot {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            margin-left: 4px;
+            vertical-align: middle;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn-back {
+            background: var(--danger);
+            color: white;
+        }
+        .btn-back:hover {
+            background: #a93226;
+        }
+        .btn-expand-all {
+            background: var(--safety);
+            color: white;
+        }
+        .btn-expand-all:hover {
+            background: #1e4f3a;
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .footer .highlight {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+        }
+        .legend-item .dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media(max-width:600px) {
+            .content { padding: 15px; }
+            .header h1 { font-size: 1.3rem; }
+            .fire-class-grid { grid-template-columns: 1fr; }
+            .summary-table { font-size: 0.75rem; }
+            .summary-table th, .summary-table td { padding: 6px 4px; }
+            .btn-row { flex-direction: column; }
+            .btn { width: 100%; justify-content: center; }
+            .legend { gap: 6px; }
+            .legend-item { font-size: 0.75rem; }
+        }
+
+        html { scroll-behavior: smooth; }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1><span class="icon">🔥</span> طبقه‌بندی انواع حریق</h1>
+            <p>بر اساس استاندارد NFPA 10 و ISO 3941</p>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <!-- توضیحات -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📖</span> آشنایی با طبقه‌بندی حریق</div>
+                <p style="margin-bottom:10px;">
+                    حریق‌ها بر اساس <strong>نوع ماده در حال سوختن</strong> به ۶ کلاس اصلی تقسیم می‌شوند. 
+                    هر کلاس نیاز به <strong>خاموش‌کننده مخصوص</strong> خود دارد و استفاده از خاموش‌کننده نامناسب 
+                    می‌تواند خطرناک باشد.
+                </p>
+                <div class="legend">
+                    <span class="legend-item"><span class="dot" style="background:#2ecc71;"></span> کلاس A</span>
+                    <span class="legend-item"><span class="dot" style="background:#f1c40f;"></span> کلاس B</span>
+                    <span class="legend-item"><span class="dot" style="background:#e67e22;"></span> کلاس C</span>
+                    <span class="legend-item"><span class="dot" style="background:#9b59b6;"></span> کلاس D</span>
+                    <span class="legend-item"><span class="dot" style="background:#3498db;"></span> کلاس E</span>
+                    <span class="legend-item"><span class="dot" style="background:#e74c3c;"></span> کلاس F</span>
+                </div>
+            </div>
+
+            <!-- کارت‌های کلاس‌ها -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🏷️</span> کلاس‌های حریق</div>
+                <div class="fire-class-grid" id="fireClassGrid">
+                    <!-- توسط JS پر می‌شود -->
+                </div>
+            </div>
+
+            <!-- جدول خلاصه -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📊</span> جدول خلاصه طبقه‌بندی</div>
+                <table class="summary-table">
+                    <thead>
+                        <tr>
+                            <th>کلاس</th>
+                            <th>نوع آتش</th>
+                            <th>مثال</th>
+                            <th>خاموش‌کننده مناسب</th>
+                        </tr>
+                    </thead>
+                    <tbody id="summaryBody">
+                        <!-- توسط JS پر می‌شود -->
+                    </tbody>
+                </table>
+            </div>
+
+
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            تهیه شده توسط <span class="highlight">شرکت معدنی و صنایع معدنی درکاو</span><br>
+            <span style="direction:ltr; display:inline-block;">📞 09178680173</span>
+        </div>
+    </div>
+
+    <script>
+        // داده‌های کلاس‌های حریق
+        const fireClasses = [{
+            id: 'A',
+            name: 'حریق مواد جامد',
+            icon: '🪵',
+            color: '#2ecc71',
+            examples: 'چوب، کاغذ، پارچه، لاستیک، پلاستیک، فرش، توتون',
+            extinguishers: ['آب و گاز', 'هالوژنه', 'ماده شیمیایی خشک', 'پودر چندمنظوره'],
+            description: 'حریق موادی که پس از سوختن خاکستر یا زغال باقی می‌گذارند. این نوع حریق با خنک‌سازی و کاهش دما خاموش می‌شود.',
+            tips: [
+                'بهترین خاموش‌کننده: آب و گاز یا پودر چندمنظوره',
+                'از خاموش‌کننده‌های CO2 برای حریق کلاس A استفاده نکنید (اثر چندانی ندارد)',
+                'حتماً از خاموش‌کننده با درجه A روی برچسب استفاده کنید'
+            ]
+        }, {
+            id: 'B',
+            name: 'حریق مایعات قابل اشتعال',
+            icon: '🛢️',
+            color: '#f1c40f',
+            examples: 'بنزین، گازوئیل، نفت، تینر، گریس، الکل، استر، کلسیم',
+            extinguishers: ['پودر خشک', 'هالوژنه', 'CO2', 'فوم'],
+            description: 'حریق مایعات قابل اشتعال یا مذاب‌ها. این نوع حریق با قطع اکسیژن یا خفه‌کردن خاموش می‌شود.',
+            tips: [
+                'هرگز از آب برای خاموش‌کردن حریق کلاس B استفاده نکنید (موجب پخش شدن آتش می‌شود)',
+                'بهترین گزینه: پودر خشک یا CO2',
+                'در صورت استفاده از فوم، حتماً فوم مخصوص مایعات قابل اشتعال باشد'
+            ]
+        }, {
+            id: 'C',
+            name: 'حریق گازهای قابل اشتعال',
+            icon: '💨',
+            color: '#e67e22',
+            examples: 'متان، اتان، پروپان، بوتان، استیلن، اکسیژن، هیدروژن',
+            extinguishers: ['پودر خشک', 'هالوژنه', 'CO2'],
+            description: 'حریق گازهای قابل اشتعال. در این نوع حریق، اولویت با بستن شیر گاز و قطع منبع است.',
+            tips: [
+                'قبل از هر اقدامی، شیر گاز را ببندید',
+                'پودر خشک بهترین گزینه برای مهار حریق گاز است',
+                'هرگز از آب برای حریق گاز استفاده نکنید'
+            ]
+        }, {
+            id: 'D',
+            name: 'حریق فلزات قابل اشتعال',
+            icon: '⚙️',
+            color: '#9b59b6',
+            examples: 'لیتیم، سدیم، پتاسیم، منیزیم، تیتانیوم، زیرکونیوم',
+            extinguishers: ['پودر مخصوص فلزات (Class D)'],
+            description: 'حریق فلزات سبک و واکنش‌دهنده. این نوع حریق بسیار خطرناک است و به خاموش‌کننده مخصوص نیاز دارد.',
+            tips: [
+                'فقط از پودر مخصوص کلاس D استفاده کنید',
+                'هرگز از آب، CO2 یا پودر معمولی استفاده نکنید (واکنش شدید ایجاد می‌شود)',
+                'در صورت امکان، فلز در حال سوختن را با ماسه خشک بپوشانید'
+            ]
+        }, {
+            id: 'E',
+            name: 'حریق برقی و الکتریکی',
+            icon: '⚡',
+            color: '#3498db',
+            examples: 'لوازم برقی، کابل‌ها، تابلوهای برق، موتورهای الکتریکی',
+            extinguishers: ['ماده شیمیایی خشک', 'CO2', 'پودر چندمنظوره'],
+            description: 'حریق تجهیزات و تأسیسات الکتریکی برقدار. مهم‌ترین اقدام، قطع جریان برق است.',
+            tips: [
+                'قبل از خاموش‌کردن، جریان برق را قطع کنید (در صورت امکان)',
+                'بهترین خاموش‌کننده: CO2 (بدون باقی‌مانده و غیررسانا)',
+                'هرگز از آب یا فوم برای حریق برقی استفاده نکنید (خطر برق‌گرفتگی)'
+            ]
+        }, {
+            id: 'F',
+            name: 'حریق روغن‌های خوراکی',
+            icon: '🍳',
+            color: '#e74c3c',
+            examples: 'روغن مایع، روغن جامد، چربی‌های آشپزی',
+            extinguishers: ['مواد شیمیایی تر (Wet Chemical)'],
+            description: 'حریق روغن‌ها و چربی‌های قابل اشتعال در آشپزخانه‌ها و رستوران‌ها. این نوع حریق دمای بالایی دارد.',
+            tips: [
+                'فقط از خاموش‌کننده Wet Chemical (مواد شیمیایی تر) استفاده کنید',
+                'هرگز آب روی روغن داغ نریزید (انفجار و پخش شدن روغن)',
+                'در آشپزخانه‌های صنعتی، حتماً خاموش‌کننده کلاس F موجود باشد'
+            ]
+        }];
+
+        // پر کردن کارت‌ها
+        function populateCards() {
+            const grid = document.getElementById('fireClassGrid');
+            grid.innerHTML = '';
+            fireClasses.forEach(cls => {
+                const div = document.createElement('div');
+                div.className = `fire-class-item class-${cls.id.toLowerCase()}`;
+                div.innerHTML = `
+                    <div class="class-badge class-${cls.id.toLowerCase()}-badge">${cls.id}</div>
+                    <div class="class-name">${cls.icon} ${cls.name}</div>
+                    <div class="class-examples">📌 ${cls.examples}</div>
+                    <div class="class-extinguisher">🧯 ${cls.extinguishers.slice(0, 2).join(' • ')}</div>
+                    <div class="class-detail" id="detail-${cls.id}">
+                        <h4>📖 توضیحات:</h4>
+                        <p style="font-size:0.9rem;">${cls.description}</p>
+                        <h4 style="margin-top:8px;">💡 نکات ایمنی:</h4>
+                        <ul>
+                            ${cls.tips.map(tip => `<li>${tip}</li>`).join('')}
+                        </ul>
+                        <h4 style="margin-top:8px;">🧯 خاموش‌کننده‌های مناسب:</h4>
+                        <div class="extinguisher-list">
+                            ${cls.extinguishers.map(ex => `<span>${ex}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+                div.onclick = function(e) {
+                    // جلوگیری از بسته شدن هنگام کلیک روی جزئیات
+                    if (e.target.closest('.class-detail')) return;
+                    toggleDetail(cls.id);
+                };
+                grid.appendChild(div);
+            });
+        }
+
+        // پر کردن جدول خلاصه
+        function populateSummary() {
+            const tbody = document.getElementById('summaryBody');
+            tbody.innerHTML = '';
+            fireClasses.forEach(cls => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${cls.id}</strong></td>
+                    <td>${cls.icon} ${cls.name}</td>
+                    <td style="font-size:0.85rem;">${cls.examples}</td>
+                    <td style="font-size:0.85rem;">${cls.extinguishers.join('، ')}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // نمایش/مخفی کردن جزئیات
+        function toggleDetail(classId) {
+            const detail = document.getElementById(`detail-${classId}`);
+            if (detail) {
+                detail.classList.toggle('show');
+            }
+        }
+
+        // باز کردن / بستن همه جزئیات
+        let allDetailsOpen = false;
+        function toggleAllDetails() {
+            allDetailsOpen = !allDetailsOpen;
+            fireClasses.forEach(cls => {
+                const detail = document.getElementById(`detail-${cls.id}`);
+                if (detail) {
+                    if (allDetailsOpen) {
+                        detail.classList.add('show');
+                    } else {
+                        detail.classList.remove('show');
+                    }
+                }
+            });
+            const btn = document.querySelector('.btn-expand-all');
+            btn.textContent = allDetailsOpen ? '📂 بستن همه جزئیات' : '📂 باز کردن همه جزئیات';
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        // مقداردهی اولیه
+        populateCards();
+        populateSummary();
+
+        console.log('✅ طبقه‌بندی انواع حریق بارگذاری شد.');
+        console.log(`📊 ${fireClasses.length} کلاس حریق تعریف شده است.`);
+    </script>
+
+<script src="hse-common.js"></script>
+
+<script src="assets/js/sw-register.js"></script>
+</body>
+</html>

@@ -1,0 +1,1022 @@
+
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+
+<script>
+/* ============================================================
+   ★ امنیت: گیت احراز هویت (سمت کلاینت)
+   هیچ صفحه‌ای بدون ورود به سامانه باز نمی‌شود. محتوای صفحه
+   مخفی می‌ماند و کاربر به صفحه ورود هدایت می‌شود.
+   (لایه نمایشی؛ لایه امنیتی واقعی در بکاند اعمال می‌شود.)
+   ============================================================ */
+(function(){
+  var ok = false;
+  try {
+    var _u = JSON.parse(localStorage.getItem('hse_user_activated') || 'null');
+    ok = !!(_u && _u.personnel && _u.fullname);
+  } catch(e) { ok = false; }
+  if (ok) return; // مجاز - ادامه می‌دهد
+
+  // پنهان‌کردن کل محتوا و نمایش قفل
+  var hide = function(){
+    try {
+      var d = document;
+      // مخفی کردن همه عناصر
+      var all = d.body ? d.body.children : [];
+      for (var i=0;i<all.length;i++){ all[i].style.display='none'; }
+      var lock = d.createElement('div');
+      lock.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#0f172a;color:#f8fafc;'
+        +'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+        +'font-family:Tahoma,sans-serif;text-align:center;padding:20px;direction:rtl;';
+      lock.innerHTML = '<div style="font-size:60px;margin-bottom:10px;">🔒</div>'
+        +'<h2 style="margin:0 0 8px;">دسترسی محدود است</h2>'
+        +'<p style="margin:0 0 20px;color:#94a3b8;">لطفاً ابتدا از صفحه اصلی وارد سامانه شوید.</p>'
+        +'<a href="index.html" style="background:#ff6208;color:#fff;padding:10px 26px;'
+        +'border-radius:10px;text-decoration:none;font-weight:bold;">بازگشت به صفحه ورود</a>';
+      d.body.appendChild(lock);
+    } catch(e){}
+  };
+  if (document.body) hide(); else document.addEventListener('DOMContentLoaded', hide);
+  setTimeout(function(){ try{ location.replace('index.html'); }catch(e){} }, 2500);
+})();
+</script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#1e3c5c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HSE درکاو" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+    <title>آموزش ایمنی کار در فضای بسته - آژند همت توس</title>
+
+    <style>
+        :root {
+            --primary: #ff6208;
+            --primary-hover: #e05300;
+            --secondary: #f39c12;
+            --success: #27ae60;
+            --safety: #2c6e4e;
+            --danger: #c0392b;
+            --dark-blue: #1e3c5c;
+            --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #dfe7f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --text-main: #1e2a2e;
+            --text-muted: #64748b;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body { padding-bottom: 75px !important;
+            background: var(--bg-gradient);
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text-main);
+            line-height: 1.8;
+        }
+
+        .main-container {
+            max-width: 1000px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            background: var(--dark-blue);
+            padding: 35px 20px;
+            color: white;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+            position: relative;
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        .header h1 .icon {
+            margin-left: 10px;
+        }
+        .header p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        .header .back-home {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .header .back-home:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+        .card:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        }
+        .card-title {
+            color: var(--dark-blue);
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-right: 4px solid var(--primary);
+            padding-right: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title .icon {
+            font-size: 1.5rem;
+        }
+        .card-subtitle {
+            color: var(--primary);
+            font-size: 1.05rem;
+            font-weight: bold;
+            margin: 18px 0 10px 0;
+            border-bottom: 2px solid rgba(255, 98, 8, 0.15);
+            padding-bottom: 6px;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .tips-grid .tip-item {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 10px 14px;
+            border-radius: var(--border-radius-sm);
+            border-right: 3px solid var(--safety);
+            font-size: 0.9rem;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .tips-grid .tip-item:hover {
+            background: rgba(44, 110, 78, 0.04);
+            transform: translateX(-3px);
+        }
+        .tips-grid .tip-item.danger-tip {
+            border-right-color: var(--danger);
+        }
+        .tips-grid .tip-item.warning-tip {
+            border-right-color: var(--secondary);
+        }
+        .tips-grid .tip-item.primary-tip {
+            border-right-color: var(--primary);
+        }
+        .tips-grid .tip-item.info-tip {
+            border-right-color: #3498db;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+        .spec-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .spec-table th,
+        .spec-table td {
+            padding: 10px 12px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        .spec-table th {
+            background: var(--dark-blue);
+            color: white;
+            font-weight: bold;
+        }
+        .spec-table tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .spec-table tr:hover {
+            background: rgba(255, 98, 8, 0.04);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+            justify-content: center;
+        }
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn-back {
+            background: var(--danger);
+            color: white;
+        }
+        .btn-back:hover {
+            background: #a93226;
+        }
+        .btn-software {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-software:hover {
+            background: var(--primary-hover);
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .footer .highlight {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .badge-standard {
+            display: inline-block;
+            background: var(--safety);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-danger {
+            display: inline-block;
+            background: var(--danger);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-warning {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-info {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+
+        .safety-alert {
+            background: rgba(192, 57, 43, 0.04);
+            border-right: 4px solid var(--danger);
+            padding: 15px;
+            border-radius: var(--border-radius-sm);
+            margin: 10px 0;
+        }
+        .safety-alert strong {
+            color: var(--danger);
+        }
+        .safety-alert ul {
+            padding-right: 20px;
+            margin-top: 5px;
+        }
+        .safety-alert ul li {
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .highlight-box {
+            background: rgba(44, 110, 78, 0.04);
+            padding: 15px 18px;
+            border-radius: var(--border-radius-sm);
+            border-right: 4px solid var(--safety);
+            margin: 10px 0;
+        }
+        .highlight-box.danger {
+            background: rgba(192, 57, 43, 0.04);
+            border-right-color: var(--danger);
+        }
+        .highlight-box.gold {
+            background: rgba(243, 156, 18, 0.04);
+            border-right-color: var(--secondary);
+        }
+        .highlight-box.green {
+            background: rgba(39, 174, 96, 0.04);
+            border-right-color: var(--success);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .item-box {
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: var(--border-radius-sm);
+            padding: 14px 16px;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .item-box:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+        }
+        .item-box .icon {
+            color: var(--primary);
+            font-size: 1.3rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .item-box .title {
+            color: var(--dark-blue);
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .item-box .desc {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            margin-top: 2px;
+        }
+
+        .material-box {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 12px 16px;
+            border-radius: var(--border-radius-sm);
+            border-right: 4px solid var(--danger);
+            margin-bottom: 8px;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .material-box:hover {
+            background: rgba(255, 98, 8, 0.04);
+        }
+        .material-box .mat-num {
+            display: inline-block;
+            background: var(--danger);
+            color: white;
+            padding: 0 10px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.75rem;
+            margin-left: 6px;
+        }
+
+        .two-col-list {
+            columns: 2;
+            column-gap: 30px;
+        }
+
+        .quote {
+            font-style: italic;
+            background: rgba(0, 0, 0, 0.02);
+            padding: 16px 24px;
+            border-radius: 60px 20px 60px 20px;
+            color: var(--text-main);
+            border-right: 4px solid var(--secondary);
+        }
+
+        @media(max-width:700px) {
+            .content { padding: 15px; }
+            .header h1 { font-size: 1.3rem; }
+            .header .back-home { width: 36px; height: 36px; font-size: 1rem; left: 10px; top: 15px; }
+            .grid-2 { grid-template-columns: 1fr; }
+            .tips-grid { grid-template-columns: 1fr; }
+            .spec-table { font-size: 0.75rem; }
+            .spec-table th, .spec-table td { padding: 6px 4px; }
+            .btn-row { flex-direction: column; }
+            .btn { width: 100%; justify-content: center; }
+            .two-col-list { columns: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <a href="index.html" class="back-home" title="بازگشت به صفحه اصلی">🏠</a>
+            <h1><span class="icon">⛑️</span> ایمنی کار در فضای بسته</h1>
+            <p>آموزش جامع ایمنی در فضاهای بسته — همراه با آیین‌نامه کامل (۷ فصل · ۹۶ ماده)</p>
+            <div style="margin-top:8px; display:flex; flex-wrap:wrap; justify-content:center; gap:8px;">
+                <span class="badge-standard">📜 آیین‌نامه فضای بسته</span>
+                <span class="badge-standard">✅ مصوب وزارت کار ۱۴۰۱</span>
+                <span class="badge-standard">📘 ویژه کارگران و ناظران</span>
+            </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <!-- ===== مقدمه ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📌</span> مقدمه</div>
+                <p style="margin-bottom:10px;">
+                    در بسیاری از محیط‌های کاری، محوطه‌های محصوری وجود دارد که ممکن است خطرات بسیاری را برای افرادی که برای انجام کار به آنها وارد می‌شوند، پدید آورد. در بسیاری از موارد، کارکنانی که به فضای بسته وارد می‌شوند، ریسک مواجهه با خطرات متعددی از جمله گیر افتادن در فضای بسته، غوطه‌ور شدن و مواجهه با هوای خطرناک را می‌پذیرند.
+                </p>
+                <p>
+                    فضای بسته به خودی خود ریسک گیر افتادن را برای افراد به وجود می‌آورد اما کار کردن در فضای بسته ممکن است موجب شود تا افراد در معرض خطرات بیشتری قرار گیرند. از این رو لازم است شرایط کار در فضای بسته به طور کامل بررسی و برای ورود اخذ مجوز شود.
+                </p>
+                <div class="quote">
+                    "ایمنی یعنی دور بودن از خطر"
+                </div>
+            </div>
+
+            <!-- ===== ایمنی و تعاریف ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🛡️</span> ایمنی و تعاریف</div>
+
+                <div class="card-subtitle">🔸 ایمنی (Safety)</div>
+                <p>اصولاً ایمنی به مجموعه تدابیر، اصول و مقرراتی گفته می‌شود که با به کار گرفتن آنها بتوان نیروی انسانی و سرمایه را در مقابل خطرات مختلف و محتمل در محیط‌های صنعتی به نحو موثری حفظ و حراست نموده و یک محیط کاری بی‌خطر و سالم جهت افزایش کارآیی کارکنان بوجود آورد.</p>
+                <p><strong>تعریف ایمنی براساس OHSAS 18001:</strong> میزان درجه فرار از خطرات.</p>
+
+                <div class="card-subtitle">🔸 خطرات بالقوه</div>
+                <p>به شرایط و موقعیت‌هایی که توانایی آسیب رساندن به افراد، خسارت به تجهیزات و ساختمان‌ها، از بین بردن مواد یا کاهش کارایی در اجرای یک عمل از قبل داشته باشد اطلاق می‌گردد.</p>
+
+                <div class="card-subtitle">🔸 خطرات بالفعل</div>
+                <p>واژه خطر بالفعل بیان کننده قرار گرفتن افراد یا تجهیزات کاری در معرض خطر بالقوه می‌باشد.</p>
+
+                <div class="card-subtitle">🔸 حادثه</div>
+                <ul>
+                    <li>یک واقعـه نامطلوب و ناخواسته که باعث جراحت، آسیب به اموال و خسارت می‌شود.</li>
+                    <li>حادثه عبارتست از رویداد ناخواسته یا پیش‌بینی نشده که منجر به جراحت و یا بیماری انسان گردد.</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 شبه حادثه (Near Miss)</div>
+                <ul>
+                    <li>رویدادی که به وقوع پیوسته ولی باعث آسیب، بیماری یا مرگ نشده است و پتانسیل ایجاد خسارت مالی و جانی را دارد.</li>
+                    <li>ثبت و گزارش به موقع شبه حوادث و ریشه‌یابی علل در جلوگیری از تکرار آنها نقش بسزایی دارد.</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 مثلث هاینریش</div>
+                <ul>
+                    <li>۱ حادثه مرگبار</li>
+                    <li>۲۹ حادثه با آسیب جزئی</li>
+                    <li>۳۰۰ شبه‌حادثه (بدون آسیب)</li>
+                </ul>
+            </div>
+
+            <!-- ===== تعریف فضای بسته ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📦</span> فضای بسته (Confined Space)</div>
+
+                <div class="safety-alert">
+                    <p style="font-size:1.1rem; font-weight:700;">هر فضای محصور که ورود و خروج در آن به سختی انجام گیرد و امکان آسیب رساندن به شما را داشته باشد، <span style="color:var(--danger);">Confined Space</span> نامیده می‌شود.</p>
+                </div>
+
+                <div class="card-subtitle">🔸 شرایط فضای بسته</div>
+                <ul>
+                    <li>مکانی برای انجام کار روزمره و همیشگی نیست.</li>
+                    <li>دارای محدودیت‌هایی برای ورود و خروج می‌باشد.</li>
+                    <li>مثال‌ها: گودال‌های زیرزمینی، تانک‌ها، مخازن، سیلوها، کانال‌های حفاری شده با عمق بیش از ۱۲۰ سانتیمتر.</li>
+                </ul>
+
+                <div class="grid-2">
+                    <div class="highlight-box green" style="border-right-color:var(--success);">
+                        <h4 style="color:var(--success); margin:0 0 8px;">✅ فضای محصور بی‌نیاز از مجوز</h4>
+                        <p>فضاهایی که حاوی مخاطرات اتمسفریک نبوده و استعداد تهدید زندگی را نداشته باشد.</p>
+                        <p><strong>مثال:</strong> چاله‌ها، سردابه‌ها.</p>
+                    </div>
+                    <div class="safety-alert">
+                        <h4 style="color:var(--danger); margin:0 0 8px;">⚠️ فضای محصور نیازمند مجوز</h4>
+                        <ul>
+                            <li>حاوی اتمسفر خطرناک باشد.</li>
+                            <li>حاوی موادی باشد که استعداد غرق نمودن فرد را داشته باشد.</li>
+                            <li>حاوی دیگر مخاطرات شدید ایمنی و بهداشتی باشد.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card-subtitle">🔸 مثال‌هایی از فضای محصور</div>
+                <div class="two-col-list">
+                    <ul>
+                        <li>مخازن</li>
+                        <li>لوله‌ها</li>
+                        <li>منهول</li>
+                        <li>کانال‌ها</li>
+                        <li>دیگهای بخار</li>
+                        <li>کانال‌های تهویه</li>
+                        <li>کوره‌ها</li>
+                        <li>تونل‌ها</li>
+                        <li>مجراهای فاضلاب</li>
+                        <li>سیلوها</li>
+                        <li>قیف‌ها</li>
+                        <li>اتاق‌های کنترل برق</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ===== پتانسیل خطرات ===== -->
+            <div class="card" style="border-right-color:var(--danger);">
+                <div class="card-title"><span class="icon">⚠️</span> پتانسیل خطرات در فضای محدود</div>
+
+                <div class="grid-2">
+                    <div>
+                        <h4 style="color:var(--dark-blue);">🔸 مواد سمی و گازها</h4>
+                        <ul>
+                            <li>منوکسید کربن (CO)</li>
+                            <li>سولفید هیدروژن (H2S)</li>
+                            <li>گازهای جوشکاری</li>
+                            <li>مواد خورنده</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="color:var(--dark-blue);">🔸 خطرات فیزیکی</h4>
+                        <ul>
+                            <li>الکتریسیته</li>
+                            <li>خطرات مکانیکی (میکسرها، خردکن‌ها)</li>
+                            <li>کمبود اکسیژن (&lt; 19.5% یا &gt; 23.5%)</li>
+                        </ul>
+                    </div>
+                </div>
+                <h4 style="color:var(--dark-blue);">🔸 مواد قابل احتراق</h4>
+                <ul>
+                    <li>متان، هیدروژن، استیلن، پروپان، بخارات نفتی</li>
+                </ul>
+            </div>
+
+            <!-- ===== دلایل ورود ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🚪</span> دلایل ورود به فضای بسته</div>
+                <ul>
+                    <li>تعمیرات، بازرسی، نگهداری و تمیزکاری</li>
+                    <li>جوشکاری و برشکاری</li>
+                    <li>نصب و راه‌اندازی تجهیزات</li>
+                    <li>نمونه‌برداری و آزمایش</li>
+                    <li>نجات افراد حادثه‌دیده</li>
+                </ul>
+            </div>
+
+            <!-- ===== فرم مجوز ورود ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📄</span> فرم مجوز ورود (Permit)</div>
+                <ul>
+                    <li>پرمیت باید قبل از ورود بطور کامل و صحیح پر شود.</li>
+                    <li>پرمیت زمانی معتبر است که توسط سوپروایزر ورود امضاء شده باشد.</li>
+                    <li><strong>هیچ ورودی بدون پرمیت مجاز نمی‌باشد.</strong></li>
+                    <li>اعتبار پرمیت‌ها حداکثر تا یک شیفت می‌باشد.</li>
+                    <li>پرمیت‌های باطله باید حداقل به مدت یکسال نگهداری شوند.</li>
+                </ul>
+                <div class="highlight-box gold">
+                    <strong>⚠️ مهم:</strong> هرگاه یک خطر از محدودیتی تجاوز کرد، تمام افراد باید سریعاً از فضا خارج شوند.
+                </div>
+            </div>
+
+            <!-- ===== تست هوا ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🌬️</span> تست هوا</div>
+                <ul>
+                    <li><strong>اکسیژن:</strong> حداقل ۱۹.۵% و کمتر از ۲۳.۵%</li>
+                    <li><strong>مواد قابل احتراق:</strong> کمتر از ۱۰% LEL</li>
+                    <li><strong>منوکسید کربن (CO):</strong> کمتر از ۲۵ ppm</li>
+                </ul>
+
+                <div class="highlight-box green">
+                    <h4 style="color:var(--success); margin:0 0 8px;">✅ شرایط مجاز برای ورود بدون دستگاه تنفسی</h4>
+                    <ul>
+                        <li>اکسیژن: ۲۰% ≤ O2 ≤ ۲۳%</li>
+                        <li>H2S: کمتر از ۱ ppm</li>
+                        <li>CO: کمتر از ۱ ppm</li>
+                        <li>LEL: کمتر از ۱%</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ===== گازهای سمی ===== -->
+            <div class="card" style="border-right-color:var(--danger);">
+                <div class="card-title"><span class="icon">☠️</span> گازهای سمی</div>
+
+                <div class="card-subtitle">🔸 منوکسید کربن (CO)</div>
+                <ul>
+                    <li>گازی بی‌بو و بی‌رنگ که تمایلش به هموگلوبین خون <strong>۲۵۰ برابر</strong> بیشتر از اکسیژن است.</li>
+                </ul>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead><tr><th>میزان (ppm)</th><th>عوارض</th></tr></thead>
+                        <tbody>
+                            <tr><td>۲۵</td><td>بعد از ۸ ساعت شروع سردرد</td></tr>
+                            <tr><td>۱۰۰</td><td>بعد از ۳ ساعت سردرد ملایم</td></tr>
+                            <tr><td>۲۰۰</td><td>بعد از ۲ ساعت سردرد شدید</td></tr>
+                            <tr><td>۴۰۰</td><td>سردرد و تهوع پس از ۱ تا ۲ ساعت</td></tr>
+                            <tr><td>۸۰۰</td><td>گیجی و تهوع در ۴۵ دقیقه و مرگ در ۲ ساعت</td></tr>
+                            <tr><td>۳۲۰۰</td><td>گیجی در ۵ تا ۱۰ دقیقه، مرگ در ۳۰ دقیقه</td></tr>
+                            <tr><td>۱۲۸۰۰</td><td>بی‌هوشی سریع و مرگ در ۱ تا ۳ دقیقه</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card-subtitle">🔸 سولفید هیدروژن (H2S)</div>
+                <ul>
+                    <li>قابل اشتعال و انفجار، بی‌نهایت سمی، بوی تخم‌مرغ گندیده.</li>
+                    <li>غلظت بیش از <strong>۱۰ ppm</strong> خطر مرگ دارد.</li>
+                </ul>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead><tr><th>میزان (ppm)</th><th>عوارض</th></tr></thead>
+                        <tbody>
+                            <tr><td>۱۰</td><td>سوزش چشم، زمان مجاز ۸ ساعت</td></tr>
+                            <tr><td>۱۰۰</td><td>سرفه، کاهش حس بویایی</td></tr>
+                            <tr><td>۵۰۰~۷۰۰</td><td>بی‌هوشی، قطع تنفس و مرگ</td></tr>
+                            <tr><td>۱۰۰۰~۲۰۰۰</td><td>مرگ سریع و بدون بازگشت</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card-subtitle">🔸 کمبود اکسیژن</div>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead><tr><th>غلظت اکسیژن</th><th>عوارض</th></tr></thead>
+                        <tbody>
+                            <tr><td>۱۹.۵% - ۲۳.۵%</td><td>محدوده ایمن</td></tr>
+                            <tr><td>۱۵% - ۱۹%</td><td>کاهش توانایی کار، خستگی زودرس</td></tr>
+                            <tr><td>۱۲% - ۱۴%</td><td>تنفس سریع، افزایش ضربان قلب</td></tr>
+                            <tr><td>۱۰% - ۱۲%</td><td>گیجی، عدم تعادل، تنفس بسیار سخت</td></tr>
+                            <tr><td>۸% - ۱۰%</td><td>کاهش هوشیاری، بی‌هوشی</td></tr>
+                            <tr><td>کمتر از ۸%</td><td>مرگ در عرض چند دقیقه</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===== LEL و UEL ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🔥</span> LEL و UEL</div>
+                <ul>
+                    <li><strong>LEL (حد پایین انفجار):</strong> پایین‌ترین درصد حجمی گازها یا بخارات قابل اشتعال که می‌تواند مشتعل شود.</li>
+                    <li><strong>UEL (حد بالای انفجار):</strong> بالاترین درصد حجمی گازها یا بخارات قابل اشتعال که می‌تواند مشتعل شود.</li>
+                    <li>برای ورود ایمن، غلظت گازهای قابل اشتعال باید کمتر از <strong>۱۰% LEL</strong> باشد.</li>
+                </ul>
+            </div>
+
+            <!-- ===== شرایط صدور پروانه ورود ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📋</span> شرایط صدور پروانه ورود (۲۵ شرط)</div>
+                <ol style="padding-right:25px;">
+                    <li>هیچ فردی بدون پروانه ورود اجازه ورود ندارد.</li>
+                    <li>تدارکات و تسهیلات لازم برای ورود و خروج فراهم گردد.</li>
+                    <li>ورود بدون وسایل ایمنی ممنوع است.</li>
+                    <li>شستشو با بخار، آب، تهویه، مسدود کردن و آزمایش گاز انجام شود.</li>
+                    <li>حداقل یک نفر در خارج برای کمک و نجات به صورت تمام وقت گمارده شود.</li>
+                    <li>ظروف تخلیه و تمیز شوند.</li>
+                    <li>بستن شیرها کافی نیست، ظروف باید کاملاً مسدود شوند.</li>
+                    <li>ارتباط با ظروف مجاور قطع و صفحات مسدود کننده نصب شوند.</li>
+                    <li>برق دستگاه قطع، ایزوله و قفل (Lockout) شود.</li>
+                    <li>دمای مخزن نزدیک به دمای محیط باشد.</li>
+                    <li>در صورت جوشکاری، تهویه مناسب و کنترل مداوم اکسیژن.</li>
+                    <li>پروانه فقط برای یک شیفت کاری اعتبار دارد.</li>
+                    <li>نور کافی برای کار فراهم باشد.</li>
+                    <li>پروانه توسط افراد مجاز صادر شود.</li>
+                    <li>برای هر ظرف پروانه جداگانه صادر شود.</li>
+                    <li>گازسنجی مواد قابل اشتعال، بخارات سمی و اکسیژن انجام شود.</li>
+                    <li>گازسنج به صورت روشن و مستمر در فضای بسته وجود داشته باشد.</li>
+                    <li>آزمایش گازها فقط توسط واحد ایمنی انجام شود.</li>
+                    <li>امضا کنندگان پروانه مسئول هرگونه اتفاق هستند.</li>
+                    <li>توزیع نسخ پروانه مانند پروانه کار گرم/سرد می‌باشد.</li>
+                    <li>مسئول محوطه با باز شدن دریچه‌ها، واحد ایمنی را مطلع نماید.</li>
+                    <li>پس از ایمن‌سازی و تأیید، کار به واحد تعمیرات تحویل شود.</li>
+                    <li>پس از اتمام کار، درب‌های منهول بسته و صفحات مسدود کننده برداشته شوند.</li>
+                    <li>مقررات پروانه کار گرم و سرد نیز رعایت گردد.</li>
+                    <li>دستورالعمل ورود به مخازن توسط مسئولین مطالعه و بکار گرفته شود.</li>
+                </ol>
+            </div>
+
+            <!-- ===== دستورالعمل ورود ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📋</span> دستورالعمل ورود به محوطه محصور</div>
+                <ul>
+                    <li><strong>هرگز قبل از کامل شدن Permit کار را شروع نکنید.</strong></li>
+                    <li>مطمئن شوید به تمام دستورات مجوز کار عمل شده است.</li>
+                    <li>مجوزکار را حتماً چک کنید.</li>
+                    <li>اتصالات برقی قطع و Lock out انجام شده باشد.</li>
+                    <li>راه ورود و خروج باز است.</li>
+                    <li><strong>تحت هیچ شرایطی سر یا تنه خود را به درون محوطه محصور داخل نکنید.</strong></li>
+                    <li>قبل از ورود به اتاق کنترل اطلاع دهید.</li>
+                    <li>Standby ارتباط خود را با فرد داخل حفظ کند.</li>
+                    <li>پس از پایان کار، به آهستگی خارج شوید.</li>
+                    <li>خروج را به اتاق کنترل اطلاع دهید.</li>
+                    <li>محوطه را تمیز و ایمن کنید.</li>
+                    <li>خاتمه کار را روی مجوز امضاء و عودت دهید.</li>
+                </ul>
+            </div>
+
+            <!-- ===== تهویه و روشنایی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">💨</span> تهویه و روشنایی</div>
+                <ul>
+                    <li>تهویه قبل و در طول کار بخوبی صورت گیرد.</li>
+                    <li>فن‌های الکتریکی در محیط‌های حاوی گاز یا مایعات نفتی <strong>ممنوع</strong> است.</li>
+                    <li>فن‌های بادی (پنوماتیک) مناسب هستند.</li>
+                    <li>هوای تمیز به داخل فرستاده شود.</li>
+                    <li>روشنایی با وسایل <strong>Flame Proof</strong> تأمین شود.</li>
+                </ul>
+            </div>
+
+            <!-- ===== تجهیزات ایمنی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🧰</span> تجهیزات ایمنی و نجات</div>
+                <ul>
+                    <li><strong>هارنس:</strong> تسمه‌های توزیع کننده نیروی سقوط بر روی ران، لگن، کمر، سینه و شانه‌ها.</li>
+                    <li><strong>کانکتور:</strong> کارابینر، D-Ring، Snap-hook برای اتصال قطعات.</li>
+                    <li><strong>طناب نجات:</strong> طناب افقی یا عمودی برای اتصال به کمربند یا هارنس.</li>
+                    <li><strong>سه پایه:</strong> حداقل ۸ فوت (۲.۴ متر) بالای دهانه.</li>
+                    <li><strong>وینچ:</strong> برای بلند کردن/پایین آوردن افراد.</li>
+                    <li><strong>سایر PPE:</strong> کلاه ایمنی، چکمه، عینک ایمنی.</li>
+                </ul>
+                <div class="highlight-box gold">
+                    <strong>⚠️ بدون آموزش عملی، وارد فضای بسته نشوید.</strong>
+                </div>
+            </div>
+
+            <!-- ===== ماسک‌های تنفسی ===== -->
+            <div class="card" style="border-right-color:var(--danger);">
+                <div class="card-title"><span class="icon">😷</span> ماسک‌های تنفسی</div>
+                <ul>
+                    <li><strong>ماسک‌های تصفیه کننده هوا:</strong> فقط در شرایط اکسیژن کافی و مشخص بودن آلاینده.</li>
+                    <li><strong>ماسک‌های تأمین کننده هوا (SCBA):</strong> تنها گزینه مناسب برای فضای بسته.</li>
+                </ul>
+                <div class="safety-alert">
+                    <h4 style="color:var(--danger); margin:0 0 8px;">🚫 ماسک‌های کارتریج‌دار شما را در فضای بسته محافظت نمی‌کنند!</h4>
+                    <p><strong>کمبود اکسیژن در فضای سربسته بزرگترین قاتل شما خواهد بود.</strong></p>
+                </div>
+                <div class="highlight-box green">
+                    <h4 style="color:var(--success); margin:0 0 8px;">✅ ظرفیت SCBA</h4>
+                    <ul>
+                        <li>۱۵۰ بار = ۱۸ دقیقه</li>
+                        <li>۲۰۰ بار = ۲۴ دقیقه</li>
+                        <li>۳۰۰ بار = ۳۶ دقیقه</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ===== خلاصه موارد ایمنی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📋</span> خلاصه موارد ایمنی فضاهای بسته</div>
+                <div class="grid-2">
+                    <ul>
+                        <li><strong>پایش هوای داخل</strong></li>
+                        <li><strong>تهویه</strong></li>
+                        <li><strong>وسایل حفاظت فردی</strong></li>
+                        <li><strong>ارتباطات</strong></li>
+                    </ul>
+                    <ul>
+                        <li><strong>روشنایی</strong></li>
+                        <li><strong>موانع و حفاظ‌ها</strong></li>
+                        <li><strong>ورود و خروج</strong></li>
+                        <li><strong>امداد و نجات</strong></li>
+                    </ul>
+                </div>
+                <div class="highlight-box green">
+                    <strong>✅ هرگاه یک خطر از محدودیتی تجاوز کرد، تمام افراد باید سریعاً خارج شوند.</strong>
+                </div>
+            </div>
+
+            <!-- ===== سوالات کلیدی ===== -->
+            <div class="card" style="border-right-color:var(--secondary);">
+                <div class="card-title"><span class="icon">❓</span> سوالات کلیدی قبل از ورود</div>
+                <ul>
+                    <li>آیا مجوز کار گرفته‌اید؟</li>
+                    <li>آیا پرمیت را چک کرده‌اید؟</li>
+                    <li>آیا هوا تست شده است؟</li>
+                    <li>آیا تجهیزات نجات آماده است؟</li>
+                    <li>آیا ناظر در محل حضور دارد؟</li>
+                    <li>آیا تهویه به درستی کار می‌کند؟</li>
+                    <li>آیا ارتباط با فرد داخل برقرار است؟</li>
+                </ul>
+            </div>
+
+            <!-- ===== آیین نامه کامل فضای بسته ===== -->
+            <div class="card" style="border:2px solid var(--danger);">
+                <div class="card-title"><span class="icon">📜</span> آیین‌نامه فضای بسته</div>
+                <p style="margin-bottom:10px;">
+                    <span class="badge-danger">مصوب ۱۴۰۱/۰۴/۲۱</span>
+                    <span class="badge-standard">به استناد مواد ۸۵ و ۹۱ قانون کار</span>
+                    <span class="badge-warning">۷ فصل · ۵ بخش · ۹۶ ماده</span>
+                </p>
+
+                <div class="card-subtitle">🔹 کلیات و تعاریف (۲۸ تعریف)</div>
+
+                <div class="material-box"><span class="mat-num">تعریف ۱</span> <strong>فضای بسته:</strong> محلی که برای اقامت دائم طراحی نشده، ورود و خروج محدود دارد و دارای حداقل یکی از مخاطرات فیزیکی، شیمیایی، بیولوژیکی، الکتریکی یا مکانیکی باشد.</div>
+                <div class="material-box"><span class="mat-num">تعریف ۲</span> <strong>برنامه عملیات اجرایی:</strong> برنامه‌ریزی، اجرا، نظارت و پایش حضور عوامل اجرایی در محیط، ورود شخص مجاز، انجام کار و خروج وی از فضای بسته.</div>
+                <div class="material-box"><span class="mat-num">تعریف ۳</span> <strong>مجوز ورود:</strong> سند مکتوبی که توسط کارفرما یا نماینده وی تهیه می‌شود و برای ورود، انجام فعالیت و تعیین شرایط کار می‌باشد.</div>
+                <div class="material-box"><span class="mat-num">تعریف ۴</span> <strong>شرایط ورود و خروج قابل قبول:</strong> وضعیت حاکم بر فضای بسته که ورود، خروج و فعالیت اشخاص مجاز در آن به صورت ایمن انجام گیرد.</div>
+                <div class="material-box"><span class="mat-num">تعریف ۵</span> <strong>کارفرما:</strong> شخص حقیقی یا حقوقی است که یک یا تعدادی کارگر به دستور و حساب وی، به کار گمارده می‌شوند.</div>
+                <div class="material-box"><span class="mat-num">تعریف ۶</span> <strong>پیمانکار اصلی:</strong> شخص حقیقی یا حقوقی دارای صلاحیتی است که بر اساس اسناد و مدارک پیمان به عنوان مجری اصلی موضوع پیمان شناخته می‌شود.</div>
+                <div class="material-box"><span class="mat-num">تعریف ۷</span> <strong>پیمانکار فرعی:</strong> شخصی که پیمانکار اصلی با وی برای انجام بخشی از امور، قرارداد منعقد نموده است.</div>
+                <div class="material-box"><span class="mat-num">تعریف ۸</span> <strong>ناظر:</strong> شخصی که توسط کارفرما برای نظارت بر شرایط ایمن محیط کار، عملکرد اشخاص مسئول و اجرای صحیح برنامه عملیات اجرایی معرفی گردیده است.</div>
+                <div class="material-box"><span class="mat-num">تعریف ۹</span> <strong>شخص مسئول:</strong> شخصی که در خارج از فضای بسته مستقر و بر شرایط ایمن عملیات اجرایی، ورود و خروج و عملکرد اشخاص مجاز نظارت می‌نماید.</div>
+                <div class="material-box"><span class="mat-num">تعریف ۱۰</span> <strong>شخص مجاز:</strong> شخصی است که با داشتن مجوز ورود می‌تواند وارد فضای بسته شود و آموزش‌های مرتبط را گذرانده باشد.</div>
+                <div class="material-box"><span class="mat-num">تعریف ۱۱</span> <strong>آزمایشگر:</strong> شخصی که از دانش و توانایی لازم برای انجام آزمایشات و تشخیص مخاطرات فضای بسته برخوردار است.</div>
+                <div class="material-box"><span class="mat-num">تعریف ۱۲</span> <strong>عوامل اجرایی:</strong> اشخاصی که تحت نظارت ناظر، فعالیت‌های مرتبط با خارج از فضای بسته را انجام می‌دهند.</div>
+                <div class="material-box"><span class="mat-num">تعریف ۱۳</span> <strong>اتمسفر خطرناک:</strong> اتمسفری است که قرارگیری اشخاص در معرض آن می‌تواند منجر به مرگ، آسیب و عدم توانایی در خروج از فضای بسته شود و دارای شرایط زیر است:
+                    <ul>
+                        <li>درصد حد پایین اشتعال (LEL) ≥ ۱۰%</li>
+                        <li>گاز، بخار یا گرد و غبار قابل اشتعال با غلظت ≥ ۱۰% LEL</li>
+                        <li>اکسیژن کمتر از ۱۹.۵% یا بیشتر از ۲۳.۵%</li>
+                        <li>تغییرات غلظت مواد بیش از حدود مجاز مواجهه شغلی</li>
+                        <li>هر شرایط اتمسفری دیگر که برای زندگی و سلامت فرد خطرناک باشد.</li>
+                    </ul>
+                </div>
+                <div class="material-box"><span class="mat-num">تعریف ۱۴</span> <strong>وضعیت اضطراری و خطرناک:</strong> شرایط یا وضعیتی که بتواند مخاطراتی برای عوامل اجرایی یا اشخاص مجاز ایجاد نماید.</div>
+                <div class="material-box"><span class="mat-num">تعریف ۱۵</span> <strong>شرایط ممنوع:</strong> وقوع شرایط یا وضعیت غیرایمن که مخاطراتی برای شخص مجاز ایجاد نماید.</div>
+                <div class="material-box"><span class="mat-num">تعریف ۱۶</span> <strong>غوطه‌وری و فرو رفتن:</strong> محاصره و دربر گرفتن یک شخص توسط مایعات یا ذرات ریزجامد قابل حرکت که بتواند به واسطه از کار انداختن سیستم تنفسی یا اعمال فشار به بدن باعث آسیب یا مرگ شود.</div>
+                <div class="material-box"><span class="mat-num">تعریف ۱۷</span> <strong>خنثی‌سازی:</strong> عملی که طی آن یک گاز بی‌اثر غیر قابل احتراق (مانند نیتروژن) جایگزین گاز یا بخارات موجود در اتمسفر قابل اشتعال می‌گردد.</div>
+                <div class="material-box"><span class="mat-num">تعریف ۱۸</span> <strong>جداسازی:</strong> فرآیندی که تمام یا بخشی از فضای بسته را برای پیشگیری از آزاد شدن انرژی یا ورود مواد از مدار خارج می‌نماید.</div>
+                <div class="material-box"><span class="mat-num">تعریف ۱۹</span> <strong>پایش:</strong> آزمایشاتی که برای شناسایی و ارزیابی خطرات و تعیین میزان تغییرات شرایط ایمن فضای بسته به صورت دوره‌ای و مداوم انجام می‌شود.</div>
+                <div class="material-box"><span class="mat-num">تعریف ۲۰</span> <strong>گروه امدادی:</strong> افراد معین آموزش دیده و دارای صلاحیتی که وظیفه آنها رفع خطر و نجات اشخاص حادثه‌دیده از فضای بسته می‌باشد.</div>
+                <div class="material-box"><span class="mat-num">تعریف ۲۱</span> <strong>تجهیزات امداد و نجات:</strong> طناب نجات، هارنس، جلیقه نجات، کپسول اطفاء حریق، تجهیزات حفاظت فردی، کپسول اکسیژن و دیگر لوازم مورد نیاز.</div>
+                <div class="material-box"><span class="mat-num">تعریف ۲۲</span> <strong>آزمایش:</strong> فرآیندی شامل آزمون‌ها و اقداماتی برای شناسایی خطرات فضای بسته.</div>
+                <div class="material-box"><span class="mat-num">تعریف ۲۳</span> <strong>مدارک و مستندات:</strong> تمامی برنامه‌ها، مجوزها، گواهی‌نامه‌ها و تأییدیه‌های کار در فضای بسته به صورت مکتوب یا الکترونیکی.</div>
+                <div class="material-box"><span class="mat-num">تعریف ۲۴</span> <strong>کالیبراسیون (واسنجی):</strong> مقایسه یک دستگاه اندازه‌گیری با یک استاندارد و تعیین میزان خطای آن.</div>
+                <div class="material-box"><span class="mat-num">تعریف ۲۵</span> <strong>ماسک فرار:</strong> ماسک قابل حمل که در هنگام وقوع حوادث غیرمترقبه ناشی از انتشار گازهای سمی مورد استفاده قرار گیرد.</div>
+                <div class="material-box"><span class="mat-num">تعریف ۲۶</span> <strong>مدیریت ریسک:</strong> فرایند شناسایی، ارزیابی، تحلیل و رفع عوامل خطرساز که می‌تواند با کنترل خطرات احتمالی از حوادث پیش‌گیری نماید.</div>
+
+                <div class="card-subtitle">🔹 فصل دوم – مقررات عمومی (ماده ۳ تا ۲۹)</div>
+
+                <div class="material-box"><span class="mat-num">ماده ۳</span> کارفرما مکلف است قبل از شروع هرگونه فعالیت، نسبت به اجرای صحیح مدیریت ریسک اقدام نماید.</div>
+                <div class="material-box"><span class="mat-num">ماده ۴</span> کارفرما باید برنامه عملیات اجرایی شامل آزمایش‌های لازم، شناسایی مخاطرات، شرایط ورود و خروج، روش ایمن، امداد و نجات و ایمن‌سازی را تهیه و اجرا نماید.</div>
+                <div class="material-box"><span class="mat-num">ماده ۵</span> کارفرما مکلف است برنامه عملیات اجرایی را به صورت مکتوب تهیه و ابلاغ نموده و بر اجرای آن نظارت نماید.</div>
+                <div class="material-box"><span class="mat-num">ماده ۶</span> کارفرما با نصب علائم خطر، هشداردهنده مانند «خطر» و «ورود ممنوع» از ورود اشخاص غیرمجاز جلوگیری نماید.</div>
+                <div class="material-box"><span class="mat-num">ماده ۷</span> باز شدن پوشش یا دریچه فضای بسته منوط به حذف یا کنترل شرایط ناایمن بوده و باید با مانع یا حفاظ موقت از سقوط افراد یا اجسام خارجی جلوگیری شود.</div>
+                <div class="material-box"><span class="mat-num">ماده ۸</span> قبل از ورود، عملیات گازسنجی توسط آزمایشگر و با دستگاه کالیبره شده برای تعیین مقدار اکسیژن، گازها و بخارات قابل اشتعال و سمی انجام شود.</div>
+                <div class="material-box"><span class="mat-num">ماده ۹</span> فضای بسته قبل از ورود باید از سرویس خارج شده و با روش حذف، مهار یا کنترل، از آزاد شدن انرژی یا ورود مواد جلوگیری شود.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۰</span> ورود اشخاص به فضای بسته تا زمان حذف تمامی مخاطرات و صدور مجوز ورود، ممنوع است.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۱</span> تهویه مکانیکی دائمی فضای بسته باید محل استقرار و فعالیت اشخاص مجاز را تا زمان خروج آخرین فرد، ایمن نگهدارد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۲</span> جایگزینی هوای آلوده با هوای سالم و قابل استنشاق الزامی است.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۳</span> کارفرما باید هوای فضای بسته را در طول مدت کار، توسط آزمایشگر پایش نماید.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۴</span> استفاده از تجهیزات الکتریکی برای تهویه اتمسفر قابل اشتعال ممنوع است مگر اینکه هواکش‌ها از نوع ضدجرقه بوده و مجهز به اتصال زمین باشند.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۵</span> در صورت واگذاری کار به صورت مقاطعه‌کاری، کارفرما باید قوانین و مقررات ایمنی را رعایت نماید.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۶</span> در صورت شناسایی اتمسفر خطرناک، اشخاص را سریعاً خارج و علت را ارزیابی نماید. ورود مجدد با رعایت اقدامات حفاظتی و تأیید کتبی مجاز است.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۷</span> کارفرما باید مدارک مکتوب مربوط به حذف خطرات فضای بسته را تهیه نماید.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۸</span> فضای بسته‌ای که تمامی خطرات آن حذف گردیده، با تأیید کتبی می‌تواند به فضای بسته بی‌نیاز به مجوز تغییر نماید.</div>
+                <div class="material-box"><span class="mat-num">ماده ۱۹</span> در صورت تغییر شرایط ایمنی فضای بسته بی‌نیاز از مجوز، کارفرما دستور خروج صادر و فضا را مجدداً ارزیابی نماید.</div>
+                <div class="material-box"><span class="mat-num">ماده ۲۰</span> کارفرما قبل از ایمن‌سازی فضای بسته، از ورود تمامی اشخاص ممانعت بعمل آورد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۲۱</span> پیمانکار قبل از انجام فعالیت، اطلاعات مورد نیاز در خصوص مخاطرات را از کارفرما دریافت نماید.</div>
+                <div class="material-box"><span class="mat-num">ماده ۲۲</span> پیمانکار قبل از ورود، نسبت به انطباق برنامه عملیات اجرایی با دستورالعمل‌های حفاظت فنی و ایمنی اقدام نماید.</div>
+                <div class="material-box"><span class="mat-num">ماده ۲۳</span> هرگاه کارفرما اجرای عملیات را به طور کامل به یک پیمانکار محول نماید، پیمانکار مسئول اجرای مقررات خواهد بود.</div>
+                <div class="material-box"><span class="mat-num">ماده ۲۴</span> هرگاه کارفرما عملیات را به پیمانکاران مختلف محول نماید، هر پیمانکار در محدوده خود مسئول بوده و کارفرما مسئول هماهنگی و نظارت است.</div>
+                <div class="material-box"><span class="mat-num">ماده ۲۵</span> در صورت واگذاری به پیمانکاران جزء، پیمانکار اصلی مسئول نظارت و هماهنگی بین آنها خواهد بود.</div>
+                <div class="material-box"><span class="mat-num">ماده ۲۶</span> هرگاه تأمین وسایل و تجهیزات بر عهده کارفرما باشد، پیمانکار مسئول نیروی انسانی آموزش‌دیده و نظارت بر کارگران خود خواهد بود.</div>
+                <div class="material-box"><span class="mat-num">ماده ۲۷</span> پیمانکار باید بر رفتار ایمن کارگران خود نظارت نماید.</div>
+                <div class="material-box"><span class="mat-num">ماده ۲۸</span> پیمانکار شروع و پایان عملیات را با هماهنگی و مجوز کتبی کارفرما انجام دهد و گزارش حوادث را ارائه نماید.</div>
+                <div class="material-box"><span class="mat-num">ماده ۲۹</span> کارفرما گزارش عملیات و مخاطرات را از پیمانکار اخذ و در صورت نیاز بازنگری نماید.</div>
+
+                <div class="card-subtitle">🔹 فصل سوم – وظایف ناظر (ماده ۳۰ تا ۳۶)</div>
+
+                <div class="material-box"><span class="mat-num">ماده ۳۰</span> کارفرما اشخاص ناظر، مسئول، مجاز، آزمایشگر و گروه امدادی را مشخص و شرح وظایف آنها را ابلاغ نماید.</div>
+                <div class="material-box"><span class="mat-num">ماده ۳۱</span> ناظر باید از مخاطرات فضای بسته و برنامه عملیات اجرایی آگاهی کامل داشته باشد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۳۲</span> ناظر بر اجرای صحیح برنامه عملیات اجرایی و عملکرد اشخاص مسئول نظارت نماید.</div>
+                <div class="material-box"><span class="mat-num">ماده ۳۳</span> ناظر در صورت مشاهده شرایط ناایمن، دستور توقف کار و تخلیه فضای بسته را صادر نماید.</div>
+                <div class="material-box"><span class="mat-num">ماده ۳۴</span> ناظر باید از حضور و آمادگی گروه امدادی اطمینان حاصل نماید.</div>
+                <div class="material-box"><span class="mat-num">ماده ۳۵</span> ناظر باید مجوز ورود را قبل از شروع کار تأیید نماید.</div>
+                <div class="material-box"><span class="mat-num">ماده ۳۶</span> ناظر باید گزارش نهایی عملیات را تهیه و به کارفرما ارائه نماید.</div>
+
+                <div class="card-subtitle">🔹 فصل چهارم – وظایف شخص مسئول (ماده ۳۷ تا ۳۸)</div>
+
+                <div class="material-box"><span class="mat-num">ماده ۳۷</span> شخص مسئول باید مجوز ورود را صادر و از رعایت کلیه شرایط ورود اطمینان حاصل نماید.</div>
+                <div class="material-box"><span class="mat-num">ماده ۳۸</span> شخص مسئول باید از مراحل انجام کار در داخل فضای بسته مطلع باشد و گزارش فرآیند را ثبت و به ناظر ارائه نماید.</div>
+
+                <div class="card-subtitle">🔹 فصل پنجم – وظایف اشخاص (ماده ۳۹ تا ۴۹)</div>
+
+                <div class="material-box"><span class="mat-num">ماده ۳۹</span> شخص مجاز باید از سلامت و توانایی جسمی برخوردار بوده و مجوز ورود را از شخص مسئول دریافت نماید.</div>
+                <div class="material-box"><span class="mat-num">ماده ۴۰</span> شخص مجاز باید دوره‌های آموزش ایمنی را گذرانده و مهارت لازم را داشته باشد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۴۱</span> شخص مجاز در صورت قرار گرفتن در وضعیت خطرناک، باید سریعاً فضا را ترک و شخص مسئول را آگاه نماید.</div>
+                <div class="material-box"><span class="mat-num">ماده ۴۲</span> شخص مجاز به محض فعال شدن هشدار تخلیه، باید سریعاً از فضای بسته خارج شود.</div>
+                <div class="material-box"><span class="mat-num">ماده ۴۳</span> ورود اشخاص مجاز بدون حضور و تأیید شخص مسئول ممنوع است.</div>
+                <div class="material-box"><span class="mat-num">ماده ۴۴</span> شخص مجاز باید به تجهیزات امداد و نجات مجهز شود. در صورت تأیید کارفرما و عدم ایجاد مخاطره، استفاده از تجهیزات الزامی نیست.</div>
+                <div class="material-box"><span class="mat-num">ماده ۴۵</span> شخص مجاز در صورت الزام به استفاده از تجهیزات تنفسی، باید به جلیقه تمام بدن متصل به طناب نجات مجهز باشد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۴۶</span> آزمایشگر باید از دانش، تخصص و مهارت لازم در بکارگیری تجهیزات برخوردار باشد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۴۷</span> آزمایشگر باید از تجهیزات سالم و کالیبره شده استفاده نماید.</div>
+                <div class="material-box"><span class="mat-num">ماده ۴۸</span> آزمایشگر موظف است ضمن آلاینده‌سنجی، مخاطرات را شناسایی و در صورت شرایط ممنوع، سریعاً خارج و به شخص مسئول اطلاع دهد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۴۹</span> آزمایشگر باید در تمام مراحل عملیات در دسترس باشد و نتایج آزمون را در مجوز ورود ثبت و امضا نماید.</div>
+
+                <div class="card-subtitle">🔹 فصل ششم – آموزش (ماده ۵۰ تا ۵۲)</div>
+
+                <div class="material-box"><span class="mat-num">ماده ۵۰</span> کارفرما قبل از شروع کار، آموزش‌های مبتنی بر دانش و مهارت را توسط مراجع دارای صلاحیت ارائه نماید.</div>
+                <div class="material-box"><span class="mat-num">ماده ۵۱</span> آموزش‌های عمومی و تخصصی باید توسط مراجع دارای صلاحیت انجام شود و گواهی‌نامه صادر گردد.</div>
+                <div class="material-box"><span class="mat-num">ماده ۵۲</span> کارفرما پیمانکار را ملزم به بکارگیری کارگرانی که آموزش‌های مرتبط را گذرانده‌اند، نماید.</div>
+
+                <div class="card-subtitle">🔹 فصل هفتم – سایر مقررات (ماده ۵۳ تا ۹۶)</div>
+
+                <div class="material-box"><span class="mat-num">ماده ۵۳</span> کارفرما برای انجام تعمیرات و سرویس، با جداسازی اجزای متحرک و گردنده، فضای بسته را ایمن نماید.</div>
+                <div class="material-box"><span class="mat-num">ماده ۵۴</span> کارفرما کلیه تجهیزات الکتریکی را به شکل ایمن قفل نماید تا به طور ناگهانی راه‌اندازی نشود.</div>
+                <div class="material-box"><span class="mat-num">ماده ۵۵</span> استفاده از اکسیژن خالص برای تأمین هوای مورد نیاز یا تهویه فضای بسته، ممنوع است.</div>
+                <div class="material-box"><span class="mat-num">ماده ۵۶</span> قراردادن مخزن یا کپسول تأمین‌کننده هوا برای تهویه در داخل فضای بسته ممنوع است.</div>
+                <div class="material-box"><span class="mat-num">ماده ۵۷</span> پمپ‌های هوادهی باید به تأسیسات برق اضطراری مجهز باشند.</div>
+                <div class="material-box"><span class="mat-num">ماده ۵۸</span> گازسنجی مستمر برای پایش میزان غلظت اکسیژن و مواد سمی در فضاهایی که احتمال تغییر شرایط اتمسفری وجود دارد، الزامی است.</div>
+                <div class="material-box"><span class="mat-num">ماده ۵۹</span> کارفرما اشخاص مجاز را برای مقابله با مخاطرات احتمالی و امکان فرار در مواقع اضطراری، مجهز به ماسک فرار نماید.</div>
+                <div class="material-box"><span class="mat-num">ماده ۶۰</span> محل کار شخص مجاز باید از نظر گرما و سرما قابل تحمل باشد و یا به لباس کار متناسب مجهز شود.</div>
+                <div class="material-box"><span class="mat-num">ماده ۶۱</span> استعمال دخانیات، ایجاد شعله باز و همراه داشتن موبایل، کبریت و فندک در فضای بسته‌ای که احتمال احتراق و انفجار وجود دارد، ممنوع است.</div>
+                <div class="material-box"><span class="mat-num">ماده ۶۲</span> در صورت وجود خطر غرق‌شدگی، جلیقه نجات تهیه شود.</div>
+                <div class="material-box"><span class="mat-num">ماده ۶۳</span> کلیه تجهیزات باید قبل از استفاده، بازرسی و پس از هر بار استفاده، تمیز و نگهداری شوند.</div>
+                <div class="material-box"><span class="mat-num">ماده ۶۴</span> پس از اتمام کار، تمامی دریچه‌ها بسته و صفحات مسدودکننده برداشته شوند.</div>
+                <div class="material-box"><span class="mat-num">ماده ۶۵</span> کارفرما باید سوابق آموزش، مجوزها و گزارشات را حداقل به مدت یکسال نگهداری نماید.</div>
+                <div class="material-box"><span class="mat-num">ماده ۶۶</span> در صورت بروز حادثه، کارفرما موظف به بررسی علل و ارائه گزارش به مراجع ذی‌صلاح می‌باشد.</div>
+
+                <div class="highlight-box">
+                    <strong>✅ این آیین‌نامه مشتمل بر ۷ فصل و ۵ بخش در ۹۶ ماده به استناد مواد (۸۵) و (۹۱) قانون کار جمهوری اسلامی ایران در یکصد و هفتاد و هفتمین جلسه شورای عالی حفاظت فنی در تاریخ ۱۴۰۱/۰۴/۲۱ تدوین شده و در تاریخ ۱۴۰۱/۰۴/۲۶ به تصویب سرپرست وزارت تعاون، کار و رفاه اجتماعی رسیده است.</strong>
+                </div>
+            </div>
+
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            تهیه شده توسط <span class="highlight">شرکت معدنی و صنایع معدنی درکاو</span><br>
+            <span style="direction:ltr; display:inline-block;">📞 09178680173</span>
+        </div>
+
+    </div>
+
+    <script>
+        // اضافه کردن قابلیت کپی متن با کلیک
+        document.querySelectorAll('.tip-item, .item-box, .highlight-box, .card ul li, .card ol li, .spec-table tr, .safety-alert, .material-box').forEach(el => {
+            el.style.cursor = 'pointer';
+            el.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') return;
+                const text = this.textContent.trim();
+                navigator.clipboard.writeText(text).then(() => {
+                    const origBg = this.style.background;
+                    this.style.background = '#d4edda';
+                    setTimeout(() => {
+                        this.style.background = origBg || '';
+                    }, 400);
+                });
+            });
+        });
+
+        console.log('✅ آموزش جامع ایمنی کار در فضای بسته (کامل) بارگذاری شد.');
+        console.log('📋 کلیک روی هر متن برای کپی کردن');
+        console.log('📦 شامل تمام مباحث: تعاریف، خطرات، گازها، تجهیزات، آیین‌نامه کامل');
+    </script>
+
+<script src="hse-common.js"></script>
+
+<script src="assets/js/sw-register.js"></script>
+</body>
+</html>

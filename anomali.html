@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<script>window.fetchWithTimeout=window.fetchWithTimeout||function(url,options,timeoutMs){timeoutMs=timeoutMs||12000;var controller=new AbortController();var id=setTimeout(function(){controller.abort();},timeoutMs);var opts=Object.assign({},options||{},{signal:controller.signal});return fetch(url,opts).finally(function(){clearTimeout(id);});};</script>
+
+
+<script>
+/* ============================================================
+   ★ امنیت: گیت احراز هویت (سمت کلاینت)
+   هیچ صفحه‌ای بدون ورود به سامانه باز نمی‌شود. محتوای صفحه
+   مخفی می‌ماند و کاربر به صفحه ورود هدایت می‌شود.
+   (لایه نمایشی؛ لایه امنیتی واقعی در بکاند اعمال می‌شود.)
+   ============================================================ */
+(function(){
+  var ok = false;
+  try {
+    var _u = JSON.parse(localStorage.getItem('hse_user_activated') || 'null');
+    ok = !!(_u && _u.personnel && _u.fullname);
+  } catch(e) { ok = false; }
+  if (ok) return; // مجاز - ادامه می‌دهد
+
+  // پنهان‌کردن کل محتوا و نمایش قفل
+  var hide = function(){
+    try {
+      var d = document;
+      // مخفی کردن همه عناصر
+      var all = d.body ? d.body.children : [];
+      for (var i=0;i<all.length;i++){ all[i].style.display='none'; }
+      var lock = d.createElement('div');
+      lock.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#0f172a;color:#f8fafc;'
+        +'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+        +'font-family:Tahoma,sans-serif;text-align:center;padding:20px;direction:rtl;';
+      lock.innerHTML = '<div style="font-size:60px;margin-bottom:10px;">🔒</div>'
+        +'<h2 style="margin:0 0 8px;">دسترسی محدود است</h2>'
+        +'<p style="margin:0 0 20px;color:#94a3b8;">لطفاً ابتدا از صفحه اصلی وارد سامانه شوید.</p>'
+        +'<a href="index.html" style="background:#ff6208;color:#fff;padding:10px 26px;'
+        +'border-radius:10px;text-decoration:none;font-weight:bold;">بازگشت به صفحه ورود</a>';
+      d.body.appendChild(lock);
+    } catch(e){}
+  };
+  if (document.body) hide(); else document.addEventListener('DOMContentLoaded', hide);
+  setTimeout(function(){ try{ location.replace('index.html'); }catch(e){} }, 2500);
+})();
+</script>
+
+    <meta charset="UTF-8" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#1e3c5c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HSE درکاو" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+    <title>فرم گزارش عدم انطباق کارخانه سرب و روی - فلوتاسیون [v3.2]</title>
+    <link rel="stylesheet" href="assets/fontawesome/css/all.min.css" />
+
+    <style>
+        :root {
+            --primary: #ff6208;
+            --primary-hover: #e05300;
+            --secondary: #f39c12;
+            --success: #27ae60;
+            --safety: #2c6e4e;
+            --danger: #c0392b;
+            --dark-blue: #1e3c5c;
+            --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #dfe7f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --text-main: #1e2a2e;
+            --text-muted: #64748b;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body { padding-bottom: 75px !important;
+            background: var(--bg-gradient);
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text-main);
+            line-height: 1.8;
+        }
+
+        .main-container {
+            max-width: 1100px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            background: var(--dark-blue);
+            padding: 35px 20px;
+            color: white;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+            position: relative;
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        .header h1 .icon {
+            margin-left: 10px;
+        }
+        .header p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        .header .back-home {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .header .back-home:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+        .card:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        }
+        .card-title {
+            color: var(--dark-blue);
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-right: 4px solid var(--primary);
+            padding-right: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title .icon {
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 0.95rem;
+            margin-bottom: 7px;
+        }
+        label .required-star {
+            color: #dc2626;
+            font-weight: 700;
+            margin-right: 2px;
+        }
+        label .optional-badge {
+            font-weight: 400;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            background: #f1f5f9;
+            padding: 2px 12px;
+            border-radius: 30px;
+            margin-right: 8px;
+        }
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-family: inherit;
+            background: #fafcff;
+            transition: all 0.25s ease;
+            color: #1e293b;
+        }
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #ffffff;
+            box-shadow: 0 0 0 5px rgba(255, 98, 8, 0.08);
+        }
+        textarea {
+            min-height: 130px;
+            resize: vertical;
+        }
+
+        .row-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+        }
+
+        .severity-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+        .severity-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 22px;
+            border: 2.5px solid #e2e8f0;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-weight: 500;
+            font-size: 0.95rem;
+            background: #fafcff;
+            flex: 1;
+            min-width: 85px;
+            justify-content: center;
+            user-select: none;
+        }
+        .severity-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+        }
+        .severity-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            margin: 0;
+            accent-color: var(--primary);
+            flex-shrink: 0;
+        }
+        .severity-low {
+            border-color: #86efac;
+        }
+        .severity-low:has(input:checked) {
+            background: #dcfce7;
+            border-color: #16a34a;
+            box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+        }
+        .severity-medium {
+            border-color: #fcd34d;
+        }
+        .severity-medium:has(input:checked) {
+            background: #fef3c7;
+            border-color: #d97706;
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
+        }
+        .severity-high {
+            border-color: #fb923c;
+        }
+        .severity-high:has(input:checked) {
+            background: #ffedd5;
+            border-color: #ea580c;
+            box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+        }
+        .severity-critical {
+            border-color: #f87171;
+        }
+        .severity-critical:has(input:checked) {
+            background: #fee2e2;
+            border-color: #b91c1c;
+            box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.15);
+        }
+
+        .file-upload-area {
+            border: 2.5px dashed #d1d9e6;
+            border-radius: 20px;
+            padding: 35px 20px 28px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #fafcff;
+            position: relative;
+        }
+        .file-upload-area:hover {
+            border-color: var(--primary);
+            background: #fff6ed;
+        }
+        .file-upload-area.dragover {
+            border-color: var(--primary);
+            background: #ffefe5;
+            transform: scale(1.01);
+        }
+        .file-upload-area input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            padding: 0;
+            border: none;
+            background: transparent;
+        }
+        .file-upload-icon {
+            font-size: 3.2rem;
+            display: block;
+            margin-bottom: 4px;
+            color: #64748b;
+        }
+        .file-upload-text {
+            color: #64748b;
+            font-size: 0.95rem;
+        }
+        .file-upload-text strong {
+            color: var(--dark-blue);
+        }
+        .file-upload-text .hint {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            display: block;
+            margin-top: 4px;
+        }
+
+        .file-preview {
+            display: none;
+            margin-top: 18px;
+            padding: 16px 22px;
+            background: #f1f6fa;
+            border-radius: 18px;
+            border-right: 5px solid var(--primary);
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .file-preview.show {
+            display: flex;
+        }
+        .file-preview .file-info {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 160px;
+        }
+        .file-preview .file-info .file-icon {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+        .file-preview .file-info .file-name {
+            font-weight: 600;
+            color: #1e293b;
+            word-break: break-all;
+        }
+        .file-preview .file-info .file-size {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+        .file-preview .file-remove {
+            background: #fee2e2;
+            border: none;
+            border-radius: 40px;
+            padding: 7px 20px;
+            color: #991b1b;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .file-preview .file-remove:hover {
+            background: #fecaca;
+        }
+        .file-preview .file-thumbnail {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 2px solid #e2e8f0;
+            flex-shrink: 0;
+            display: none;
+        }
+        .file-preview .file-thumbnail.show {
+            display: block;
+        }
+
+        .status-msg {
+            display: none;
+            padding: 18px 24px;
+            border-radius: 18px;
+            margin-top: 22px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            text-align: center;
+        }
+        .status-msg.success {
+            display: block;
+            background: #dcfce7;
+            color: #166534;
+            border: 2px solid #86efac;
+        }
+        .status-msg.error {
+            display: block;
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #fca5a5;
+        }
+        .status-msg.loading {
+            display: block;
+            background: #e0f2fe;
+            color: #0369a1;
+            border: 2px solid #7dd3fc;
+        }
+        .status-msg i {
+            margin-left: 10px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--dark-blue) 0%, #0b2b44 100%);
+            color: white;
+            border: none;
+            border-radius: 18px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+        }
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(26, 55, 82, 0.35);
+        }
+        .btn-submit:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        .btn-submit i {
+            font-size: 1.3rem;
+        }
+
+        .note-box {
+            background: #f1f6fa;
+            padding: 18px 24px;
+            border-radius: 18px;
+            margin-top: 24px;
+            color: #475569;
+            font-size: 0.95rem;
+            border-right: 5px solid var(--primary);
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+        .note-box i {
+            font-size: 1.4rem;
+            color: var(--primary);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .note-box strong {
+            color: var(--dark-blue);
+        }
+
+        .btn-back {
+            background: #cbd5e1;
+            border: none;
+            padding: 10px 24px;
+            border-radius: var(--border-radius-sm);
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 12px;
+            color: #334155;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .btn-back:hover {
+            background: #b0bec5;
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .footer .highlight {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+
+        .conditional-field {
+            display: none;
+            margin-top: 10px;
+        }
+        .conditional-field.show {
+            display: block;
+        }
+
+
+        .jalali-date-wrapper {
+            position: relative;
+        }
+        .jalali-date-input {
+            cursor: pointer;
+            background: #fafcff;
+        }
+        .jalali-picker {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: min(100%, 340px);
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 18px;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.18);
+            padding: 14px;
+            z-index: 50;
+        }
+        .jalali-picker.open {
+            display: block;
+        }
+        .jalali-picker-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .jalali-current-month {
+            flex: 1;
+            text-align: center;
+            font-weight: 800;
+            color: var(--dark-blue);
+            font-size: 1rem;
+        }
+        .jalali-nav {
+            width: 38px;
+            height: 38px;
+            border: none;
+            border-radius: 12px;
+            background: #f1f5f9;
+            color: var(--dark-blue);
+            font-size: 1.6rem;
+            line-height: 1;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .jalali-nav:hover:not(:disabled) {
+            background: #fff6ed;
+            color: var(--primary);
+        }
+        .jalali-nav:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+        .jalali-weekdays,
+        .jalali-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+        .jalali-weekdays span {
+            text-align: center;
+            color: #64748b;
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 4px 0;
+        }
+        .jalali-day {
+            height: 38px;
+            border: none;
+            border-radius: 12px;
+            background: #f8fafc;
+            color: #1e293b;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .jalali-day:hover:not(:disabled) {
+            background: #fff6ed;
+            color: var(--primary);
+            transform: translateY(-1px);
+        }
+        .jalali-day.today {
+            border: 2px solid var(--primary);
+        }
+        .jalali-day.selected {
+            background: var(--primary);
+            color: #ffffff;
+            box-shadow: 0 8px 16px rgba(255, 98, 8, 0.25);
+        }
+        .jalali-day:disabled {
+            background: #f1f5f9;
+            color: #cbd5e1;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+        .jalali-empty {
+            height: 38px;
+        }
+
+        @media (max-width: 700px) {
+            .content {
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            .header .back-home {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+                left: 10px;
+            }
+            .row-2col {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            .severity-group {
+                flex-direction: column;
+            }
+            .severity-option {
+                justify-content: center;
+            }
+            .file-preview {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            .file-preview .file-info {
+                justify-content: center;
+            }
+            .note-box {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .content {
+                padding: 12px;
+            }
+            .header h1 {
+                font-size: 1.1rem;
+            }
+            input,
+            select,
+            textarea {
+                padding: 12px 14px;
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="main-container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <a href="index.html?v=202606300519" class="back-home" title="بازگشت به صفحه اصلی">🏠</a>
+            <h1><span class="icon">📋</span> گزارش عدم انطباق کارخانه سرب و روی</h1>
+            <p>ویژه خطوط خردایش، آسیاکنی، فلوتاسیون، آبگیری، باطله، آزمایشگاه و پشتیبانی</p>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <div class="card">
+                <div class="card-title"><span class="icon">📝</span> فرم گزارش عدم انطباق فرآیند فلوتاسیون سرب و روی</div>
+
+                <form id="ncrForm">
+
+                    <!-- ROW 1: NAME + POSITION -->
+                    <div class="row-2col">
+                        <div class="form-group">
+                            <label><i class="fas fa-user" style="color:var(--primary); margin-left:6px;"></i>نام و نام خانوادگی <span class="required-star">*</span></label>
+                            <input type="text" id="name" placeholder="مثال: علی محمدی" required />
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-briefcase" style="color:var(--primary); margin-left:6px;"></i>سمت / وظیفه <span class="required-star">*</span></label>
+                            <input type="text" id="position" placeholder="مثال: سرپرست شیفت" required />
+                        </div>
+                    </div>
+
+                    <!-- ROW 2: DEPARTMENT + DATE -->
+                    <div class="row-2col">
+                        <div class="form-group">
+                            <label><i class="fas fa-building" style="color:var(--primary); margin-left:6px;"></i>واحد / بخش <span class="required-star">*</span></label>
+                            <select id="department" required>
+                                <option value="" selected disabled>انتخاب واحد / بخش</option>
+                                <option value="خردایش و سرند">خردایش و سرند</option>
+                                <option value="آسیاکنی و طبقه‌بندی">آسیاکنی و طبقه‌بندی</option>
+                                <option value="فلوتاسیون سرب">فلوتاسیون سرب</option>
+                                <option value="فلوتاسیون روی">فلوتاسیون روی</option>
+                                <option value="آبگیری، فیلتر و خشک‌کن">آبگیری، فیلتر و خشک‌کن</option>
+                                <option value="تیکنر، آب برگشتی و باطله">تیکنر، آب برگشتی و باطله</option>
+                                <option value="آزمایشگاه کنترل کیفیت">آزمایشگاه کنترل کیفیت</option>
+                                <option value="انبار مواد شیمیایی و واکنشگرها">انبار مواد شیمیایی و واکنشگرها</option>
+                                <option value="تعمیرات مکانیک">تعمیرات مکانیک</option>
+                                <option value="برق و ابزار دقیق">برق و ابزار دقیق</option>
+                                <option value="HSE و محیط‌زیست">HSE و محیط‌زیست</option>
+                                <option value="بارگیری و انبار محصول">بارگیری و انبار محصول</option>
+                                <option value="سایر">سایر</option>
+                            </select>
+                            <input type="text" id="departmentOther" class="conditional-field" placeholder="نام واحد / بخش را وارد کنید" />
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-calendar-alt" style="color:var(--primary); margin-left:6px;"></i>تاریخ مشاهده <span class="required-star">*</span></label>
+                            <div class="jalali-date-wrapper">
+                                <input type="text" id="dateDisplay" class="jalali-date-input" placeholder="انتخاب تاریخ شمسی" readonly required autocomplete="off" />
+                                <input type="hidden" id="date" />
+                                <div class="jalali-picker" id="jalaliPicker" aria-hidden="true">
+                                    <div class="jalali-picker-header">
+                                        <button type="button" id="jalaliPrevMonth" class="jalali-nav" aria-label="ماه قبل">‹</button>
+                                        <div class="jalali-current-month" id="jalaliCurrentMonth"></div>
+                                        <button type="button" id="jalaliNextMonth" class="jalali-nav" aria-label="ماه بعد">›</button>
+                                    </div>
+                                    <div class="jalali-weekdays">
+                                        <span>ش</span><span>ی</span><span>د</span><span>س</span><span>چ</span><span>پ</span><span>ج</span>
+                                    </div>
+                                    <div class="jalali-days" id="jalaliDays"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ROW 3: PROCESS AREA + EQUIPMENT -->
+                    <div class="row-2col">
+                        <div class="form-group">
+                            <label><i class="fas fa-industry" style="color:var(--primary); margin-left:6px;"></i>ناحیه فرآیندی / محل کلی <span class="required-star">*</span></label>
+                            <select id="processArea" required>
+                                <option value="" selected disabled>انتخاب ناحیه فرآیندی</option>
+                                <option value="خوراک ورودی و دپو ماده معدنی">خوراک ورودی و دپو ماده معدنی</option>
+                                <option value="سنگ‌شکن، سرند و نوار نقاله‌ها">سنگ‌شکن، سرند و نوار نقاله‌ها</option>
+                                <option value="آسیاب، سیکلون و پمپ‌های دوغاب">آسیاب، سیکلون و پمپ‌های دوغاب</option>
+                                <option value="سلول‌های فلوتاسیون سرب">سلول‌های فلوتاسیون سرب</option>
+                                <option value="سلول‌های فلوتاسیون روی">سلول‌های فلوتاسیون روی</option>
+                                <option value="آماده‌سازی و تزریق مواد شیمیایی">آماده‌سازی و تزریق مواد شیمیایی</option>
+                                <option value="تیکنر، آب برگشتی و مدیریت باطله">تیکنر، آب برگشتی و مدیریت باطله</option>
+                                <option value="فیلتر، خشک‌کن و انبار کنسانتره">فیلتر، خشک‌کن و انبار کنسانتره</option>
+                                <option value="آزمایشگاه عیارسنجی و نمونه‌برداری">آزمایشگاه عیارسنجی و نمونه‌برداری</option>
+                                <option value="سایر">سایر</option>
+                            </select>
+                            <input type="text" id="processAreaOther" class="conditional-field" placeholder="ناحیه فرآیندی را وارد کنید" />
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-cogs" style="color:var(--primary); margin-left:6px;"></i>تجهیز / مدار مرتبط <span class="optional-badge">اختیاری</span></label>
+                            <input type="text" id="equipment" placeholder="مثال: سلول فلوتاسیون Pb-03، پمپ دوغاب، سیکلون، فیلترپرس" />
+                        </div>
+                    </div>
+
+                    <!-- DESCRIPTION -->
+                    <div class="form-group">
+                        <label><i class="fas fa-pen" style="color:var(--primary); margin-left:6px;"></i>شرح کامل عدم انطباق <span class="required-star">*</span></label>
+                        <textarea id="description" placeholder="شرح دقیق عدم انطباق را بنویسید؛ مثل افت بازیابی، سرریز دوغاب، نشتی مواد شیمیایی، خرابی همزن سلول، انحراف pH/دانسیته، آلودگی کنسانتره یا خطر ایمنی..." required></textarea>
+                    </div>
+
+                    <!-- LOCATION -->
+                    <div class="form-group">
+                        <label><i class="fas fa-map-pin" style="color:var(--primary); margin-left:6px;"></i>محل وقوع (دقیق) <span class="required-star">*</span></label>
+                        <input type="text" id="location" placeholder="مثال: سالن فلوتاسیون، مدار سرب، ردیف دوم سلول‌ها، کنار پمپ دوغاب P-02" required />
+                    </div>
+
+                    <!-- SEVERITY -->
+                    <div class="form-group">
+                        <label><i class="fas fa-exclamation-triangle" style="color:var(--primary); margin-left:6px;"></i>شدت / سطح ریسک تولیدی، HSE یا زیست‌محیطی <span class="required-star">*</span></label>
+                        <div class="severity-group">
+                            <label class="severity-option severity-low">
+                                <input type="radio" name="severity" value="کم" required />
+                                <i class="fas fa-circle" style="color:#16a34a; font-size:0.7rem;"></i> کم
+                            </label>
+                            <label class="severity-option severity-medium">
+                                <input type="radio" name="severity" value="متوسط" />
+                                <i class="fas fa-circle" style="color:#d97706; font-size:0.7rem;"></i> متوسط
+                            </label>
+                            <label class="severity-option severity-high">
+                                <input type="radio" name="severity" value="بالا" />
+                                <i class="fas fa-circle" style="color:#ea580c; font-size:0.7rem;"></i> بالا
+                            </label>
+                            <label class="severity-option severity-critical">
+                                <input type="radio" name="severity" value="بحرانی" />
+                                <i class="fas fa-circle" style="color:#b91c1c; font-size:0.7rem;"></i> بحرانی
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- ROW 4: TYPE + ACTION LEVEL -->
+                    <div class="row-2col">
+                        <div class="form-group">
+                            <label><i class="fas fa-tag" style="color:var(--primary); margin-left:6px;"></i>نوع عدم انطباق</label>
+                            <select id="type">
+                                <option value="ایمنی و HSE">ایمنی و HSE</option>
+                                <option value="کیفیت کنسانتره / عیار / بازیابی">کیفیت کنسانتره / عیار / بازیابی</option>
+                                <option value="فرآیندی و بهره‌برداری">فرآیندی و بهره‌برداری</option>
+                                <option value="مکانیکی / خرابی تجهیز">مکانیکی / خرابی تجهیز</option>
+                                <option value="برق و ابزار دقیق / کنترل فرآیند">برق و ابزار دقیق / کنترل فرآیند</option>
+                                <option value="مواد شیمیایی و واکنشگرها">مواد شیمیایی و واکنشگرها</option>
+                                <option value="زیست‌محیطی / باطله / آب برگشتی">زیست‌محیطی / باطله / آب برگشتی</option>
+                                <option value="نمونه‌برداری و آزمایشگاه">نمونه‌برداری و آزمایشگاه</option>
+                                <option value="انبار، بارگیری و حمل کنسانتره">انبار، بارگیری و حمل کنسانتره</option>
+                                <option value="سایر">سایر</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-traffic-light" style="color:var(--primary); margin-left:6px;"></i>وضعیت اقدام فوری <span class="required-star">*</span></label>
+                            <select id="actionLevel" required>
+                                <option value="" selected disabled>انتخاب وضعیت اقدام</option>
+                                <option value="فقط ثبت و پیگیری اصلاحی">فقط ثبت و پیگیری اصلاحی</option>
+                                <option value="ادامه کار با کنترل موقت">ادامه کار با کنترل موقت</option>
+                                <option value="نیاز به توقف تجهیز / مدار مربوطه">نیاز به توقف تجهیز / مدار مربوطه</option>
+                                <option value="نیاز به اطلاع فوری HSE / سرپرست شیفت">نیاز به اطلاع فوری HSE / سرپرست شیفت</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-tools" style="color:var(--primary); margin-left:6px;"></i>اقدام اولیه انجام‌شده <span class="optional-badge">اختیاری</span></label>
+                        <textarea id="initialAction" placeholder="مثال: توقف پمپ، ایمن‌سازی محل نشتی، اطلاع به اتاق کنترل، نمونه‌برداری مجدد، تنظیم pH/دانسیته یا ایزوله‌کردن تجهیز" style="min-height:70px;"></textarea>
+                    </div>
+
+                    <!-- ATTACHMENT -->
+                    <div class="form-group">
+                        <label><i class="fas fa-paperclip" style="color:var(--primary); margin-left:6px;"></i>ضمیمه (عکس / مدرک) <span class="optional-badge">اختیاری</span></label>
+                        <div class="file-upload-area" id="fileDropArea">
+                            <span class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></span>
+                            <div class="file-upload-text">
+                                <strong>جهت آپلود کلیک کنید</strong> یا فایل را بکشید و رها کنید
+                                <span class="hint">
+                                    <i class="fas fa-file-image"></i> JPG, PNG &nbsp;|&nbsp;
+                                    <i class="fas fa-file-pdf"></i> PDF &nbsp;|&nbsp;
+                                    <i class="fas fa-file-word"></i> DOC, DOCX &nbsp;|&nbsp;
+                                    حداکثر ۵ مگابایت
+                                </span>
+                            </div>
+                            <input type="file" id="attachment" accept="image/*,.pdf,.doc,.docx" />
+                        </div>
+
+                        <div class="file-preview" id="filePreview">
+                            <div class="file-info">
+                                <span class="file-icon" id="fileIcon"><i class="fas fa-file-alt"></i></span>
+                                <div>
+                                    <div class="file-name" id="fileName">نام فایل</div>
+                                    <div class="file-size" id="fileSize">۰ کیلوبایت</div>
+                                </div>
+                            </div>
+                            <img class="file-thumbnail" id="fileThumbnail" alt="پیش‌نمایش" />
+                            <button type="button" class="file-remove" id="fileRemove"><i class="fas fa-times"></i> حذف</button>
+                        </div>
+                    </div>
+
+                    <!-- STATUS MESSAGE -->
+                    <div id="statusMsg" class="status-msg"></div>
+
+                    <!-- SUBMIT BUTTON -->
+                    <button type="submit" class="btn-submit" id="submitBtn">
+                        <i class="fas fa-paper-plane"></i> ارسال گزارش عدم انطباق
+                    </button>
+
+                </form>
+
+                <!-- NOTE BOX -->
+                <div class="note-box">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <strong>نکته:</strong> در موارد بحرانی مثل نشت شدید دوغاب/مواد شیمیایی، خطر برق‌گرفتگی، ریزش یا توقف تولید، علاوه بر ثبت فرم، موضوع را فوراً به سرپرست شیفت و HSE اطلاع دهید.
+                    </div>
+                </div>
+
+            </div>  <!-- /.card -->
+
+
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            تهیه شده توسط <span class="highlight">شرکت معدنی و صنایع معدنی درکاو</span><br>
+            <span style="direction:ltr; display:inline-block;">📞 09178680173</span>
+        </div>
+
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- EMAILJS + Google Apps Script -->
+    <!-- ============================================================ -->
+    <script type="text/javascript" src="assets/js/email.min.js">
+    </script>
+
+    <script>
+        // ============================================================
+        // 🔑 تنظیمات EmailJS
+        // ============================================================
+        const EMAILJS_CONFIG = {
+            PUBLIC_KEY: 'i0H5JBzN32Kxg5NPw',
+            SERVICE_ID: 'service_hse',
+            TEMPLATE_ID: 'template_vpc0hid'
+        };
+
+        // ============================================================
+        // 🔑 آدرس Web App گوگل
+        // ============================================================
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzDZiadFyzTOgSpMzSo9b_xQ29N_ZHD2vIOxmswrl0O2YNod2prV1qCN34myNsp653OjQ/exec';
+
+        // ============================================================
+        // متغیرها
+        // ============================================================
+        const form = document.getElementById('ncrForm');
+        const statusMsg = document.getElementById('statusMsg');
+        const submitBtn = document.getElementById('submitBtn');
+
+        const fileInput = document.getElementById('attachment');
+        const filePreview = document.getElementById('filePreview');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const fileIcon = document.getElementById('fileIcon');
+        const fileThumbnail = document.getElementById('fileThumbnail');
+        const fileRemove = document.getElementById('fileRemove');
+        const dropArea = document.getElementById('fileDropArea');
+
+        const departmentSelect = document.getElementById('department');
+        const departmentOther = document.getElementById('departmentOther');
+        const processAreaSelect = document.getElementById('processArea');
+        const processAreaOther = document.getElementById('processAreaOther');
+
+        let selectedFile = null;
+
+        // ============================================================
+        // مقداردهی EmailJS
+        // ============================================================
+        (function() {
+            if (EMAILJS_CONFIG.PUBLIC_KEY && EMAILJS_CONFIG.PUBLIC_KEY !== 'YOUR_PUBLIC_KEY_HERE') {
+                emailjs.init(EMAILJS_CONFIG.PUBLIC_KEY);
+                console.log('✅ EmailJS مقداردهی شد.');
+            } else {
+                console.warn('⚠️ EmailJS تنظیم نشده است.');
+            }
+        })();
+
+        // ============================================================
+        // توابع کمکی
+        // ============================================================
+        function showStatus(type, message) {
+            statusMsg.className = 'status-msg ' + type;
+            statusMsg.textContent = message;
+            statusMsg.style.display = 'block';
+            clearTimeout(window.statusTimeout);
+            window.statusTimeout = setTimeout(() => {
+                statusMsg.style.display = 'none';
+            }, 8000);
+        }
+
+        function getSelectedSeverity() {
+            const radios = document.querySelectorAll('input[name="severity"]');
+            for (let r of radios) {
+                if (r.checked) return r.value;
+            }
+            return '';
+        }
+
+
+        function toggleOtherField(selectEl, inputEl) {
+            const isOther = selectEl.value === 'سایر';
+            inputEl.classList.toggle('show', isOther);
+            inputEl.required = isOther;
+            if (!isOther) inputEl.value = '';
+        }
+
+        function getSelectWithOtherValue(selectEl, inputEl) {
+            return selectEl.value === 'سایر' ? inputEl.value.trim() : selectEl.value;
+        }
+
+        function setupFactoryFields() {
+            departmentSelect.addEventListener('change', () => toggleOtherField(departmentSelect, departmentOther));
+            processAreaSelect.addEventListener('change', () => toggleOtherField(processAreaSelect, processAreaOther));
+            toggleOtherField(departmentSelect, departmentOther);
+            toggleOtherField(processAreaSelect, processAreaOther);
+        }
+
+        function resetFactoryFields() {
+            toggleOtherField(departmentSelect, departmentOther);
+            toggleOtherField(processAreaSelect, processAreaOther);
+        }
+
+        function toPersianDate(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr + 'T00:00:00');
+            return d.toLocaleDateString('fa-IR', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        // ============================================================
+        // تقویم شمسی (جلالی) + جلوگیری از انتخاب تاریخ گذشته
+        // ============================================================
+        const JALALI_MONTH_NAMES = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+        const PERSIAN_DIGITS = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+        const dateInput = document.getElementById('date');
+        const dateDisplay = document.getElementById('dateDisplay');
+        const jalaliPicker = document.getElementById('jalaliPicker');
+        const jalaliDays = document.getElementById('jalaliDays');
+        const jalaliCurrentMonth = document.getElementById('jalaliCurrentMonth');
+        const jalaliPrevMonth = document.getElementById('jalaliPrevMonth');
+        const jalaliNextMonth = document.getElementById('jalaliNextMonth');
+
+        let todayIso = '';
+        let todayJalali = null;
+        let selectedJalali = null;
+        let viewingJalali = null;
+
+        function toPersianNumber(value) {
+            return String(value).replace(/\d/g, d => PERSIAN_DIGITS[d]);
+        }
+
+        function pad2(n) {
+            return String(n).padStart(2, '0');
+        }
+
+        function getTodayIso() {
+            const today = new Date();
+            return today.getFullYear() + '-' + pad2(today.getMonth() + 1) + '-' + pad2(today.getDate());
+        }
+
+        function div(a, b) {
+            return ~~(a / b);
+        }
+
+        function jalaliToGregorian(jy, jm, jd) {
+            jy = parseInt(jy, 10);
+            jm = parseInt(jm, 10);
+            jd = parseInt(jd, 10);
+            let jy2 = jy - 979;
+            let jm2 = jm - 1;
+            let jd2 = jd - 1;
+            let jDayNo = 365 * jy2 + div(jy2, 33) * 8 + div((jy2 % 33) + 3, 4);
+            for (let i = 0; i < jm2; ++i) jDayNo += (i < 6) ? 31 : 30;
+            jDayNo += jd2;
+            let gDayNo = jDayNo + 79;
+            let gy = 1600 + 400 * div(gDayNo, 146097);
+            gDayNo %= 146097;
+            let leap = true;
+            if (gDayNo >= 36525) {
+                gDayNo--;
+                gy += 100 * div(gDayNo, 36524);
+                gDayNo %= 36524;
+                if (gDayNo >= 365) gDayNo++;
+                else leap = false;
+            }
+            gy += 4 * div(gDayNo, 1461);
+            gDayNo %= 1461;
+            if (gDayNo >= 366) {
+                leap = false;
+                gDayNo--;
+                gy += div(gDayNo, 365);
+                gDayNo %= 365;
+            }
+            const gdMonth = [31, (leap ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+            let gm;
+            for (gm = 0; gm < 12 && gDayNo >= gdMonth[gm]; gm++) gDayNo -= gdMonth[gm];
+            return { gy, gm: gm + 1, gd: gDayNo + 1 };
+        }
+
+        function gregorianToJalali(gy, gm, gd) {
+            gy = parseInt(gy, 10);
+            gm = parseInt(gm, 10);
+            gd = parseInt(gd, 10);
+            const gDm = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+            let jy = (gy <= 1600) ? 0 : 979;
+            gy -= (gy <= 1600) ? 621 : 1600;
+            const gy2 = (gm > 2) ? (gy + 1) : gy;
+            let days = (365 * gy) + div((gy2 + 3), 4) - div((gy2 + 99), 100) + div((gy2 + 399), 400) - 80 + gd + gDm[gm - 1];
+            jy += 33 * div(days, 12053);
+            days %= 12053;
+            jy += 4 * div(days, 1461);
+            days %= 1461;
+            if (days > 365) {
+                jy += div((days - 1), 365);
+                days = (days - 1) % 365;
+            }
+            const jm = (days < 186) ? 1 + div(days, 31) : 7 + div((days - 186), 30);
+            const jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
+            return { jy, jm, jd };
+        }
+
+        function jalaliToIso(jy, jm, jd) {
+            const g = jalaliToGregorian(jy, jm, jd);
+            return g.gy + '-' + pad2(g.gm) + '-' + pad2(g.gd);
+        }
+
+        function isoToJalali(iso) {
+            const [gy, gm, gd] = iso.split('-').map(Number);
+            return gregorianToJalali(gy, gm, gd);
+        }
+
+        function isJalaliLeap(jy) {
+            // اسفند ۳۰ روزه را با تبدیل روز ۳۰ اسفند به سال میلادی و برگشت کنترل می‌کنیم
+            const g = jalaliToGregorian(jy, 12, 30);
+            const j = gregorianToJalali(g.gy, g.gm, g.gd);
+            return j.jy === jy && j.jm === 12 && j.jd === 30;
+        }
+
+        function getJalaliMonthLength(jy, jm) {
+            if (jm <= 6) return 31;
+            if (jm <= 11) return 30;
+            return isJalaliLeap(jy) ? 30 : 29;
+        }
+
+        function getJalaliWeekdayIndex(jy, jm, jd) {
+            const g = jalaliToGregorian(jy, jm, jd);
+            const jsDay = new Date(g.gy, g.gm - 1, g.gd).getDay(); // Sun=0 ... Sat=6
+            return (jsDay + 1) % 7; // Sat=0 ... Fri=6
+        }
+
+        function formatJalaliDisplay(j) {
+            return toPersianNumber(j.jd) + ' ' + JALALI_MONTH_NAMES[j.jm - 1] + ' ' + toPersianNumber(j.jy);
+        }
+
+        function openJalaliPicker() {
+            jalaliPicker.classList.add('open');
+            jalaliPicker.setAttribute('aria-hidden', 'false');
+            renderJalaliCalendar();
+        }
+
+        function closeJalaliPicker() {
+            jalaliPicker.classList.remove('open');
+            jalaliPicker.setAttribute('aria-hidden', 'true');
+        }
+
+        function renderJalaliCalendar() {
+            if (!viewingJalali) return;
+            jalaliCurrentMonth.textContent = JALALI_MONTH_NAMES[viewingJalali.jm - 1] + ' ' + toPersianNumber(viewingJalali.jy);
+            jalaliDays.innerHTML = '';
+
+            const firstDayIndex = getJalaliWeekdayIndex(viewingJalali.jy, viewingJalali.jm, 1);
+            const monthLength = getJalaliMonthLength(viewingJalali.jy, viewingJalali.jm);
+            for (let i = 0; i < firstDayIndex; i++) {
+                const empty = document.createElement('div');
+                empty.className = 'jalali-empty';
+                jalaliDays.appendChild(empty);
+            }
+
+            for (let day = 1; day <= monthLength; day++) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'jalali-day';
+                btn.textContent = toPersianNumber(day);
+                const iso = jalaliToIso(viewingJalali.jy, viewingJalali.jm, day);
+                if (iso < todayIso) btn.disabled = true;
+                if (iso === todayIso) btn.classList.add('today');
+                if (dateInput.value === iso) btn.classList.add('selected');
+                btn.addEventListener('click', function() {
+                    if (iso < todayIso) return;
+                    setJalaliDate({ jy: viewingJalali.jy, jm: viewingJalali.jm, jd: day }, true);
+                });
+                jalaliDays.appendChild(btn);
+            }
+
+            const firstOfPrevMonth = jalaliToIso(viewingJalali.jy, viewingJalali.jm, 1);
+            const firstAllowedMonth = { jy: todayJalali.jy, jm: todayJalali.jm, jd: 1 };
+            const firstAllowedIso = jalaliToIso(firstAllowedMonth.jy, firstAllowedMonth.jm, firstAllowedMonth.jd);
+            jalaliPrevMonth.disabled = firstOfPrevMonth <= firstAllowedIso;
+        }
+
+        function changeJalaliMonth(delta) {
+            let jy = viewingJalali.jy;
+            let jm = viewingJalali.jm + delta;
+            if (jm < 1) { jm = 12; jy--; }
+            if (jm > 12) { jm = 1; jy++; }
+            viewingJalali = { jy, jm, jd: 1 };
+            renderJalaliCalendar();
+        }
+
+        function setJalaliDate(j, closeAfterSelect) {
+            selectedJalali = { jy: j.jy, jm: j.jm, jd: j.jd };
+            dateInput.value = jalaliToIso(j.jy, j.jm, j.jd);
+            dateDisplay.value = formatJalaliDisplay(j);
+            viewingJalali = { jy: j.jy, jm: j.jm, jd: 1 };
+            renderJalaliCalendar();
+            if (closeAfterSelect) closeJalaliPicker();
+        }
+
+        function setDateToToday() {
+            todayIso = getTodayIso();
+            todayJalali = isoToJalali(todayIso);
+            setJalaliDate(todayJalali, false);
+        }
+
+        function setupJalaliDatePicker() {
+            setDateToToday();
+            dateDisplay.addEventListener('click', openJalaliPicker);
+            dateDisplay.addEventListener('focus', openJalaliPicker);
+            jalaliPrevMonth.addEventListener('click', () => changeJalaliMonth(-1));
+            jalaliNextMonth.addEventListener('click', () => changeJalaliMonth(1));
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.jalali-date-wrapper')) closeJalaliPicker();
+            });
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' بایت';
+            if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' کیلوبایت';
+            return (bytes / 1048576).toFixed(1) + ' مگابایت';
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64 = e.target.result.split(',')[1];
+                    resolve(base64);
+                };
+                reader.onerror = function(e) {
+                    reject(e);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // ============================================================
+        // مدیریت فایل (پیش‌نمایش)
+        // ============================================================
+        function showFilePreview(file) {
+            selectedFile = file;
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+
+            const ext = file.name.split('.').pop().toLowerCase();
+            const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+
+            if (imageExts.includes(ext)) {
+                fileIcon.innerHTML = '<i class="fas fa-image" style="color:var(--primary);"></i>';
+                fileThumbnail.classList.add('show');
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    fileThumbnail.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            } else if (ext === 'pdf') {
+                fileIcon.innerHTML = '<i class="fas fa-file-pdf" style="color:#dc2626;"></i>';
+                fileThumbnail.classList.remove('show');
+            } else if (['doc', 'docx'].includes(ext)) {
+                fileIcon.innerHTML = '<i class="fas fa-file-word" style="color:var(--primary);"></i>';
+                fileThumbnail.classList.remove('show');
+            } else {
+                fileIcon.innerHTML = '<i class="fas fa-file-alt" style="color:#64748b;"></i>';
+                fileThumbnail.classList.remove('show');
+            }
+
+            filePreview.classList.add('show');
+        }
+
+        function removeFile() {
+            selectedFile = null;
+            fileInput.value = '';
+            filePreview.classList.remove('show');
+            fileThumbnail.classList.remove('show');
+            fileThumbnail.src = '';
+        }
+
+        fileInput.addEventListener('change', function(e) {
+            if (this.files && this.files.length > 0) {
+                const file = this.files[0];
+                if (file.size > 5 * 1024 * 1024) {
+                    showStatus('error', '❌ حجم فایل نباید بیشتر از ۵ مگابایت باشد.');
+                    this.value = '';
+                    return;
+                }
+                showFilePreview(file);
+                statusMsg.style.display = 'none';
+            } else {
+                removeFile();
+            }
+        });
+
+        fileRemove.addEventListener('click', removeFile);
+
+        dropArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+        dropArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+        });
+        dropArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const file = files[0];
+                if (file.size > 5 * 1024 * 1024) {
+                    showStatus('error', '❌ حجم فایل نباید بیشتر از ۵ مگابایت باشد.');
+                    return;
+                }
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                fileInput.files = dt.files;
+                showFilePreview(file);
+                statusMsg.style.display = 'none';
+            }
+        });
+
+        // ============================================================
+        // مقداردهی پیش‌فرض تاریخ
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            setupJalaliDatePicker();
+            setupFactoryFields();
+        });
+
+        // ============================================================
+        // SUBMIT FORM - ارسال همزمان به EmailJS + Google Drive
+        // ============================================================
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // ---- اعتبارسنجی ----
+            const name = document.getElementById('name').value.trim();
+            const position = document.getElementById('position').value.trim();
+            const department = getSelectWithOtherValue(departmentSelect, departmentOther);
+            const date = document.getElementById('date').value;
+            const processArea = getSelectWithOtherValue(processAreaSelect, processAreaOther);
+            const equipment = document.getElementById('equipment').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const location = document.getElementById('location').value.trim();
+            const severity = getSelectedSeverity();
+            const actionLevel = document.getElementById('actionLevel').value;
+
+            if (!name || !position || !department || !date || !processArea || !description || !location || !severity || !actionLevel) {
+                showStatus('error', '❌ لطفاً تمام فیلدهای الزامی (علامت‌دار) را پر کنید.');
+                return;
+            }
+
+            if (date < getTodayIso()) {
+                showStatus('error', '❌ انتخاب تاریخ قبل از امروز مجاز نیست.');
+                setDateToToday();
+                return;
+            }
+
+            // ---- تغییر دکمه ----
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال ارسال ...';
+            showStatus('loading', '⏳ در حال ارسال گزارش... لطفاً صبر کنید.');
+
+            // ★ امنیت: بررسی مجوز سمت کلاینت قبل از ارسال (لایه اول؛ لایه اصلی در سرور)
+            try {
+                const _perm = JSON.parse(localStorage.getItem('hse_user_permissions') || '{}');
+                const _hasPerm = (_perm.nonconformity === true || _perm['عدم_انطباق'] === true || _perm['آنومالی'] === true);
+                if (!_hasPerm) {
+                    showStatus('error', '⛔ شما مجوز ثبت گزارش عدم انطباق را ندارید.');
+                    submitBtn.disabled = false;
+                    return;
+                }
+            } catch (e) { /* آفلاین یا فاقد کش → ادامه داده می‌شود؛ سرور دوباره بررسی می‌کند */ }
+
+            // ---- آماده‌سازی داده‌ها ----
+            // ★ امنیت: ارسال شماره پرسنلی کاربر واردشده برای کنترل مجوز سمت سرور
+            let _pU = null;
+            try { const _rr = localStorage.getItem('hse_user_activated'); if (_rr) _pU = JSON.parse(_rr); } catch (e) {}
+            const reportData = {
+                personnel: (_pU && _pU.personnel) ? String(_pU.personnel) : '',
+                name: name,
+                position: position,
+                department: department,
+                date: toPersianDate(date),
+                processArea: processArea,
+                equipment: equipment || 'ثبت نشده',
+                description: description,
+                location: location,
+                severity: severity,
+                type: document.getElementById('type').value,
+                actionLevel: actionLevel,
+                initialAction: document.getElementById('initialAction').value.trim() || 'اقدامی ثبت نشده',
+                attachment_name: selectedFile ? selectedFile.name : 'بدون ضمیمه',
+                attachment_size: selectedFile ? formatFileSize(selectedFile.size) : '-'
+            };
+
+            // ---- متغیر برای ذخیره خطاها ----
+            let emailjsError = null;
+            let driveError = null;
+            let driveSuccess = false;
+            let uploadedFileUrl = '';
+
+            // ============================================================
+            // 1️⃣ ارسال به EmailJS (متن گزارش)
+            // ============================================================
+            if (EMAILJS_CONFIG.PUBLIC_KEY && EMAILJS_CONFIG.PUBLIC_KEY !== 'YOUR_PUBLIC_KEY_HERE') {
+                try {
+                    await emailjs.send(
+                        EMAILJS_CONFIG.SERVICE_ID,
+                        EMAILJS_CONFIG.TEMPLATE_ID,
+                        reportData
+                    );
+                    console.log('✅ EmailJS ارسال شد.');
+                } catch (error) {
+                    console.error('❌ خطا در EmailJS:', error);
+                    emailjsError = error.text || 'خطا در ارسال ایمیل';
+                }
+            } else {
+                emailjsError = 'EmailJS تنظیم نشده است';
+            }
+
+            // ============================================================
+            // 2️⃣ ارسال به Google Drive (فایل + گزارش) + ثبت ردیف در شیت
+            // ============================================================
+            try {
+                const driveData = { ...reportData, action: 'save_report' };
+                if (selectedFile) {
+                    const base64Data = await fileToBase64(selectedFile);
+                    driveData.data = base64Data;
+                    driveData.filename = selectedFile.name;
+                    driveData.mimetype = selectedFile.type;
+                }
+
+                const driveResp = await fetchWithTimeout(WEB_APP_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams(driveData)
+                }, 25000);
+                // ★ امنیت: پاسخ سرور خوانده می‌شود تا فقط در صورت تأیید (مجوز + ذخیره) پیام موفقیت نمایش داده شود
+                let driveJson = null;
+                try { driveJson = await driveResp.json(); } catch (e) { driveJson = null; }
+                if (driveJson && driveJson.ok) {
+                    driveSuccess = true;
+                    uploadedFileUrl = driveJson.driveUrl || '';
+                    console.log('✅ گوگل درایو + شیت: ذخیره شد.');
+                } else {
+                    driveError = (driveJson && driveJson.error) ? driveJson.error : 'خطا در ذخیره گزارش (مجوز یا خطای سرور)';
+                    console.error('❌ پاسخ سرور:', driveJson);
+                }
+            } catch (error) {
+                console.error('❌ خطا در ارسال به گوگل درایو:', error);
+                driveError = 'خطا در ذخیره فایل';
+            }
+
+            // ============================================================
+            // 3️⃣ نمایش نتیجه نهایی
+            // ============================================================
+            if (driveSuccess && !emailjsError) {
+                showStatus('success', '✅ گزارش با موفقیت به گوگل درایو و ایمیل ارسال شد!' + (uploadedFileUrl ? ' 📎 ضمیمه ذخیره شد.' : ''));
+                form.reset();
+                setDateToToday();
+                resetFactoryFields();
+                document.querySelectorAll('input[name="severity"]').forEach(r => r.checked = false);
+                removeFile();
+            } else if (driveSuccess && emailjsError) {
+                showStatus('success', '✅ گزارش به گوگل درایو ارسال شد.' + (uploadedFileUrl ? ' 📎 ضمیمه ذخیره شد. ' : ' ') + '(⚠️ ایمیل ارسال نشد: ' + emailjsError + ')');
+                form.reset();
+                setDateToToday();
+                resetFactoryFields();
+                document.querySelectorAll('input[name="severity"]').forEach(r => r.checked = false);
+                removeFile();
+            } else if (!driveSuccess && !emailjsError) {
+                showStatus('error', '❌ خطا در ارسال به گوگل درایو. لطفاً دوباره تلاش کنید.');
+            } else {
+                showStatus('error', '❌ خطا در ارسال. لطفاً دوباره تلاش کنید.');
+            }
+
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> ارسال گزارش عدم انطباق';
+        });
+    </script>
+
+<script src="hse-common.js"></script>
+
+<script src="assets/js/sw-register.js"></script>
+</body>
+</html>

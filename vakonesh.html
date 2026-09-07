@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+
+<script>
+/* ============================================================
+   ★ امنیت: گیت احراز هویت (سمت کلاینت)
+   هیچ صفحه‌ای بدون ورود به سامانه باز نمی‌شود. محتوای صفحه
+   مخفی می‌ماند و کاربر به صفحه ورود هدایت می‌شود.
+   (لایه نمایشی؛ لایه امنیتی واقعی در بکاند اعمال می‌شود.)
+   ============================================================ */
+(function(){
+  var ok = false;
+  try {
+    var _u = JSON.parse(localStorage.getItem('hse_user_activated') || 'null');
+    ok = !!(_u && _u.personnel && _u.fullname);
+  } catch(e) { ok = false; }
+  if (ok) return; // مجاز - ادامه می‌دهد
+
+  // پنهان‌کردن کل محتوا و نمایش قفل
+  var hide = function(){
+    try {
+      var d = document;
+      // مخفی کردن همه عناصر
+      var all = d.body ? d.body.children : [];
+      for (var i=0;i<all.length;i++){ all[i].style.display='none'; }
+      var lock = d.createElement('div');
+      lock.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#0f172a;color:#f8fafc;'
+        +'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+        +'font-family:Tahoma,sans-serif;text-align:center;padding:20px;direction:rtl;';
+      lock.innerHTML = '<div style="font-size:60px;margin-bottom:10px;">🔒</div>'
+        +'<h2 style="margin:0 0 8px;">دسترسی محدود است</h2>'
+        +'<p style="margin:0 0 20px;color:#94a3b8;">لطفاً ابتدا از صفحه اصلی وارد سامانه شوید.</p>'
+        +'<a href="index.html" style="background:#ff6208;color:#fff;padding:10px 26px;'
+        +'border-radius:10px;text-decoration:none;font-weight:bold;">بازگشت به صفحه ورود</a>';
+      d.body.appendChild(lock);
+    } catch(e){}
+  };
+  if (document.body) hide(); else document.addEventListener('DOMContentLoaded', hide);
+  setTimeout(function(){ try{ location.replace('index.html'); }catch(e){} }, 2500);
+})();
+</script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#1e3c5c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HSE درکاو" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+    <title>دوره کامل آمادگی و واکنش در شرایط اضطراری</title>
+
+    <style>
+        :root {
+            --primary: #ff6208;
+            --primary-hover: #e05300;
+            --secondary: #f39c12;
+            --success: #27ae60;
+            --safety: #2c6e4e;
+            --danger: #c0392b;
+            --dark-blue: #1e3c5c;
+            --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #dfe7f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --text-main: #1e2a2e;
+            --text-muted: #64748b;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body { padding-bottom: 75px !important;
+            background: var(--bg-gradient);
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text-main);
+            line-height: 1.8;
+        }
+
+        .main-container {
+            max-width: 1000px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            background: var(--dark-blue);
+            padding: 35px 20px;
+            color: white;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+            position: relative;
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        .header h1 .icon {
+            margin-left: 10px;
+        }
+        .header p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        .header .back-home {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .header .back-home:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+        .card:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        }
+        .card-title {
+            color: var(--dark-blue);
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-right: 4px solid var(--primary);
+            padding-right: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title .icon {
+            font-size: 1.5rem;
+        }
+
+        .card-subtitle {
+            color: var(--primary);
+            font-size: 1.05rem;
+            font-weight: bold;
+            margin: 18px 0 10px 0;
+            border-bottom: 2px solid rgba(255, 98, 8, 0.15);
+            padding-bottom: 6px;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .tips-grid .tip-item {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 10px 14px;
+            border-radius: var(--border-radius-sm);
+            border-right: 3px solid var(--safety);
+            font-size: 0.9rem;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .tips-grid .tip-item:hover {
+            background: rgba(44, 110, 78, 0.04);
+            transform: translateX(-3px);
+        }
+        .tips-grid .tip-item.danger-tip {
+            border-right-color: var(--danger);
+        }
+        .tips-grid .tip-item.warning-tip {
+            border-right-color: var(--secondary);
+        }
+        .tips-grid .tip-item.primary-tip {
+            border-right-color: var(--primary);
+        }
+        .tips-grid .tip-item.info-tip {
+            border-right-color: #3498db;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+        .spec-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .spec-table th,
+        .spec-table td {
+            padding: 10px 12px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        .spec-table th {
+            background: var(--dark-blue);
+            color: white;
+            font-weight: bold;
+        }
+        .spec-table tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .spec-table tr:hover {
+            background: rgba(255, 98, 8, 0.04);
+        }
+
+        .btn-back {
+            background: #cbd5e1;
+            border: none;
+            padding: 10px 24px;
+            border-radius: var(--border-radius-sm);
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 12px;
+            color: #334155;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .btn-back:hover {
+            background: #b0bec5;
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .footer .highlight {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .badge-standard {
+            display: inline-block;
+            background: var(--safety);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-danger {
+            display: inline-block;
+            background: var(--danger);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-warning {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-info {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+
+        .safety-alert {
+            background: rgba(192, 57, 43, 0.04);
+            border-right: 4px solid var(--danger);
+            padding: 15px;
+            border-radius: var(--border-radius-sm);
+            margin: 10px 0;
+        }
+        .safety-alert strong {
+            color: var(--danger);
+        }
+        .safety-alert ul {
+            padding-right: 20px;
+            margin-top: 5px;
+        }
+        .safety-alert ul li {
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .definition-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .definition-item {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 10px 14px;
+            border-radius: var(--border-radius-sm);
+            border-right: 3px solid var(--secondary);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .definition-item:hover {
+            background: rgba(255, 98, 8, 0.04);
+        }
+        .definition-item strong {
+            color: var(--dark-blue);
+            display: block;
+            font-size: 0.92rem;
+        }
+        .definition-item span {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: block;
+            margin-top: 2px;
+        }
+
+        .material-list {
+            list-style: none;
+            padding: 0;
+            margin: 5px 0;
+        }
+        .material-list li {
+            padding: 10px 15px;
+            margin-bottom: 6px;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: var(--border-radius-sm);
+            border-right: 3px solid var(--primary);
+            transition: var(--transition);
+            cursor: pointer;
+            font-size: 0.92rem;
+        }
+        .material-list li:hover {
+            background: rgba(255, 98, 8, 0.04);
+        }
+        .material-list li .mat-num {
+            font-weight: bold;
+            color: var(--dark-blue);
+            display: inline-block;
+            min-width: 40px;
+        }
+
+        .step-list {
+            counter-reset: step;
+            list-style: none;
+            padding-right: 0;
+        }
+        .step-list li {
+            counter-increment: step;
+            padding-right: 35px;
+            position: relative;
+            margin-bottom: 10px;
+            line-height: 1.8;
+            font-size: 1.02rem;
+        }
+        .step-list li::before {
+            content: counter(step);
+            position: absolute;
+            right: 0;
+            top: 0;
+            background: var(--danger);
+            color: white;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .two-column-list {
+            columns: 2;
+            column-gap: 40px;
+        }
+        @media (max-width: 600px) {
+            .two-column-list {
+                columns: 1;
+            }
+        }
+
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 12px 0;
+        }
+
+        .highlight-box {
+            background: #e8f0fe;
+            padding: 18px 24px;
+            border-radius: var(--border-radius-sm);
+            margin: 24px 0 12px 0;
+            border-right: 6px solid #2563eb;
+        }
+
+        .warning-box {
+            background: #fffbeb;
+            padding: 18px 24px;
+            border-radius: var(--border-radius-sm);
+            margin: 24px 0 12px 0;
+            border-right: 6px solid var(--secondary);
+        }
+
+        @media(max-width:700px) {
+            .content {
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            .header .back-home {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+                left: 10px;
+            }
+            .definition-grid {
+                grid-template-columns: 1fr;
+            }
+            .tips-grid {
+                grid-template-columns: 1fr;
+            }
+            .grid-2col {
+                grid-template-columns: 1fr;
+            }
+            .spec-table {
+                font-size: 0.75rem;
+            }
+            .spec-table th,
+            .spec-table td {
+                padding: 6px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <a href="index.html" class="back-home" title="بازگشت به صفحه اصلی">🏠</a>
+            <h1><span class="icon">🚨</span> دوره کامل آمادگی و واکنش در شرایط اضطراری</h1>
+            <p>دوره آموزشی جامع — مفاهیم، مدیریت بحران، طرح ریزی، واکنش و بازیابی</p>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <!-- ===== مقدمه ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📌</span> مقدمه</div>
+                <p style="margin-bottom:10px;">
+                    هرساله شرایط اضطراري باعث وارد آمدن خسارات زيادي به صنايع و افراد مي شود. شرايط اضطراري وضعيتي پيش بيني نشده و طراحي نشده اي است كه مي تواند منجر به مرگ افراد يا آسيب جدي به كاركنان، مشتريان يا جامعه و همچنين باعث توقف عمليات كاري و صدمه به محيط زيست شود.
+                </p>
+                <p style="margin-bottom:10px;">
+                    این شرایط می تواند برای هر کسی، در هر جایی و در هر زمانی پیش آید و بایستی به منظور مقابله با این شرایط و تخلیه مکان های کاری در هنگام وقوع این شرایط آمادگی های لازم را کسب نمود. بهترین راه حفاظت از کارکنان و محیط های کاری ایجاد یک طرح واکنش اضطراری خوب می باشد.
+                </p>
+                <p>
+                    اگر وضعیتهای اضطراری به خوبی کنترل نشوند میتواند به خارج از محیط صنعتی سرایت کند و جامعه را تحت تاثیر قراردهد. شرایط اضطراری می تواند طبیعی ویا ساخته دست بشر باشد، از قبیل سیل، طوفان، حریق، آزاد شدن گازهای سمی، ریخت و پاش مواد شیمیایی، حوادث و...
+                </p>
+                <div class="highlight-box" style="margin-top:15px;">
+                    <strong>✅ یکی از الزامات مهم و تعیین کننده در سیستمهای مدیریت ایمنی و بهداشت حرفه ای (OHSAS 18001) و زیست محیطی (ISO 14001) می باشد.</strong>
+                    <p style="margin-top:8px;">دلیل گنجاندن "آمادگی و واکنش در شرایط اضطراری" در استانداردهای یاد شده، اهمیتی است که این موضوع در کاهش عواقب حادثه دارد. با داشتن طرحی در خصوص آمادگی و واکنش در شرایط اضطراری می توان تاثیر عوامل بیرونی و درونی را پس از بالفعل شدن تا حد قابل ملاحظه ای کنترل نمود و کاهش داد.</p>
+                </div>
+            </div>
+
+            <!-- ===== فهرست مطالب ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📑</span> فهرست جامع مطالب</div>
+                <div style="background:#f8fafc; padding:20px 28px; border-radius:var(--border-radius-sm); border:1px solid #e2e8f0;">
+                    <div class="two-column-list">
+                        <ul>
+                            <li><strong>بخش ۱:</strong> مقدمه و تعاریف</li>
+                            <li><strong>بخش ۲:</strong> انواع شرایط اضطراری</li>
+                            <li><strong>بخش ۳:</strong> مدیریت شرایط اضطراری</li>
+                            <li><strong>بخش ۴:</strong> واکنش در شرایط اضطراری</li>
+                            <li><strong>بخش ۵:</strong> شناسایی پتانسیل های بحران</li>
+                            <li><strong>بخش ۶:</strong> طرح ریزی اضطراری</li>
+                            <li><strong>بخش ۷:</strong> تدوین روش اجرایی</li>
+                            <li><strong>بخش ۸:</strong> مسیرها و خروجی های تخلیه</li>
+                            <li><strong>بخش ۹:</strong> سرشماری افراد پس از تخلیه</li>
+                            <li><strong>بخش ۱۰:</strong> وظایف در شرایط اضطراری</li>
+                            <li><strong>بخش ۱۱:</strong> نکات کلیدی آمادگی</li>
+                            <li><strong>بخش ۱۲:</strong> کمیته اضطراری</li>
+                            <li><strong>بخش ۱۳:</strong> مرکز کنترل اضطراری</li>
+                            <li><strong>بخش ۱۴:</strong> دستورالعمل های عمومی و اختصاصی</li>
+                            <li><strong>بخش ۱۵:</strong> کمیته بحران</li>
+                            <li><strong>بخش ۱۶:</strong> مانور شرایط اضطراری</li>
+                            <li><strong>بخش ۱۷:</strong> پیاده سازی طرح (فازهای سه گانه)</li>
+                            <li><strong>بخش ۱۸:</strong> سناریو و طبقه بندی مانورها</li>
+                            <li><strong>بخش ۱۹:</strong> نظام اعلام وضعیت اضطراری</li>
+                            <li><strong>بخش ۲۰:</strong> توقف اضطراری</li>
+                            <li><strong>بخش ۲۱:</strong> وظایف آتش نشانی، انتظامات، اورژانس</li>
+                            <li><strong>بخش ۲۲:</strong> تخلیه اضطراری و نقاط تجمع</li>
+                            <li><strong>بخش ۲۳:</strong> عملیات پس از وقوع</li>
+                            <li><strong>بخش ۲۴:</strong> منابع و مآخذ</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== تعاریف ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📖</span> تعاریف</div>
+
+                <div class="card-subtitle">🔸 ایمنی</div>
+                <p>اصولاً ایمنى به مجموعه تدابیر، اصول و مقرراتى گفته مى شود كه با به کار گرفتن آنها بتوان نیروى انسانى و سرمایه را درمقابل خطرات مختلف و محتمل در محیط های صنعتى به نحو موثرى حفظ و حراست نموده و یک محیط کارى بی خطر و سالم جهت افزایش کارآیى کارکنان بوجود آورد.</p>
+
+                <div class="card-subtitle">🔸 خطر</div>
+                <p>به منبع یا وضعیتی گفته می شود که دارای پتانسیل آسیب به شکل جراحت های انسانی یا بیماری و یا ترکیبی از این موارد باشد.</p>
+
+                <div class="card-subtitle">🔸 ریسک</div>
+                <p>ترکیب از احتمال و پیامدهای ناشی از وقوع یک واقعه خطرناک یا خطری که خساراتی به سازمان (جانی و مالی) وارد می کند.</p>
+                <div style="background:#e6f0fa; padding:16px 24px; border-radius:50px; display:inline-block; font-size:1.2rem; font-weight:600; margin:10px 0;">
+                    ریسک = احتمال × پیامدها
+                </div>
+
+                <div class="card-subtitle">🔸 حادثه</div>
+                <p>یک واقعه نامطلوب و ناخواسته در اکثر موارد یک حادثه واقعـه ای برنامه ریزی نشده است که باعث جراحت، آسیب به اموال و خسارت می شود.</p>
+
+                <div class="card-subtitle">🔸 شرایط اضطراری (تعریف ۱)</div>
+                <p>وضعیتی است كه در اثر آن، تاسیسات و محیط زیست در معرض خطر جدی قرار می گیرند. این وضعیت اغلب در نتیجه نقص دستگاهها یا خطاهای انسانی به وقوع می‌پیوندد. مانند نشت گاز سمی، ریزش مواد شیمیایی، نشت مخاطره‌آمیز گازهای قابل انفجار و اشتعال، انفجارها و حریق ها و البته عوامل خارجی دیگر نظیر رعد و برق، طوفان، سیل، زلزله و جنگ نیز ممکن است سبب بروز آن گردند.</p>
+
+                <div class="card-subtitle">🔸 شرایط اضطراری (تعریف ۲)</div>
+                <p>هر اتفاق غیر منتظره‌ای که توان وارد آوردن ضرر و یا زیان را داشته و امکان گسترش آن تا حدی است که افراد مجبور به متوقف کردن عملیات و ترک محل کار شوند.</p>
+
+                <div class="card-subtitle">🔸 شرایط اضطراری (تعریف ۳)</div>
+                <p>وضعیت اضطراری رویداد برنامه ریزی نشده ای است که می تواند: فعالیت تجاری سازمان را متوقف کند، فعالیت های عملیاتی سازمان را قطع کند، سبب خسارات جانی، مالی یا محیطی گردد، تأسیسات سازمان را تهدید کند، دارایی های جامعه را تهدید کند.</p>
+
+                <div class="card-subtitle">🔸 بحران (تعریف ۱)</div>
+                <p>شدیدترین حالت بروز وضعیت اضطراری را گویند که شامل موارد زیر است: انفجار، آتش سوزی گسترده، نشت گازهای سمی در حد وسیع که جان افراد را در معرض تهدید قرار دهد، عوامل ناخواسته ای که منجر به قطع تولید گردد، نقض جدی قوانین عمومی نظیر قوانین ایمنی و زیست محیطی و احتمال وارد آمدن صدمه به ساکنین محیط اطراف.</p>
+
+                <div class="card-subtitle">🔸 بحران (تعریف ۲)</div>
+                <p>حادثه‌ای است که به صورت طبیعی یا بوسیلۀ بشر به طور ناگهانی و به صورت فزآینده به وجود می آید و سختی و مشقتی را به جامعة انسانی تحمیل می نماید که جهت برطرف نمودن آن نیاز به اقدامات اساسی و فوق العاده می‌باشد.</p>
+            </div>
+
+            <!-- ===== مدیریت شرایط اضطراری ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📋</span> مدیریت شرایط اضطراری</div>
+                <p style="margin-bottom:10px;">
+                    مدیریت شرایط اضطراری فرایندی است که مخاطرات و خطرات بالقوه، نیازها و منابع موجود در یک مجموعه و یا جوامع را پیش، حین و پس از به وقوع پیوستن مخاطرات و ایجاد بحران های متعاقب، ارزیابی کرده و به نحوی برنامه ریزی می نماید که منابع موجود و قابل تامین را به بهترین شکل اختصاص دهد.
+                </p>
+                <p>
+                    علمی کاربردی است که به وسیله مشاهده سیستماتیک بحرانها و تجزیه و تحلیل آنها در جستجوی یافتن ابزاری است که بوسیله آنها بتوان از بروز بحرانها پیشگیری نموده و یا در صورت بروز آن در خصوص کاهش آثار، آمادگی لازم، امداد رسانی سریع و بهبود، اقدام نمود.
+                </p>
+
+                <div class="card-subtitle">🔸 سناریوی حادثه</div>
+                <p>برنامه‌ای از پیش تعیین شده است که در آن اتفاق اولیه، محدوده گسترش، پیامدها و نیز اقدامات لازم برای مقابله با یک حادثه فرضی تعیین می‌شود.</p>
+
+                <div class="card-subtitle">🔸 مانور شرایط اضطراری</div>
+                <p>به اجرا در آوردن برنامه مقابله با شرایط اضطراری در یک حادثه فرضی.</p>
+            </div>
+
+            <!-- ===== واکنش در شرایط اضطراری ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🚨</span> واکنش در شرایط اضطراری</div>
+                <p style="margin-bottom:10px;">
+                    فعالیت‌هایی که به منظور مقابله با یک حادثه یا بحران و به حداقل رساندن آثار آن و به منظور نجات جان انسانها، کاهش صدمات جسمی یا روحی و پیشگیری از آسیب‌های آتی انجام می‌شوند را واکنش به وضعیت اضطراری می‌نامند.
+                </p>
+                <p>
+                    مجموعه اعمالی که ایمنی کارفرما و کارکنان را در شرایط اضطراری تضمین می‌نماید، طرح واکنش اضطراری نامیده می‌شود. به عبارت دیگر این طرح شامل فرایند آمادگی، کاهش ریسک و عادی سازی وضعیت اضطراری است.
+                </p>
+
+                <div class="warning-box">
+                    <strong>⚠️ در هنگام بروز شرایط اضطراری چه باید کرد؟</strong>
+                    <ul>
+                        <li>خونسردی خود را حفظ کنید.</li>
+                        <li>وضعیت را ارزیابی کنید.</li>
+                        <li>در صورت نیاز، کمک بخواهید.</li>
+                        <li>مسیرهای تخلیه را شناسایی کنید.</li>
+                        <li>به دستورات امدادگران عمل کنید.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ===== شناسایی پتانسیل های بحران ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🔍</span> شناسایی پتانسیل های بحران</div>
+                <p style="margin-bottom:10px;">
+                    شناسایی پتانسیل‌های بحران در کارخانجات و سازمان‌ها اولین قدم در راه کنترل حوادث منتج از این پتانسیل‌ها می‌باشد. تا زمانی که شناختی کامل و کافی از خطرات موجود در سازمان نداشته باشیم قادر به برنامه‌ریزی برای مقابله با آنها نخواهیم بود.
+                </p>
+                <p>
+                    بر اساس تعریف استاندارد OSHA، حالت اضطراری می تواند به مواردی مانند نشت گاز سمی، ریزش مواد شیمیایی، نشت مخاطره‌آمیز گازهای قابل انفجار و اشتعال، انفجارها و حریق‌ها و... اطلاق گردد.
+                </p>
+
+                <div class="card-subtitle">🔸 انواع حوادثی که نیازمند تخلیه اضطراری است</div>
+                <div class="grid-2col">
+                    <ul>
+                        <li>زلزله</li>
+                        <li>سیل</li>
+                        <li>تندباد</li>
+                        <li>طوفان‌ها</li>
+                        <li>آتش‌سوزی‌ها</li>
+                    </ul>
+                    <ul>
+                        <li>انتشار گازهای سمی</li>
+                        <li>انتشار مواد شیمیایی</li>
+                        <li>انفجارها</li>
+                        <li>مشکلاتی که در محل کار به صدمات جسمی می‌انجامد</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ===== طرح ریزی اضطراری ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📋</span> طرح ریزی اضطراری (قسمت اول)</div>
+                <ul>
+                    <li><strong>انواع وضعیتهای اضطراری</strong></li>
+                    <li><strong>کمیته اضطراری</strong></li>
+                    <li><strong>مرکز کنترل اضطراری</strong></li>
+                    <li><strong>شبکه واکنش اضطراری</strong></li>
+                    <li><strong>دستورالعملهای آمادگی و واکنش اضطراری</strong></li>
+                    <li><strong>اطلاع رسانی در شرایط اضطراری</strong></li>
+                </ul>
+
+                <div class="card-subtitle">🔸 انواع وضعیت اضطراری به لحاظ وسعت حادثه</div>
+                <ul>
+                    <li>وضعیت اضطراری مختص مجتمع</li>
+                    <li>وضعیت اضطراری محلی (منطقه‌ای)</li>
+                    <li>وضعیت اضطراری ملی</li>
+                    <li>وضعیت اضطراری بین‌المللی</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 انواع وضعیت اضطراری به لحاظ منشاء حادثه</div>
+                <ul>
+                    <li><strong>بلایای طبیعی:</strong> زلزله، سیل، طوفان</li>
+                    <li><strong>حوادث انسان ساخت:</strong> آتش‌سوزی، انفجار، رها شدن مواد سمی، حوادث هسته‌ای، خراب‌کاری</li>
+                </ul>
+            </div>
+
+            <!-- ===== تدوین روش اجرایی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📝</span> تدوین روش اجرایی جهت آمادگی و واکنش در مواقع اضطراری</div>
+                <p style="margin-bottom:10px;">
+                    سازمان باید برنامه‌ها و روش‌های اجرایی را برای شناسایی احتمال وقوع و مقابله با حوادث و وضعیت‌های اضطراری، و برای پیشگیری و کاهش امکان بروز بیماری‌ها و جراحات منتج از این حوادث ایجاد و برقرار نگه‌دارد.
+                </p>
+                <p>
+                    سازمان باید روش‌های اجرایی و برنامه‌های سازماندهی و واکنش در مواقع اضطراری را خصوصاً پس از وقوع حوادث یا وضعیت‌های اضطراری، در صورت لزوم مورد بازنگری و تجدید نظر قرار دهد. سازمان همچنین باید به صورت دوره‌ای، روش‌های اجرایی را هر وقت که امکان پذیر باشد، مورد آزمایش قرار دهد.
+                </p>
+
+                <div class="card-subtitle">🔸 موارد طرح عملیات اضطراری</div>
+                <ol>
+                    <li>نحوه آگاه‌سازی افراد از یک وضعیت اضطراری بیان گردد.</li>
+                    <li>مسیرها و خروجی‌های تخلیه را باید مشخص کند.</li>
+                    <li>نقش هماهنگ‌کننده‌ها، مدیران و سایرین در تخلیه اضطراری معین شود.</li>
+                    <li>وظیفه گروه‌هایی که به امدادرسانی خواهند پرداخت نوشته شود.</li>
+                    <li>سیستم ارتباطاتی زمان بروز حوادث غیرمترقبه مشخص گردد.</li>
+                    <li>یک مکان امن برای نگهداری اسناد معلوم شده باشد.</li>
+                    <li>مکانی به عنوان محل تجمع افراد پس از عملیات تخلیه اضطراری مشخص شده باشد.</li>
+                    <li>شیوه‌هایی برای سرشماری افراد پس از عملیات تخلیه اضطراری تعیین گردد.</li>
+                </ol>
+            </div>
+
+            <!-- ===== مسیرها و خروجی های تخلیه ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🚪</span> مشخص کردن مسیرها و خروجی های تخلیه</div>
+                <ul>
+                    <li>وجود نقشه محل</li>
+                    <li>علائمی که مسیرهای خروجی را مشخص می‌کند</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 شرایط مسیرهای تخلیه و خروجی‌های اضطراری</div>
+                <ul>
+                    <li>دارای علامت‌گذاری واضح و روشنایی مناسب</li>
+                    <li>دارای فضای کافی برای تجمع افراد یا پرسنل تخلیه شده</li>
+                    <li>تمیز و عاری از زباله و وسایل اضافه</li>
+                    <li>عدم ایجاد خطر اضافه برای افراد یا پرسنل تخلیه شده</li>
+                    <li>اگر نقشه‌هایی را آماده کردید که مسیرها و خروجی‌های تخلیه را نشان می‌دهند، آن‌ها را در جایی در معرض دید افراد قرار دهید.</li>
+                </ul>
+            </div>
+
+            <!-- ===== سرشماری افراد ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📊</span> سرشماری افراد پس از تخلیه</div>
+                <p>سرشماری افراد پس از تخلیه بسیار مهم است. بی‌نظمی و اغتشاش در محل تجمع می‌تواند موجب تأخیر در نجات افراد گرفتار در ساختمان و یا عملیات جستجو و نجات غیرضروری و خطرناک شود. برای اطمینان از سریع‌ترین و مناسب‌ترین راه سرشماری می‌باشد.</p>
+            </div>
+
+            <!-- ===== وظایف در شرایط اضطراری ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">⚡</span> شرایط اضطراری و وظیفه شما در این شرایط</div>
+                <ul>
+                    <li>در صورتی که شرایط اضطراری و غیر عادی را مشاهده نمودید از طریق تلفن و ارسال پیام، واحد ایمنی و آتش‌نشانی منطقه را مطلع سازید.</li>
+                    <li>چنانچه اقدامات اولیه برای شما خطر جانی به همراه ندارد تا رسیدن نیروهای اطفاء حریق و امداد و نجات، نسبت به اطفاء حریق با وسایل و ادوات دستی اقدام و یا در صورت آشنایی با روشهایی امداد و نجات به کمک مصدومین و مجروحین بشتابید.</li>
+                    <li>اگر چنانچه با روشهای اطفاء و یا امداد و نجات آشنایی ندارید، به هیچ وجه اقدامی ننموده و فقط ایمنی و آتش‌نشانی و یا دفتر منطقه و یا هر واحدی را که به راحتی به آن دسترسی دارید مطلع نموده و از موقعیت بحران دور شوید.</li>
+                    <li>در هنگام عملیات اطفاء و امدادرسانی سعی نمایید مانع از انجام کار توسط دیگران نشده و به محوطه محصور وارد نگردید.</li>
+                    <li>در صورت صلاحدید گروههای امداد و نجات، نسبت به انتقال مصدومین از محل حادثه به نقاط امن و تجمع اقدام نمایید.</li>
+                </ul>
+            </div>
+
+            <!-- ===== نکات کلیدی آمادگی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🔑</span> نکات کلیدی آمادگی و واکنش در وضعیت اضطراری</div>
+                <ul>
+                    <li>شناسایی حوادث، شرایط و نقاط اضطراری بالقوه</li>
+                    <li>مسئولیت‌ها و اختیارات در شرایط اضطراری (نظیر گروه امداد، گروه کمکهای اولیه، آتش‌نشانی‌ها و غیره)</li>
+                    <li>ارتباطات در شرایط اضطراری (شامل ارتباطات داخلی نظیر تلفن‌های اضطراری و سیستم‌های اعلام حریق و ارتباطات خارجی نظیر ارتباطات با همسایگان، آتش‌نشانی، مراکز اورژانس، سازمانهای دولتی)</li>
+                    <li>نقشه و طرح سایت (شامل محل درب‌های خروج اضطراری، پلکان فرار، محل انبارش مواد سمی یا قابل انفجار، محل کپسول‌های اطفاء حریق و غیره)</li>
+                    <li>روش‌های اجرای تخلیه محل (از جمله تدارک مکان مناسبی برای تجمع کارکنان)</li>
+                    <li>انجام مانور و تمرینات شرایط اضطراری، ارزیابی نتایج حاصله و اقدامات اصلاحی لازم</li>
+                    <li>نحوه انجام امداد و کمکهای اولیه</li>
+                    <li>تست ادوات هشدار دهنده</li>
+                    <li>برنامه‌ریزی تعمیرات و بازرسی ادواری تجهیزات</li>
+                    <li>آموزش عمومی</li>
+                    <li>احداث پناهگاه</li>
+                    <li>نحوه ایجاد هماهنگی با نزدیک‌ترین سازمانهای امدادی</li>
+                    <li>ارزیابی صلاحیت کارکنان کمیته مقابله با شرایط اضطراری</li>
+                    <li>نحوه مقابله با حریق</li>
+                    <li>تهیه نقشه کلی سایت و مشخص کردن نقاط بروز حادثه</li>
+                    <li>تهیه نقشه منطقه</li>
+                    <li>نصب نقشه‌ها در چند نقطه سازمان</li>
+                    <li>نصب علائم مربوط به شرایط اضطراری</li>
+                </ul>
+            </div>
+
+            <!-- ===== کمیته اضطراری ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">👥</span> کمیته اضطراری</div>
+                <p style="margin-bottom:10px;">
+                    زمان وقوع وضعیت اضطراری مشخص نمی‌باشد، از این رو لازم است برای مقابله با آنها فعالیت‌های هماهنگ و مناسب انجام شود. یکی از مهمترین اقدامات در راستای ایجاد این هماهنگی تشکیل کمیته‌ای است که توانایی لازم را برای واکنشی سریع داشته باشد. این کمیته باید در هر زمانی برای مواجهه با وضعیت اضطراری از آمادگی کافی برخوردار باشد و هماهنگی لازم را در امور فراهم آورد.
+                </p>
+
+                <div class="card-subtitle">🔸 وظایف کمیته در رابطه با برنامه‌ریزی برای شرایط اضطراری</div>
+                <ol>
+                    <li>شناسایی و تعیین وضعیت‌های اضطراری در ارتباط با فرآیند عملیاتی بخش، خطرات بالقوه که میتوانند وضعیت‌های اضطراری بوجود آورند، با توجه به اطلاعات و سوابق بدست آمده از تجارب قبلی، وقایع و حوادثی که در گذشته اتفاق افتاده و یا می‌تواند در آینده اتفاق بیافتند و نیز حوادثی که در سازمان‌های مشابه بوقوع پیوسته است.</li>
+                    <li>تهیه و تدوین دستورالعمل واکنش در برابر هر یک از وضعیت‌های اضطراری تعیین شده و مقابله با آثار ناشی از آنها.</li>
+                    <li>آمادگی مقابله با وضعیت اضطراری</li>
+                    <li>آموزش کارکنان</li>
+                    <li>تدوین و برقراری برنامه مانور و تمرین‌هایی عملیاتی</li>
+                    <li>واکنش در مواقع بروز وضعیت اضطراری</li>
+                </ol>
+
+                <div class="card-subtitle">🔸 ساختار و اعضای کمیته در یک طرح اضطراری</div>
+                <ul>
+                    <li>مدیریت ارشد سازمان</li>
+                    <li>امور حقوقی</li>
+                    <li>منابع انسانی</li>
+                    <li>HSE</li>
+                    <li>امور انبارها</li>
+                    <li>روابط عمومی</li>
+                    <li>حراست و حفاظت</li>
+                    <li>درمانگاه و اورژانس و آتش‌نشانی</li>
+                </ul>
+            </div>
+
+            <!-- ===== مرکز کنترل اضطراری ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📡</span> مرکز کنترل اضطراری</div>
+
+                <div class="card-subtitle">🔸 اطلاعات مورد نیاز مرکز کنترل اضطراری</div>
+                <ul>
+                    <li>اطلاعات مربوط به کمیته اضطراری</li>
+                    <li>یک نقشه که نشان‌دهنده وضعیت مجتمع در منطقه باشد</li>
+                    <li>یک نقشه از مجتمع که در آن خروجی‌ها، پناهگاه‌ها، مناطق خطرناک، ایستگاه آتش‌نشانی، اورژانس و ... مشخص شده باشند</li>
+                    <li>مدارک فنی مجتمع و نمودارهای جریان فرآیند</li>
+                    <li>اطلاعات مربوط به تجهیزات و فرآیندهای واحدهای مختلف</li>
+                    <li>برگه‌های اطلاعات ایمنی مواد</li>
+                    <li>اطلاعات مربوط به سیستم‌ها و تجهیزات پزشکی موجود</li>
+                    <li>طرح‌های تخلیه اضطراری</li>
+                    <li>شماره تلفن‌های اضطراری داخل و خارج از مجتمع</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 تجهیزات مورد نیاز مرکز کنترل اضطراری</div>
+                <ul>
+                    <li>سیستم‌های صوتی – تصویری جهت ثبت وقایع</li>
+                    <li>برق اضطراری (تجهیزات روشنایی اضطراری)</li>
+                    <li>دستگاه فکس و امکانات استفاده از Email</li>
+                    <li>خطوط تلفن داخل و خارجی، بی‌سیم، فاکس، موبایل و سایر تجهیزات ارتباطی</li>
+                    <li>تجهیزات رادیویی و هواشناسی</li>
+                    <li>سیستم‌های اعلام عمومی (آژیر)</li>
+                    <li>کامپیوتر، تجهیزات و نرم‌افزارهای جانبی</li>
+                    <li>لوازم‌التحریر، فایل، کمد و سایر ملزومات اداری مورد نیاز</li>
+                    <li>تابلوهای مخصوص جهت ثبت و گزارش وقایع، شرایط جوی، وضعیت کارکنان و تماس‌های به عمل آمده</li>
+                </ul>
+            </div>
+
+            <!-- ===== دستورالعمل های آمادگی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📋</span> دستورالعملهای آمادگی و واکنش اضطراری</div>
+
+                <div class="card-subtitle">🔸 دستورالعمل های عمومی</div>
+                <p>به منظور مقابله با وضعیت‌هایی تدوین می‌شوند که در صورت وقوع تمام مجتمع را در بر می‌گیرد. مانند: نشت و آتش‌سوزی وسیع در مخازن ذخیره‌سازی.</p>
+
+                <div class="card-subtitle">🔸 دستورالعمل های اختصاصی</div>
+                <p>به منظور مقابله با وضعیت‌هایی تدوین می‌شود که به صورت خاص ممکن است در هر کدام از قسمت‌های مختلف مجتمع رخ دهد. مانند: نشت جزئی اسید در آزمایشگاه.</p>
+            </div>
+
+            <!-- ===== کمیته بحران ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🏛️</span> کمیته بحران</div>
+                <p style="margin-bottom:10px;">
+                    در زمان وقوع شرایط اضطراری و در صورتیکه وسعت و شدت شرایط اضطراری به گونه‌ای باشد که کل شرکت تحت تاثیر آن قرار گیرد، مانند بلایای طبیعی، آتش‌سوزی‌های وسیع و جنگ و به منظور کاهش خسارات جانی و مالی و هماهنگ کردن عملیات شرایط اضطراری و اخذ تصمیمات کلان با دستور مدیریت ارشد سازمان کمیته‌ای تحت عنوان "کمیته بحران" در سطح کل شرکت تشکیل می‌شود.
+                </p>
+
+                <div class="card-subtitle">🔸 اعضای کمیته</div>
+                <ul>
+                    <li>مدیر عامل شرکت به عنوان رئیس کمیته</li>
+                    <li>مدیر روابط عمومی به عنوان دبیر کمیته</li>
+                    <li>معاونین شرکت</li>
+                    <li>مدیر حراست</li>
+                    <li>مدیر امور حقوقی</li>
+                    <li>مدیر ابزاردقیق و ارتباطات</li>
+                    <li>مدیر انرژی و سیالات</li>
+                    <li>مدیر ایمنی، بهداشت، درمان و محیط زیست</li>
+                    <li>سایر افراد به تشخیص رئیس کمیته</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 وظایف کمیته در زمان بحران</div>
+                <ul>
+                    <li>هماهنگی بین برنامه‌های واکنش در مقابل شرایط اضطراری بخش‌ها</li>
+                    <li>ارزیابی وضعیت، تصمیم‌گیری و صدور دستور مقتضی</li>
+                    <li>ایجاد ارتباط با سایر سازمانهای بیرونی برای کمک رسانی مانند آتش‌نشانی، هلال احمر و غیره</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 وظایف کمیته بعد از بحران</div>
+                <ul>
+                    <li>ریشه‌یابی علل بروز شرایط اضطراری</li>
+                    <li>تجزیه و تحلیل عملیات انجام شده و برنامه‌های واکنش در مقابل شرایط اضطراری و مشخص کردن نقاط ضعف و قوت</li>
+                    <li>تعیین اقدامات اصلاحی و پیشگیرانه و مسئولین مربوطه</li>
+                    <li>بازنگری مستندات در صورت لزوم</li>
+                </ul>
+            </div>
+
+            <!-- ===== مانور شرایط اضطراری ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🎯</span> مانور شرایط اضطراری</div>
+                <p style="margin-bottom:10px;">
+                    برای ایجاد هماهنگی و آمادگی هر چه بیشتر افراد و واحدهای امدادرسانی لازم است در پریودهای زمانی مشخص حداقل سالی یک بار مانورهای عملیاتی مطابق با دستورالعمل واکنش در مقابل شرایط اضطراری برگزار شود و در این مانورها نیز حتی الامکان از سرویسها و خدمات سایر واحدها، ارگانها و سازمانها نیز استفاده نمود.
+                </p>
+                <p>
+                    به منظور اطمینان از خروج منظم افراد از ساختمانها در موقع بروز حریق و جلوگیری از وحشت و ترس آنها می‌بایست تمرین‌های مربوط به تخلیه کارگاهها و ساختمانها را باید حداقل هر شش ماه یک مرتبه انجام داد.
+                </p>
+
+                <div class="card-subtitle">🔸 مراحل انجام مانور شرایط اضطراری</div>
+                <ol class="step-list">
+                    <li>تهیه سناریوی مانور شرایط اضطراری</li>
+                    <li>برگزاری جلسه پیش از مانور جهت بررسی سناریو و اقدامات مورد نیاز</li>
+                    <li>اجرای عملیات مانور شرایط اضطراری</li>
+                    <li>برگزاری جلسه پس از پایان مانور شرایط اضطراری</li>
+                    <li>ارزیابی مانور شرایط اضطراری توسط کمیته ارزیاب</li>
+                    <li>پیگیری در جهت رفع نواقص مانور برگزار شده</li>
+                </ol>
+            </div>
+
+            <!-- ===== پیاده سازی طرح (فازهای سه گانه) ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">⚙️</span> پیاده سازی طرح (قسمت دوم)</div>
+
+                <div class="card-subtitle">🔸 فاز ۱ – عملیات مقدماتی یا اقدامات قبل از وقوع (طرح پیشگیری)</div>
+                <ul>
+                    <li>ارزیابی ریسک</li>
+                    <li>طرح‌ها و برنامه‌های ایمنی</li>
+                    <li>تحلیل سناریو</li>
+                </ul>
+                <p>بخش عمده یک طرح جامع مدیریت اضطراری، طرح پیشگیری است. در این مرحله ضمن شناخت وضعیت موجود، با به کارگیری تکنیک‌های مهندسی ایمنی، خطرات شناسایی شده و به دنبال آن منابع موجود برای مقابله با وضعیت‌های اضطراری محتمل سازماندهی می‌شوند.</p>
+
+                <div class="card-subtitle">🔸 فاز ۲ – اقدامات حین وقوع (طرح مقابله)</div>
+                <ul>
+                    <li>اطلاع از حادثه</li>
+                    <li>به کار انداختن تجهیزات ایمنی و آتش‌نشانی</li>
+                    <li>اعلام وضعیت اضطراری</li>
+                    <li>توقف اضطراری</li>
+                    <li>اقدامات امنیتی</li>
+                    <li>اقدامات حفاظتی</li>
+                    <li>نجات و درمان مصدومین و انجام کمک‌های اولیه</li>
+                    <li>تخلیه اضطراری و تجمع در محل‌های امن از پیش تعیین شده</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 فاز ۳ – عملیات پس از وقوع (طرح بازیابی)</div>
+                <ul>
+                    <li>گزارش حادثه اضطراری (بررسی اولیه در محل)</li>
+                    <li>پاکسازی محل حادثه</li>
+                    <li>تشکیل جلسه کمیته اضطراری</li>
+                    <li>بررسی آسیب‌های روانی ناشی از شرایط اضطراری</li>
+                </ul>
+            </div>
+
+            <!-- ===== سناریو و طبقه بندی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📝</span> سناریو و طبقه بندی مانورها</div>
+
+                <div class="card-subtitle">🔸 هر سناریو می بایست شامل موارد ذیل باشد</div>
+                <ul>
+                    <li>فعالیتهایی که به منظور پیشگیری از افزایش خسارتها در هر مرحله باید انجام شود.</li>
+                    <li>جزئیات اقدام برای هر یک از افراد و مسئولیت هر یک از فعالیتها.</li>
+                    <li>امکانات و تجهیزات لازم برای هر یک از این فعالیتها.</li>
+                    <li>روشهای تخلیه.</li>
+                    <li>چگونگی حفاظت از جایگاههای پر خطر.</li>
+                    <li>ارتباط با سرویسهای خارجی.</li>
+                    <li>ارتباط با طرفهای قانونی.</li>
+                    <li>ارتباطات با همسایگان.</li>
+                    <li>چگونگی حفاظت از سوابق سیستم و چگونگی دسترسی به اطلاعات ضروری.</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 طبقه بندی مانورهای شرایط اضطراری</div>
+                <ul>
+                    <li><strong>کلاس A:</strong> وضعیت‌های اضطراری که می‌تواند باعث توقف تولید واحد و سرایت به سایر بخش‌ها شده و آسیب‌های جانی و مالی خیلی شدید را بوجود آورد و با حضور اعضای مدیریت ستاد بحران برگزار می‌شود.</li>
+                    <li><strong>کلاس B:</strong> وضعیت‌های اضطراری مرتبط با فرایندهای تولیدی واحد بوده که می‌تواند باعث توقف تولید و ایجاد حادثه نماید و با مشارکت واحدهای امدادرسان وضعیت به حالت عادی بر می‌گردد.</li>
+                    <li><strong>کلاس C:</strong> وضعیت‌های اضطراری که بدون حضور واحدهای امداد رسان و با اقدامات درون واحدی و خروج اضطراری کارکنان تحت کنترل می‌باشد.</li>
+                </ul>
+            </div>
+
+            <!-- ===== نظام اعلام وضعیت اضطراری ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📢</span> نظام اعلام وقوع شرایط اضطراری</div>
+                <ul>
+                    <li>هر یک از افراد حاضر در شرکت، به محض مشاهده یک شرایط اضطراری لازم است مراتب را به اتاق کنترل مربوطه، آتش‌نشانی یا مرکز پیام اطلاع دهد و بطور همزمان راساً یا با کمک همکاران، مبادرت به مقابله با شرایط اضطراری نمایند.</li>
+                    <li>تکنسین، تکنسین ارشد و یا مدیریت واحد می‌بایستی وقوع چنین وضعیتی را به اطلاع مدیریت بخش مربوطه رسانده و بطور همزمان جریان را جهت اقدامات لازم به اطلاع واحد آتش‌نشانی و امداد، انتظامات و... برسانند.</li>
+                    <li>مراکز امداد و رسیدگی به محض دریافت خبر وقوع شرایط اضطراری، بایستی به فوریت نسبت به اعزام ماشین‌های پیشرو و اطفاء حریق، ماشین‌های امداد و نجات و گروههای اطفاء حریق، اعزام گروه‌های کنترل افراد متفرقه، اعزام گروه‌های کاری مربوط به برق، آب، گاز، کنترل ترافیک، کمک‌های اولیه و آمبولانس، به محل شرایط اضطراری اقدام نمایند.</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 آژیر خطر</div>
+                <ul>
+                    <li>آژیر خطر برای اعلام وضعیت اضطراری بصورت ده سوت ممقطع ۱۰ ثانیه‌ای با فاصله زمانی ۱۰ ثانیه می‌باشد.</li>
+                    <li>آژیر پایان خطر نیز بصورت یک سوت ممتد ۱ دقیقه‌ای می‌باشد.</li>
+                </ul>
+            </div>
+
+            <!-- ===== توقف اضطراری ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">⛔</span> توقف اضطراری</div>
+                <p>برای جلوگیری از گسترش وضعیت اضطراری، لحاظ نمودن تدابیری برای توقف اضطراری ضروری می‌باشد. به این ترتیب به هنگام وقوع حادثه، ضمن اعلام وضعیت اضطراری با قطع جریان گاز و تخلیه خطوط لوله می‌توان از شدت اثرات حادثه کاست.</p>
+            </div>
+
+            <!-- ===== وظایف آتش نشانی، انتظامات، اورژانس ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🚒</span> وظایف آتش‌نشانی، انتظامات و اورژانس</div>
+
+                <div class="card-subtitle">🔸 وظایف آتش‌نشانی و امداد</div>
+                <ul>
+                    <li>اعزام فوری ماشین‌های پیشرو، ماشین‌های آتش‌نشانی دارای بلندگوی مناسب و سایر تجهیزات مورد نیاز به همراه نیروهای متخصص و آموزش دیده و مجهز به لوازم حفاظت فردی ویژه.</li>
+                    <li>تصمیم‌گیری و اعلام در مورد نحوه تخلیه افراد با در نظر گرفتن نوع شرایط اضطراری، شرایط جوی و ابعاد شرایط اضطراری.</li>
+                    <li>اقدام ضروری برای نجات حادثه‌دیدگان براساس درخواست تکنسین، تکنسین ارشد یا دیگر افراد حاضر در محل.</li>
+                    <li>اعلام وقوع شرایط اضطراری به سازمانهای آتش‌نشانی منطقه جهت اخذ کمک براساس وسعت و طبیعت شرایط اضطراری.</li>
+                    <li>مبادرت به واقعیت‌یابی شامل بررسی مشروح علت بروز شرایط اضطراری.</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 وظایف انتظامات</div>
+                <ul>
+                    <li>حضور فوری در محل شرایط اضطراری به محض اطلاع از وقوع شرایط اضطراری و جلوگیری از ورود یا نزدیکی افراد غیر مجاز به محل‌های دارای احتمال خطر.</li>
+                    <li>کنترل ترافیک و تسهیل حرکت وسایل نقلیه‌ای که جهت کمک رسانی به محل اعزام شده‌اند.</li>
+                    <li>بستن موقت جاده‌ها به منظور امکان تحرک و کمک رسانی سریع.</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 وظایف اورژانس</div>
+                <ul>
+                    <li>اعزام فوری آمبولانس بهمراه کادر پزشکی مورد نیاز به محل وقوع شرایط اضطراری.</li>
+                    <li>انجام کمکهای اولیه به مجروحان و آسیب‌دیدگان.</li>
+                    <li>اعلام وقوع شرایط اضطراری به سایر سازمانهای مرتبط درمانی منطقه جهت اخذ کمک براساس وسعت و طبیعت شرایط اضطراری.</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 اقدامات امنیتی مورد نیاز</div>
+                <ul>
+                    <li>قرق کردن صحنه حادثه</li>
+                    <li>حراست از منطقه حادثه و کنترل ورود و خروج</li>
+                    <li>ایجاد حصارهای موقت پس از تخلیه ایمن افراد</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 اقدامات حفاظتی</div>
+                <ul>
+                    <li>حفاظت اسناد</li>
+                    <li>اسناد مالی و بیمه‌ای</li>
+                    <li>طرح‌ها و نقشه‌های مهندسی</li>
+                    <li>فهرست و مشخصات محصولات</li>
+                    <li>بانک اطلاعات کارکنان، مشتریان و تامین‌کنندگان</li>
+                    <li>اسناد محرمانه تجاری</li>
+                </ul>
+            </div>
+
+            <!-- ===== تخلیه اضطراری ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🏃</span> تخلیه اضطراری و نقاط تجمع</div>
+                <p style="margin-bottom:10px;">
+                    در هنگام بروز یک وضعیت اضطراری لازم است که افراد مسوول در محل‌های امن از پیش تعیین شده تجمع نمایند. افرادی که در مهار حادثه شرکت می‌کنند نیز پس از انجام وظایف محوله باید به محل‌های امن پناه ببرند. این محل‌ها می‌تواند در خارج از تاسیسات نیز در نظر گرفته شود. لازم است افراد تا قبل از اعلام وضعیت عادی در این محل‌ها بمانند.
+                </p>
+
+                <div class="card-subtitle">🔸 طرح تخلیه اضطراری</div>
+                <ul>
+                    <li>تعیین وضعیت‌هایی که نیاز به تخلیه اضطراری دارند.</li>
+                    <li>تعیین افرادی که مجاز به صدور فرمان تخلیه می‌باشند.</li>
+                    <li>تعیین افرادی به منظور هدایت طرح تخلیه و سرشماری و کنترل افراد.</li>
+                    <li>تدوین روش‌های اجرایی تخلیه اضطراری.</li>
+                    <li>تعیین افرادی به منظور ادامه یا توقف عملیات بحرانی.</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 موارد لحاظ شده در طرح تخلیه اضطراری</div>
+                <ul>
+                    <li>چه کسی دستور تخلیه اضطراری را صادر می‌کند.</li>
+                    <li>چگونه تصمیم تخلیه اضطراری به اطلاع افراد می‌رسد.</li>
+                    <li>مسیرهای تخلیه کدامند.</li>
+                    <li>چه تجهیزاتی برای سهولت در انجام تخلیه مورد نیاز است.</li>
+                    <li>محل‌های امن برای تجمع پس از تخلیه اضطراری کدامند.</li>
+                    <li>سرشماری افراد پس از تجمع در محل‌های امن چگونه و توسط چه کسی انجام می‌شود.</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 نقاط تجمع</div>
+                <ul>
+                    <li>تعیین مکان‌های تجمع افراد پس از تخلیه</li>
+                    <li>انجام سرشماری افراد در مکان‌های تجمع (پس از اتمام تخلیه)</li>
+                    <li>جستجوی مفقودین تنها بر عهده گروه‌های تجسس می‌باشد.</li>
+                </ul>
+            </div>
+
+            <!-- ===== عملیات پس از وقوع ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🔄</span> عملیات پس از وقوع (طرح بازیابی)</div>
+                <p style="margin-bottom:10px;">به محض اینکه شرایط امنی برقرار شد، عملیات این فاز انجام شود.</p>
+
+                <div class="card-subtitle">🔸 بررسی اولیه</div>
+                <p>تهیه گزارش یک وضعیت اضطراری قبل از اینکه بسیاری از واقعیت به فراموشی سپرده شوند بسیار اهمیت دارد.</p>
+
+                <div class="card-subtitle">🔸 پاکسازی محل حادثه</div>
+                <ul>
+                    <li>به منظور دستیابی به یک بازیابی سریع اولین کاری که باید انجام گیرد آن است که فردی به عنوان مسوول عملیات پاکسازی وارد عمل شود. علاوه بر این لازم است لیستی از افراد به این منظور در دسترس باشد. این لیست نباید شامل افرادی باشد که در کمیته اضطراری عضویت دارند.</li>
+                    <li>در سرویس بودن سیستم‌های حفاظتی در این مرحله از اهمیت خاصی برخوردار است زیرا اثرات وضعیت اضطراری محتمل بعدی اغلب شدیدتر از وضعیت اولیه می‌تواند باشد.</li>
+                </ul>
+
+                <div class="card-subtitle">🔸 تشکیل جلسه کمیته اضطراری</div>
+                <p>پس از پایان وضعیت اضطراری و پاکسازی محل حادثه لازم است کمیته اضطراری تشکیل جلسه دهد و با استفاده از اطلاعاتی که از گزارش اولیه بدست آمده، به تجزیه و تحلیل حادثه و ریشه‌یابی علل آن بپردازد. علاوه بر این لازم است نحوه عملکرد کمیته اضطراری و سایر افراد در وضعیت اضطراری مورد بررسی قرار گرفته و نقاط ضعف و قوت در طرح و اجرا مشخص گردد.</p>
+
+                <div class="card-subtitle">🔸 بررسی آسیب‌های روانی</div>
+                <p>معمولاً به هنگام وقوع شرایط اضطراری سخت (وضعیت‌های بحرانی) بسیاری افراد دچار ترس و وحشت ناشی از حادثه می‌شوند که این وضعیت در آن‌ها حالت ماندگار به خود گرفته و ممکن است تا مدت‌ها پس از آن با کمترین تحریکی باعث به وجود آوردن حالت‌های روانی در افراد شود. آماده کردن افراد جهت مواجهه با این حوادث و نیز مراقبت‌های پس از حادثه به منظور جلوگیری از آسیب‌های روانی جدی به افراد در این حالت از اهمیت خاصی برخوردار است.</p>
+            </div>
+
+            <!-- ===== سوالات کلیدی ===== -->
+            <div class="card warning-box">
+                <div class="card-title"><span class="icon">❓</span> سوالات کلیدی در شرایط اضطراری</div>
+                <ul>
+                    <li>در کجا ممکن است شرایط رخ دهد؟</li>
+                    <li>چه کسانی ممکن است تحت تأثیر قرار گیرند؟</li>
+                    <li>چه زمانی احتمال بروز این شرایط بیشتر است؟</li>
+                    <li>در صورت رخ دادن، شدت آن تا چه حد خواهد بود؟</li>
+                    <li>چه محل‌هایی ممکن است تحت تأثیر قرار گیرند؟</li>
+                    <li>چه مقدار خسارت ممکن است به بار آید؟</li>
+                </ul>
+            </div>
+
+            <!-- ===== منابع و مآخذ ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📚</span> منابع و مآخذ</div>
+                <ul>
+                    <li>مجموع آیین‌نامه‌های حفاظت و بهداشت کار</li>
+                    <li>فصل ۴ آیین‌نامه مقررات حفاظتی ساختمان کارگاه‌ها</li>
+                    <li>فصل ۲ آیین‌نامه پیشگیری و مبارزه با آتش‌سوزی در کارگاه‌ها</li>
+                    <li>OSHA 3088:2001 - How to plan for workplace emergencies and evacuations</li>
+                    <li>Kobe steel standard 0104030110: Planning for Emergencies</li>
+                    <li>ISO 14001 و OHSAS 18001 - ویرایش متن و انطباق با نظامهای مدیریتی</li>
+                </ul>
+            </div>
+
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            تهیه شده توسط <span class="highlight">شرکت معدنی و صنایع معدنی درکاو</span><br>
+            <span style="direction:ltr; display:inline-block;">📞 09178680173</span>
+        </div>
+
+    </div>
+
+    <script>
+        // اضافه کردن قابلیت کپی متن با کلیک
+        document.querySelectorAll('.tip-item, .definition-item, .material-list li, .safety-alert ul li, .safety-alert p, .card ul li, .card ol li').forEach(el => {
+            el.style.cursor = 'pointer';
+            el.addEventListener('click', function() {
+                const text = this.textContent.trim();
+                navigator.clipboard.writeText(text).then(() => {
+                    const origBg = this.style.background;
+                    this.style.background = '#d4edda';
+                    setTimeout(() => {
+                        this.style.background = origBg || '';
+                    }, 400);
+                });
+            });
+        });
+
+        console.log('✅ دوره کامل آمادگی و واکنش در شرایط اضطراری بارگذاری شد.');
+        console.log('📋 کلیک روی هر متن برای کپی کردن');
+        console.log('📚 شامل ۲۴ بخش کامل با استانداردهای OHSAS 18001 و ISO 14001');
+    </script>
+
+<script src="hse-common.js"></script>
+
+<script src="assets/js/sw-register.js"></script>
+</body>
+</html>

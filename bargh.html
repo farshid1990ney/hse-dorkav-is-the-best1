@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+
+<script>
+/* ============================================================
+   ★ امنیت: گیت احراز هویت (سمت کلاینت)
+   هیچ صفحه‌ای بدون ورود به سامانه باز نمی‌شود. محتوای صفحه
+   مخفی می‌ماند و کاربر به صفحه ورود هدایت می‌شود.
+   (لایه نمایشی؛ لایه امنیتی واقعی در بکاند اعمال می‌شود.)
+   ============================================================ */
+(function(){
+  var ok = false;
+  try {
+    var _u = JSON.parse(localStorage.getItem('hse_user_activated') || 'null');
+    ok = !!(_u && _u.personnel && _u.fullname);
+  } catch(e) { ok = false; }
+  if (ok) return; // مجاز - ادامه می‌دهد
+
+  // پنهان‌کردن کل محتوا و نمایش قفل
+  var hide = function(){
+    try {
+      var d = document;
+      // مخفی کردن همه عناصر
+      var all = d.body ? d.body.children : [];
+      for (var i=0;i<all.length;i++){ all[i].style.display='none'; }
+      var lock = d.createElement('div');
+      lock.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#0f172a;color:#f8fafc;'
+        +'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+        +'font-family:Tahoma,sans-serif;text-align:center;padding:20px;direction:rtl;';
+      lock.innerHTML = '<div style="font-size:60px;margin-bottom:10px;">🔒</div>'
+        +'<h2 style="margin:0 0 8px;">دسترسی محدود است</h2>'
+        +'<p style="margin:0 0 20px;color:#94a3b8;">لطفاً ابتدا از صفحه اصلی وارد سامانه شوید.</p>'
+        +'<a href="index.html" style="background:#ff6208;color:#fff;padding:10px 26px;'
+        +'border-radius:10px;text-decoration:none;font-weight:bold;">بازگشت به صفحه ورود</a>';
+      d.body.appendChild(lock);
+    } catch(e){}
+  };
+  if (document.body) hide(); else document.addEventListener('DOMContentLoaded', hide);
+  setTimeout(function(){ try{ location.replace('index.html'); }catch(e){} }, 2500);
+})();
+</script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#1e3c5c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HSE درکاو" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+    <title>آموزش جامع ایمنی در برق - آژند همت توس</title>
+
+    <style>
+        :root {
+            --primary: #ff6208;
+            --primary-hover: #e05300;
+            --secondary: #f39c12;
+            --success: #27ae60;
+            --safety: #2c6e4e;
+            --danger: #c0392b;
+            --dark-blue: #1e3c5c;
+            --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #dfe7f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --text-main: #1e2a2e;
+            --text-muted: #64748b;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body { padding-bottom: 75px !important;
+            background: var(--bg-gradient);
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text-main);
+            line-height: 1.8;
+        }
+
+        .main-container {
+            max-width: 1000px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            background: var(--dark-blue);
+            padding: 35px 20px;
+            color: white;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+            position: relative;
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        .header h1 .icon {
+            margin-left: 10px;
+        }
+        .header p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        .header .back-home {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .header .back-home:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+        .card:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        }
+        .card-title {
+            color: var(--dark-blue);
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-right: 4px solid var(--primary);
+            padding-right: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title .icon {
+            font-size: 1.5rem;
+        }
+
+        .card-subtitle {
+            color: var(--primary);
+            font-size: 1.05rem;
+            font-weight: bold;
+            margin: 18px 0 10px 0;
+            border-bottom: 2px solid rgba(255, 98, 8, 0.15);
+            padding-bottom: 6px;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .tips-grid .tip-item {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 10px 14px;
+            border-radius: var(--border-radius-sm);
+            border-right: 3px solid var(--safety);
+            font-size: 0.9rem;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .tips-grid .tip-item:hover {
+            background: rgba(44, 110, 78, 0.04);
+            transform: translateX(-3px);
+        }
+        .tips-grid .tip-item.danger-tip {
+            border-right-color: var(--danger);
+        }
+        .tips-grid .tip-item.warning-tip {
+            border-right-color: var(--secondary);
+        }
+        .tips-grid .tip-item.primary-tip {
+            border-right-color: var(--primary);
+        }
+        .tips-grid .tip-item.info-tip {
+            border-right-color: #3498db;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+        .spec-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .spec-table th,
+        .spec-table td {
+            padding: 10px 12px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        .spec-table th {
+            background: var(--dark-blue);
+            color: white;
+            font-weight: bold;
+        }
+        .spec-table tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .spec-table tr:hover {
+            background: rgba(255, 98, 8, 0.04);
+        }
+
+        .btn-back {
+            background: #cbd5e1;
+            border: none;
+            padding: 10px 24px;
+            border-radius: var(--border-radius-sm);
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 12px;
+            color: #334155;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .btn-back:hover {
+            background: #b0bec5;
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .footer .highlight {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .badge-standard {
+            display: inline-block;
+            background: var(--safety);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-danger {
+            display: inline-block;
+            background: var(--danger);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-warning {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-info {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+
+        .safety-alert {
+            background: rgba(192, 57, 43, 0.04);
+            border-right: 4px solid var(--danger);
+            padding: 15px;
+            border-radius: var(--border-radius-sm);
+            margin: 10px 0;
+        }
+        .safety-alert strong {
+            color: var(--danger);
+        }
+        .safety-alert ul {
+            padding-right: 20px;
+            margin-top: 5px;
+        }
+        .safety-alert ul li {
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .definition-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .definition-item {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 10px 14px;
+            border-radius: var(--border-radius-sm);
+            border-right: 3px solid var(--secondary);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .definition-item:hover {
+            background: rgba(255, 98, 8, 0.04);
+        }
+        .definition-item strong {
+            color: var(--dark-blue);
+            display: block;
+            font-size: 0.92rem;
+        }
+        .definition-item span {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: block;
+            margin-top: 2px;
+        }
+
+        .material-list {
+            list-style: none;
+            padding: 0;
+            margin: 5px 0;
+        }
+        .material-list li {
+            padding: 10px 15px;
+            margin-bottom: 6px;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: var(--border-radius-sm);
+            border-right: 3px solid var(--primary);
+            transition: var(--transition);
+            cursor: pointer;
+            font-size: 0.92rem;
+        }
+        .material-list li:hover {
+            background: rgba(255, 98, 8, 0.04);
+        }
+        .material-list li .mat-num {
+            font-weight: bold;
+            color: var(--dark-blue);
+            display: inline-block;
+            min-width: 40px;
+        }
+
+        @media(max-width:700px) {
+            .content {
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            .header .back-home {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+                left: 10px;
+            }
+            .definition-grid {
+                grid-template-columns: 1fr;
+            }
+            .tips-grid {
+                grid-template-columns: 1fr;
+            }
+            .spec-table {
+                font-size: 0.75rem;
+            }
+            .spec-table th,
+            .spec-table td {
+                padding: 6px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <a href="index.html" class="back-home" title="بازگشت به صفحه اصلی">🏠</a>
+            <h1><span class="icon">⚡</span> آموزش جامع ایمنی در برق</h1>
+            <p>دوره آموزشی ایمنی برق — مفاهیم، خطرات، حفاظت و مقررات کامل (مواد ۱ تا ۱۱۸)</p>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <!-- ===== مقدمه ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📖</span> مقدمه</div>
+                <p style="margin-bottom:10px;">
+                    <strong>"برق خادمی است که می‌تواند قاتل هم باشد!"</strong>
+                </p>
+                <p style="margin-bottom:10px;">
+                    امروزه زندگی بدون برق ممکن نیست و تمام صنایع با برق کار می‌کنند. با تمام مزایایی که از برق می‌شناسیم، خطرات، آسیب‌ها و مشکلات فراوانی برای انسان‌ها و حیوانات ایجاد می‌کند؛ از جمله برق‌گرفتگی‌های منجر به مرگ، عقیم‌کردن، ناراحتی‌های اعصاب و روان، سوختگی‌ها، قطع عضو، خسارات مالی و ... بسیاری از این مشکلات زمانی پیش می‌آید که مقررات ایمنی در کار را رعایت نمی‌کنیم.
+                </p>
+                <p>
+                    هر زمان که با ابزار برقی یا مدارهای برقی کار می‌شود، ریسک خطر برق، بخصوص شوک الکتریکی وجود دارد. کارگران در معرض خطر بیشتری هستند زیرا محیط‌های کاری مملو از ابزار و مواد، سرعت کاری بالا و در مواردی در ارتباط با فضای آزاد می‌باشد. تماس با انرژی الکتریکی می‌تواند منجر به جریان یافتن برق در بدن شده و باعث ایجاد شوک‌های الکتریکی و سوختگی گردد. حتی صدمات شدید یا مرگ نیز ممکن است رخ دهد.
+                </p>
+                <div style="margin-top:10px; padding:10px; background:rgba(44,110,78,0.04); border-radius:var(--border-radius-sm); border-right:3px solid var(--safety);">
+                    <strong>📌 سرفصل‌های دوره:</strong>
+                    <span class="badge-standard">تعاریف اولیه</span>
+                    <span class="badge-standard">برق گرفتگی</span>
+                    <span class="badge-standard">حفاظت الکتریکی</span>
+                    <span class="badge-standard">مقررات ایمنی</span>
+                    <span class="badge-standard">اقدامات اولیه</span>
+                </div>
+            </div>
+
+            <!-- ===== فصل اول: تعاریف اولیه ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📚</span> فصل اول: تعاریف اولیه و کمیات الکتریکی</div>
+
+                <div class="card-subtitle">الکتریسیته چیست؟</div>
+                <p style="margin-bottom:10px;">
+                    در نتیجه اصطکاک و مالش بعضی از اجسام با یکدیگر پدیده‌ای به وجود می‌آید که به آن الکتریسیته می‌گویند. فهم الکتریسیته با دانستن جزء اصلی ماده یعنی اتم امکان‌پذیر است. هسته اتم از پروتون و نوترون تشکیل شده است. پروتون‌ها بار مثبت و نوترون‌ها خنثی هستند. الکترون‌ها دور هسته می‌چرخند و بار منفی دارند.
+                </p>
+
+                <div class="card-subtitle">رساناها</div>
+                <p style="margin-bottom:8px;">
+                    وقتی الکترون‌های آزاد از یک اتم به اتم دیگر حرکت می‌کنند، یک جریان الکتریکی تولید می‌شود. موادی که اجازه می‌دهند الکترون‌های زیادی آزادانه حرکت کنند، <strong>رسانا</strong> نامیده می‌شوند.
+                </p>
+                <div class="tips-grid">
+                    <div class="tip-item primary-tip">🔹 مس</div>
+                    <div class="tip-item primary-tip">🔹 نقره</div>
+                    <div class="tip-item primary-tip">🔹 آلومینیوم</div>
+                    <div class="tip-item primary-tip">🔹 روی</div>
+                    <div class="tip-item primary-tip">🔹 آهن</div>
+                </div>
+
+                <div class="card-subtitle">عایق‌ها</div>
+                <p style="margin-bottom:8px;">
+                    موادی که کمتر اجازه‌ی شارش الکترون‌ها را می‌دهند <strong>عایق</strong> نامیده می‌شوند.
+                </p>
+                <div class="tips-grid">
+                    <div class="tip-item info-tip">🔸 پلاستیک</div>
+                    <div class="tip-item info-tip">🔸 شیشه</div>
+                    <div class="tip-item info-tip">🔸 میکا</div>
+                    <div class="tip-item info-tip">🔸 سرامیک</div>
+                </div>
+
+                <div class="card-subtitle">نیمه‌هادی‌ها</div>
+                <p>
+                    نیمه‌هادی‌ها مطابق نامشان نصف رسانا و نصف عایق نیستند، بلکه آنها مواد کریستالی مخصوص اصلاح‌شده‌ای هستند که هنگامیکه نیروی الکتریکی در یک جهت به آنها وارد شود مانند رسانا عمل می‌کنند، و هنگامیکه نیرو کاهش یابد، مانند عایق عمل می‌کنند. این اصل پایه عملکرد دیودها، ترانزیستورها و بسیاری از وسایل الکترونیکی حالت جامد است.
+                </p>
+
+                <div class="card-subtitle">بارهای الکتریکی</div>
+                <div class="tips-grid">
+                    <div class="tip-item primary-tip">🔹 مواد با الکترون زیاد: <strong>بار منفی</strong></div>
+                    <div class="tip-item primary-tip">🔹 مواد با پروتون زیاد: <strong>بار مثبت</strong></div>
+                    <div class="tip-item info-tip">🔸 مواد با تعداد مساوی: <strong>خنثی</strong></div>
+                    <div class="tip-item warning-tip">⚠️ بارهای غیرهم‌نام: <strong>جذب</strong> یکدیگر</div>
+                    <div class="tip-item warning-tip">⚠️ بارهای هم‌نام: <strong>دفع</strong> یکدیگر</div>
+                </div>
+
+                <div class="card-subtitle">ولتاژ</div>
+                <p>نیرویی که باعث می‌شود جریان از داخل هادی عبور کند، اختلاف ولتاژ نامیده می‌شود. واحد آن <strong>ولت</strong> می‌باشد.</p>
+
+                <div class="card-subtitle">مقاومت</div>
+                <p>تمام مواد در حد خود مانع از جاری شدن جریان می‌شوند. این خاصیت <strong>مقاومت</strong> نامیده می‌شود. واحد مقاومت <strong>اهم</strong> می‌باشد. مقاومت با افزایش طول یا کاهش سطح مقطع ماده افزایش می‌یابد.</p>
+
+                <div class="card-subtitle">قانون اهم</div>
+                <p style="margin-bottom:8px;">قانون اهم، فرمول اساسی محاسبات در مدارهای الکتریکی است. این قانون می‌گوید جریان به طور مستقیم با ولتاژ تغییر می‌کند و به صورت معکوس با مقاومت ارتباط دارد.</p>
+                <div style="padding:10px; background:rgba(0,0,0,0.03); border-radius:var(--border-radius-sm); text-align:center; font-family:'Courier New',monospace; font-size:1.1rem; direction:ltr;">
+                    V = I × R &nbsp;&nbsp;|&nbsp;&nbsp; I = V ÷ R &nbsp;&nbsp;|&nbsp;&nbsp; R = V ÷ I
+                </div>
+
+                <div class="card-subtitle">جریان مستقیم (DC)</div>
+                <p>عبور الکترون‌ها از یک سیم (هادی) که از نظر سو و جهت یکسو و ثابت می‌باشد. مانند جریان باتری‌ها.</p>
+
+                <div class="card-subtitle">جریان متناوب (AC)</div>
+                <p>جریانی که شدت و جهت آن در فواصل معین و مشخص زمانی تغییر می‌نماید. فرکانس جریان برق شهری در ایران <strong>۵۰ هرتز</strong> می‌باشد.</p>
+            </div>
+
+            <!-- ===== فصل دوم: برق گرفتگی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">⚠️</span> فصل دوم: برق گرفتگی</div>
+
+                <div class="card-subtitle">برق گرفتگی چیست؟</div>
+                <p style="margin-bottom:10px;">
+                    برق‌گرفتگی یکی از حوادث نسبتاً شایع است که روز به روز همگام با صنعتی شدن زندگی انسان امروزی رو به تزاید بوده و صرف نظر از جنبه‌های خاص درمانی و تبعات اجتماعی و روانی آن، از نظر قانونی و قضایی نیز دارای اهمیت فوق‌العاده‌ای می‌باشد.
+                </p>
+                <p>
+                    <strong>تعریف ساده:</strong> قرار گرفتن دو نقطه از بدن در مسیر جریان برق، موجب عبور جریان از بدن می‌شود و با توجه به شدت و مدت عبور جریان، برق گرفتگی بوجود می‌آید و ممکن است عواقب مختلفی نظیر مرگ ناشی از ایست قلبی، سوختگی داخلی و سوختگی خارجی بدنبال داشته باشد.
+                </p>
+
+                <div class="safety-alert">
+                    <strong>🔴 خطرات برق گرفتگی:</strong>
+                    <ul>
+                        <li>ایست قلبی و مرگ</li>
+                        <li>سوختگی‌های داخلی و خارجی</li>
+                        <li>از کار افتادن کلیه‌ها</li>
+                        <li>قطع عضو (به دلیل سوختگی داخلی)</li>
+                        <li>شکستگی استخوان‌ها (بر اثر پرتاب شدن)</li>
+                    </ul>
+                </div>
+
+                <div class="card-subtitle">دلایل ایجاد شوک الکتریکی</div>
+                <ol style="padding-right:20px; margin:5px 0;">
+                    <li>تماس با هر دو هادی یا سیم مدار برق (فاز و نول، فاز و فاز)</li>
+                    <li>تماس با سیم فاز مدار برقدار و زمین</li>
+                    <li>تماس با سیم نول و زمین در شرایط عدم تعادل بار فازها</li>
+                    <li>تماس با بدنه هادی دستگاه‌هایی که دارای اتصالی بدنه هستند</li>
+                    <li>تخلیه بار الکتریکی ذخیره‌شده از دستگاه‌های برقی در موقع خاموش بودن</li>
+                    <li>ایجاد اختلاف پتانسیل بین دو پا (ولتاژ گامی)</li>
+                    <li>الکتریسیته ساکن</li>
+                    <li>رعد و برق</li>
+                </ol>
+
+                <div class="card-subtitle">عوارض ناشی از شوک الکتریکی</div>
+                <div class="tips-grid">
+                    <div class="tip-item danger-tip">❌ انقباض ماهیچه‌ها</div>
+                    <div class="tip-item danger-tip">❌ خفگی</div>
+                    <div class="tip-item danger-tip">❌ فیبریلاسیون قلب</div>
+                    <div class="tip-item danger-tip">❌ سوختگی</div>
+                </div>
+
+                <div class="card-subtitle">انواع برق گرفتگی</div>
+                <div class="tips-grid">
+                    <div class="tip-item primary-tip"><strong>مستقیم:</strong> تماس فرد با هادی برقدار سالم</div>
+                    <div class="tip-item warning-tip"><strong>غیرمستقیم:</strong> تماس با بدنه فلزی دستگاه که بر اثر خرابی عایق برقدار شده است</div>
+                </div>
+
+                <div class="card-subtitle">عوامل مؤثر در برق گرفتگی</div>
+
+                <h5 style="color:var(--dark-blue); margin:10px 0 5px 0;">1. ولتاژ</h5>
+                <p>حداکثر مجاز ولتاژ تماس در فرکانس ۵۰ هرتز در شرایط عادی و خشک برابر <strong>۵۰ ولت</strong> (استاندارد انگلستان) و <strong>۶۵ ولت</strong> (استاندارد آلمان) می‌باشد.</p>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead><tr><th>ولتاژ مؤثر (r.m.s)</th><th>احساسات فیزیولوژیکی</th></tr></thead>
+                        <tbody>
+                            <tr><td>۱۰ تا ۱۲ ولت</td><td>حداقل آستانه احساس</td></tr>
+                            <tr><td>۱۵ ولت</td><td>حداقل آستانه درد</td></tr>
+                            <tr><td>۲۰ ولت</td><td>حداقل آستانه درد شدید</td></tr>
+                            <tr><td>۲۰ تا ۲۵ ولت</td><td>حداقل ولتاژ نگهدارنده</td></tr>
+                            <tr><td>۴۰ تا ۵۰ ولت</td><td>حداقل ولتاژ کشنده</td></tr>
+                            <tr><td>۵۰ تا ۶۰ ولت</td><td>محدوده ولتاژ برای فیبریلاسیون</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h5 style="color:var(--dark-blue); margin:10px 0 5px 0;">2. مقاومت بدن انسان</h5>
+                <p>بدن انسان پیچیده‌ترین هادی الکتریکی می‌باشد. مقاومت پوست بدن از عوامل مؤثر در کاهش یا افزایش مقاومت الکتریکی است. مقاومت بدن در ولتاژهای پایین بیشتر از ولتاژهای بالا است و با بالا رفتن ولتاژ، مقاومت بدن تنزل پیدا می‌کند. مقاومت الکتریکی بدن پس از مرگ حدود <strong>۶۵ درصد</strong> افزایش می‌یابد.</p>
+
+                <h5 style="color:var(--dark-blue); margin:10px 0 5px 0;">3. مسیر عبور جریان</h5>
+                <p>کوتاه‌ترین مسیر بین نقطه ورود و خروج جریان از بدن، مسیر عبور جریان نامیده می‌شود. خطرناک‌ترین مسیر، عبور جریان از قسمت‌های حساس بدن مثل مغز، قلب و ریه‌ها می‌باشد.</p>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead><tr><th>مسیر جریان</th><th>درصد عبور از قلب</th></tr></thead>
+                        <tbody>
+                            <tr><td>دست چپ</td><td>۳.۷٪</td></tr>
+                            <tr><td>دست راست</td><td>۶.۷٪</td></tr>
+                            <tr><td>پاها</td><td>۰.۴٪</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h5 style="color:var(--dark-blue); margin:10px 0 5px 0;">4. سطح تماس</h5>
+                <p>هر چه سطح تماس (مثلاً کف دست) با هادی برقدار بیشتر باشد، خطر برق گرفتگی بیشتر می‌شود.</p>
+
+                <h5 style="color:var(--dark-blue); margin:10px 0 5px 0;">5. مدت زمان عبور جریان</h5>
+                <p>هر چه مدت زمان عبور جریان از بدن بیشتر باشد، شدت و خسارت‌های ناشی از برق گرفتگی بیشتر خواهد شد. جریان ۷۵ میلی‌آمپر در مدت ۹ ثانیه باعث از کار افتادگی قلب و قطع تنفس می‌شود.</p>
+
+                <h5 style="color:var(--dark-blue); margin:10px 0 5px 0;">6. حساسیت‌های فردی</h5>
+                <p>به جنس، جثه، ورزشکار بودن و شرایط فیزیکی فرد بستگی دارد.</p>
+
+                <h5 style="color:var(--dark-blue); margin:10px 0 5px 0;">7. فرکانس</h5>
+                <p>فرکانس ۵۰ و ۶۰ هرتز تقریباً فرکانسی است که باعث حداکثر تحریک در انتهای یک عصب می‌شود. در فرکانس‌های بالاتر از <strong>۱۰ کیلوهرتز</strong>، جریان برق در سطح بدن عبور می‌کند و برق گرفتگی رخ نمی‌دهد.</p>
+            </div>
+
+            <!-- ===== فصل سوم: حفاظت الکتریکی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🛡️</span> فصل سوم: حفاظت الکتریکی</div>
+
+                <div class="card-subtitle">حفاظت الکتریکی چیست؟</div>
+                <p>مجموعه اقداماتی است که باید در تأسیسات الکتریکی انجام گیرد تا خطرات و خسارات ناشی از جریان برق به افراد و تأسیسات به حداقل برسد.</p>
+
+                <div class="card-subtitle">روش‌های حفاظت در مقابل برق گرفتگی مستقیم</div>
+                <div class="tips-grid">
+                    <div class="tip-item primary-tip">✅ عایق‌بندی قسمت‌های برقدار</div>
+                    <div class="tip-item primary-tip">✅ محصور کردن تجهیزات</div>
+                    <div class="tip-item primary-tip">✅ استقرار خارج از دسترس</div>
+                </div>
+
+                <div class="card-subtitle">تماس غیرمستقیم</div>
+                <p>هنگامی که در اثر خراب شدن عایق‌بندی، یک هادی برق‌دار با سطوح فلزی در دسترس تماس حاصل کند و انسان با آن سطح فلزی در تماس باشد.</p>
+
+                <div class="card-subtitle">روش‌های حفاظت در مقابل برق گرفتگی غیرمستقیم</div>
+                <div class="tips-grid">
+                    <div class="tip-item primary-tip">✅ قطع خودکار مدار با اتصال زمین</div>
+                    <div class="tip-item primary-tip">✅ عایق‌بندی مضاعف یا دوبل</div>
+                    <div class="tip-item primary-tip">✅ عایق کردن محیط</div>
+                    <div class="tip-item primary-tip">✅ هم ولتاژ کردن بدون اتصال زمین</div>
+                    <div class="tip-item primary-tip">✅ جدا کردن منبع تغذیه از زمین (ایزوله کردن)</div>
+                </div>
+
+                <div class="card-subtitle">ارت یا اتصال زمین</div>
+                <p>اتصال بدنه دستگاه الکتریکی به زمین می‌باشد. به منظور حفاظت افراد و دستگاه‌ها در برابر اضافه ولتاژهای تولید شده در بدنه تجهیزات الکتریکی که باعث صدمه دیدن دستگاه‌ها و افراد می‌شود، همچنین ولتاژهای بسیار زیاد و خطرناک ناشی از برخورد صاعقه با ساختمان‌ها، باید به وسیله تجهیزاتی مستقیماً در زمین خنثی شوند.</p>
+
+                <div class="tips-grid">
+                    <div class="tip-item info-tip"><strong>ارت حفاظتی:</strong> ایمنی افراد و تجهیزات</div>
+                    <div class="tip-item info-tip"><strong>ارت الکتریکی:</strong> صحیح کار کردن دستگاه</div>
+                </div>
+
+                <div class="safety-alert">
+                    <strong>📌 نحوه عملکرد چاه ارت:</strong>
+                    <p style="margin-top:5px;">مقاومت بدن انسان معمولاً ۲۵۰۰ تا ۵۰۰۰ اهم است. مقاومت چاه ارت باید زیر <strong>۲ اهم</strong> باشد. زمانی که دستگاه به چاه ارت متصل باشد، جریان نشتی به جای عبور از بدن، از مسیر کم‌مقاومت چاه ارت عبور می‌کند و فرد در برابر برق گرفتگی محافظت می‌شود.</p>
+                </div>
+
+                <div class="card-subtitle">انواع چاه ارت</div>
+                <div class="tips-grid">
+                    <div class="tip-item primary-tip"><strong>چاه ارت عمقی:</strong> حفاری با عمق زیاد</div>
+                    <div class="tip-item primary-tip"><strong>چاه ارت سطحی:</strong> تا عمق ۸۰ سانتیمتر</div>
+                </div>
+
+                <div class="card-subtitle">مراحل احداث چاه ارت</div>
+                <ol style="padding-right:20px; margin:5px 0;">
+                    <li>انتخاب محل مناسب (پایین‌ترین سطح، دسترسی به رطوبت)</li>
+                    <li>حفاری به عمق ۴ تا ۸ متر و قطر حدود ۸۰ سانتیمتر</li>
+                    <li>استفاده از صفحه مسی (۵۰×۵۰×۵ میلیمتر برای مناطق نیمه‌خشک)</li>
+                    <li>جوش دادن سیم مسی نمره ۵۰ به صفحه (با جوش برنج یا نقره)</li>
+                    <li>پر کردن چاه با دوغاب بنتونیت و خاک رس</li>
+                    <li>نصب لوله پلی‌اتیلن برای تزریق آب در فصول گرم</li>
+                </ol>
+
+                <div class="card-subtitle">کلیدهای جریان نشتی (RCD / RCCB)</div>
+                <p>کلید محافظ جان با تشخیص نشت جریان، مدار را در کسری از ثانیه قطع کرده و مانع از صدمات جانی می‌شود. اساس عملکرد آن مقایسه جریان فاز و نول است.</p>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead><tr><th>نوع RCD</th><th>کاربرد</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>تیپ AC</strong></td><td>تشخیص جریان‌های نشتی متناوب (AC)</td></tr>
+                            <tr><td><strong>تیپ A</strong></td><td>تشخیص جریان متناوب و پالسی DC</td></tr>
+                            <tr><td><strong>تیپ B</strong></td><td>تشخیص جریان متناوب، پالسی و صاف DC تا ۱ مگاهرتز</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="safety-alert">
+                    <strong>⚠️ نکته مهم:</strong>
+                    <ul>
+                        <li>بدن انسان توانایی تحمل جریان <strong>۳۰ میلی‌آمپر</strong> را در مدت <strong>۲۰۰ میلی‌ثانیه</strong> دارد.</li>
+                        <li>کلید محافظ جان باید در جریان نشتی بیش از ۳۰ میلی‌آمپر، مدار را در کمتر از ۲۰۰ میلی‌ثانیه قطع کند.</li>
+                        <li>کلید محافظ جان <strong>جایگزین سیستم ارت</strong> نمی‌شود و فقط به عنوان حفاظت مضاعف استفاده می‌شود.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ===== فصل چهارم: مقررات و نکات استفاده ایمن از برق (کامل) ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📋</span> فصل چهارم: مقررات و نکات استفاده ایمن از برق</div>
+                <p style="margin-bottom:10px; color:var(--text-muted);">بر اساس آیین‌نامه حفاظت در برابر برق (وزارت کار و امور اجتماعی) — <strong>مواد ۱ تا ۱۱۸</strong></p>
+
+                <div class="card-subtitle">مقررات عمومی (مواد ۱ تا ۲۲)</div>
+                <ul class="material-list">
+                    <li><span class="mat-num">ماده ۱:</span> نصب، تنظیم، آزمایش، نگهداری و تعمیرات کلیه تجهیزات الکتریکی فقط باید توسط افراد متخصص و ماهر انجام شود.</li>
+                    <li><span class="mat-num">ماده ۲:</span> تجهیزات الکتریکی کارگاه باید با استانداردهای الکتریکی مطابقت داشته باشند.</li>
+                    <li><span class="mat-num">ماده ۳:</span> تجهیزات و ملزومات مورد استفاده برای هر نوع عملیات برقی باید متناسب با آن کاربرد خاص باشد.</li>
+                    <li><span class="mat-num">ماده ۴:</span> طراحی شبکه توزیع برق باید به گونه‌ای باشد که احتمال برقراری اتصال کوتاه و عبور جریان اضافی وجود نداشته باشد.</li>
+                    <li><span class="mat-num">ماده ۵:</span> قبل از بکارگیری کلیه تجهیزات الکتریکی باید از صحت عایق‌بندی الکتریکی قسمت‌های برقدار آن‌ها اطمینان حاصل شود.</li>
+                    <li><span class="mat-num">ماده ۶:</span> تجهیزات الکتریکی باید متناسب با اثرات خاص شرایط جوی و محیطی بکار گرفته شود.</li>
+                    <li><span class="mat-num">ماده ۷:</span> انتخاب و بکارگیری تجهیزات الکتریکی باید به گونه‌ای باشد که اثرات قوس الکتریکی (آرک) مهار گردیده و باعث بروز خطر نشود.</li>
+                    <li><span class="mat-num">ماده ۸:</span> رعایت دستورالعمل‌های کارخانه سازنده برای نصب، راه‌اندازی، نگهداری و تعمیرات تجهیزات الکتریکی الزامی است.</li>
+                    <li><span class="mat-num">ماده ۹:</span> تجهیزاتی که برای قطع جریان الکتریکی مدار بکار می‌روند، باید با ولتاژ و جریان نامی آن مطابقت داشته باشند.</li>
+                    <li><span class="mat-num">ماده ۱۰:</span> هیچیک از تجهیزات الکتریکی بخصوص سیم‌ها و هادی‌ها نباید در معرض عوامل شیمیایی خورنده، گازها، بخارات، رطوبت، مواد قابل اشتعال و انفجار، مایعات یا عوامل دیگر قرار گیرند؛ مگر اینکه به طور مشخص برای کار در چنین محیط‌هایی طراحی و ساخته شده باشند.</li>
+                    <li><span class="mat-num">ماده ۱۱:</span> در زمان اجرای عملیات ساختمانی باید تجهیزات الکتریکی از صدمات ناشی از شرایط فیزیکی و جوی محافظت شوند.</li>
+                    <li><span class="mat-num">ماده ۱۲:</span> کلیه تجهیزات الکتریکی شامل شین‌ها، ترمینال‌ها، سیم‌کشی‌ها و عایق‌ها باید کاملاً سالم بوده و نباید با رنگ، گچ، گرد و غبار، مواد پاک‌کننده، مواد ساینده و یا دیگر مواد آلوده شوند.</li>
+                    <li><span class="mat-num">ماده ۱۳:</span> قسمت‌هایی از تجهیزات و وسایل الکتریکی که در حال کارکرد عادی، قوس الکتریکی، جرقه، شعله یا فلز مذاب تولید می‌کنند، باید محصور شده و از هرگونه مواد منفجره و قابل اشتعال دور باشند.</li>
+                    <li><span class="mat-num">ماده ۱۴:</span> در محل ورود به اتاق‌ها یا محل‌های حفاظت شده که قسمت‌های برقدار در دسترس دارند، باید علائم هشداردهنده مبنی بر ممنوع بودن ورود افراد غیرمجاز نصب شود.</li>
+                    <li><span class="mat-num">ماده ۱۵:</span> کلیه تابلوهای برق، جعبه تقسیم‌ها و تجهیزات مشابه دیگر باید دارای علائم هشدار دهنده مناسب باشند.</li>
+                    <li><span class="mat-num">ماده ۱۶:</span> برای کلیه قسمت‌های برقدار با ولتاژ فشار قوی اعم از روکشدار و بدون روکش باید حفاظ فلزی متصل به سیستم اتصال به زمین برای جلوگیری از قوس الکتریکی تعبیه گردد.</li>
+                    <li><span class="mat-num">ماده ۱۷:</span> باید در ورودی مدار توزیع برق کارگاه وسیله مناسبی برای قطع کامل برق تجهیزات تعبیه شود.</li>
+                    <li><span class="mat-num">ماده ۱۸:</span> به دلیل امکان گرم شدن زیاد و جرفه‌زنی فیوزها و قطع‌کننده‌های مدار، نگهداری مواد قابل اشتعال و انفجار در مجاورت آن‌ها ممنوع است.</li>
+                    <li><span class="mat-num">ماده ۱۹:</span> تابلوهای برق، جعبه تقسیم‌ها و نظایر آن باید به گونه‌ای نصب شود که از نفوذ و تجمع آب در داخل آنها جلوگیری شود.</li>
+                    <li><span class="mat-num">ماده ۲۰:</span> موتورهای الکتریکی، وسایلی که با موتور کنترل می‌شوند و سیم‌های مدارهای انشعابی موتورهای الکتریکی باید در برابر افزایش دمای ناشی از اضافه بار موتور یا معایب مربوط به روشن‌شدن موتور محافظت شوند.</li>
+                    <li><span class="mat-num">ماده ۲۱:</span> در محل استقرار افرادی که در نزدیکی کنترل‌کننده یا قسمت‌های برقدار موتور کار می‌کنند، باید سکو یا کفپوش عایق مناسب در نظر گرفته شود.</li>
+                    <li><span class="mat-num">ماده ۲۲:</span> کارفرما مکلف به اخذ تاییدیه سالیانه صحت عملکرد سیستم اتصال به زمین (الکترود ارت ـ دستگاه‌ها ـ همبندی‌ها و دیگر تجهیزات و متعلقات) از وزارت کار و امور اجتماعی می‌باشد.</li>
+                </ul>
+
+                <div class="card-subtitle">سیم‌کشی (مواد ۲۳ تا ۶۰)</div>
+                <ul class="material-list">
+                    <li><span class="mat-num">ماده ۲۳:</span> دسترسی به کانال‌های تأسیسات برق باید به راحتی امکان پذیر باشد.</li>
+                    <li><span class="mat-num">ماده ۲۴:</span> سیم‌ها و کابل‌های برق در کانال‌ها باید به گونه‌ای نصب شوند که تعقیب مسیر آن‌ها آسان باشد.</li>
+                    <li><span class="mat-num">ماده ۲۵:</span> درپوش ورودی کانال‌های تاسیساتی زیرزمینی باید به گونه‌ای قرار گیرد که احتمال جابجائی و لغزش آنها وجود نداشته باشد.</li>
+                    <li><span class="mat-num">ماده ۲۶:</span> درپوش کانال‌های تاسیساتی در سطح کارگاه باید تحمل وزن افراد و وسایل نقلیه عبوری را داشته باشد.</li>
+                    <li><span class="mat-num">ماده ۲۷:</span> شرایط داخل کانال باید از لحاظ تهویه، نور، حرارت و رطوبت مناسب باشد.</li>
+                    <li><span class="mat-num">ماده ۲۸:</span> ورودی‌ها، دیوارها و کف کانال‌های تاسیسات برق باید از مصالحی ساخته شود که مانع از نفوذ و تجمع آب در کانال گردد.</li>
+                    <li><span class="mat-num">ماده ۲۹:</span> بدنه کانال‌های تاسیسات برقی باید از مصالحی ساخته شود که تحمل فشارهای جانبی و غیره را داشته باشد.</li>
+                    <li><span class="mat-num">ماده ۳۰:</span> در کانال‌های تاسیساتی آدم‌رو باید کابل‌ها و تجهیزات برقی براساس اصول فنی و ایمنی نصب شده باشند.</li>
+                    <li><span class="mat-num">ماده ۳۱:</span> به منظور جلوگیری از وقوع خطرات احتمالی و امدادرسانی، بکارگیری کارگران به تنهایی در کانال‌ها ممنوع می‌باشد.</li>
+                    <li><span class="mat-num">ماده ۳۲:</span> ورود به کانال‌های برق بدون هماهنگی با واحد برق یا مسؤول برق به هر عنوان ممنوع است.</li>
+                    <li><span class="mat-num">ماده ۳۳:</span> اتصال سیم‌ها به یکدیگر و ترمینال‌ها باید یک اتصال مطمئن بوده و قسمت لخت هادی برق به نحو ایمن عایق‌بندی گردد.</li>
+                    <li><span class="mat-num">ماده ۳۴:</span> کلیدهای روشنایی باید در محلی نصب گردد که شخص برای روشن کردن چراغ، در معرض تماس احتمالی با قسمت‌های برقدار یا قسمت‌های متحرک تجهیزات دیگر قرار نگیرد.</li>
+                    <li><span class="mat-num">ماده ۳۵:</span> بکار بردن سیم‌های برق خارج از استاندارد رنگ سیم‌ها ممنوع است. <strong>رنگ سیم فاز:</strong> قرمز یا مشکی یا قهوه‌ای — <strong>رنگ سیم نول:</strong> آبی — <strong>رنگ سیم ارت:</strong> زرد-سبز</li>
+                    <li><span class="mat-num">ماده ۳۶:</span> کلیه سیم‌ها و کابل‌های برق باید به لحاظ نوع، رنگ، جنس و سطح مقطع به گونه‌ای انتخاب شود که کاربرد آن به سادگی قابل تشخیص باشد.</li>
+                    <li><span class="mat-num">ماده ۳۷:</span> تجهیزات سیستم اتصال به زمین نباید برای اهداف دیگر بکار گرفته شوند.</li>
+                    <li><span class="mat-num">ماده ۳۸:</span> استفاده از سیم ارت به جای سیم نول و بالعکس تحت هر شرایطی ممنوع است.</li>
+                    <li><span class="mat-num">ماده ۳۹:</span> قطع کننده مدار نوع دستگیره‌ای باید روی تابلو کلیدها عمودی نصب شده و در وضعیت ON دستگیره در موقعیت بالا باشد.</li>
+                    <li><span class="mat-num">ماده ۴۰:</span> حصارها و بدنه فلزی تجهیزات الکتریکی باید اتصال به زمین مؤثر داشته باشند.</li>
+                    <li><span class="mat-num">ماده ۴۱:</span> کلیه اجزای فلزی سیم‌کشی و نیز سپر (شیلد) حفاظ‌های فلزی کابل‌ها باید اتصال زمین موثر داشته باشد.</li>
+                    <li><span class="mat-num">ماده ۴۲:</span> عبور هرگونه سیم و کابل از داخل کانال‌های مخصوص تهویه و کانال‌های خروج ذرات گرد و غبار یا بخارات قابل اشتعال ممنوع است.</li>
+                    <li><span class="mat-num">ماده ۴۳:</span> استفاده از سیم‌کشی‌های موقت در کارگاه‌های ساختمانی، در زمان تخریب، ساخت، تعمیرات و تغییرات مجاز است با رعایت اصول ایمنی و صرفاً و بلافاصله پس از اتمام کار بایستی کلیه سیم‌کشی‌های موقت جمع‌آوری شود.</li>
+                    <li><span class="mat-num">ماده ۴۴:</span> سیم‌کشی‌های موقت باید در ارتفاع مناسبی نصب و یا به روش مطمئن دیگری استفاده شود تا از تماس تصادفی افراد و تجهیزات با آن‌ها جلوگیری گردد.</li>
+                    <li><span class="mat-num">ماده ۴۵:</span> سیم‌کشی‌های موقت در مدارهای فشار ضعیف برای محل‌های عبور و مرور باید حداقل ۳ متر ارتفاع داشته باشند.</li>
+                    <li><span class="mat-num">ماده ۴۶:</span> کلیه سیم‌ها و کابل‌های نصب‌شده در ارتفاع، سقف و دیوارها باید در فواصل مناسبی تثبیت شوند تا از آویزان شدن آنها جلوگیری شود.</li>
+                    <li><span class="mat-num">ماده ۴۷:</span> کلیه چراغ‌های مورد استفاده برای روشنایی موقت باید در برابر تماس اشیاء و افراد و شکستن حفاظت شوند.</li>
+                    <li><span class="mat-num">ماده ۴۸:</span> پریزهای مورد استفاده در مدارهای سیم‌کشی موقت باید از نوع ارت‌دار بوده و به سیستم اتصال به زمین مطمئن و مؤثر وصل شوند.</li>
+                    <li><span class="mat-num">ماده ۴۹:</span> بدنه فلزی تابلوهای برق بایستی مجهز به سیستم اتصال به زمین بوده و درب‌دار باشد و پیرامون آنها کفپوش یا سکوی عایق مؤثر نصب گردد.</li>
+                    <li><span class="mat-num">ماده ۵۰:</span> برای دسترسی آسان و ایمن به کلیه قسمت‌های تابلوهای برق با عرض زیاد، باید در جهت‌های مختلف، درهایی باشد که از تماس تصادفی جلوگیری شود.</li>
+                    <li><span class="mat-num">ماده ۵۱:</span> برای جلوگیری از صدمه دیدن کابل‌ها در اثر ساییده شدن به لبه‌های تیز ورودی به تابلوها، جعبه تقسیم‌ها و دستگاه‌ها باید از کلمپ‌های الاستیکی استفاده شود.</li>
+                    <li><span class="mat-num">ماده ۵۲:</span> در کلیدهای چاقویی، جریان ورودی باید به پایه ثابت وصل شده و تیغه‌های متحرک همواره به جریان برگشتی فاز متصل باشد، به نحوی که هیچگاه در حالت باز تیغه‌ها برقدار نباشد.</li>
+                    <li><span class="mat-num">ماده ۵۳:</span> کلید‌های چاقویی باید به صورت عمودی نصب شود، به نحوی که پایه متحرک در سمت پایین باشد.</li>
+                    <li><span class="mat-num">ماده ۵۴:</span> از سیم‌های رابط نباید به عنوان سیم‌کشی دایم استفاده نمود.</li>
+                    <li><span class="mat-num">ماده ۵۵:</span> عبور سیم‌های رابط از زیر کفپوش‌ها و محل‌هایی که احتمال ساییدگی، ضربه، بریدگی و معیوب شدن آنها وجود دارد، ممنوع است.</li>
+                    <li><span class="mat-num">ماده ۵۶:</span> سیم‌های رابط نباید در معرض صدمات ناشی از تماس با لبه‌های در و پنجره و بست‌ها قرار گیرند.</li>
+                    <li><span class="mat-num">ماده ۵۷:</span> سیم‌های رابط باید پیوسته و یک تکه باشند.</li>
+                    <li><span class="mat-num">ماده ۵۸:</span> سیم‌های رابط باید توسط تجهیزات ایمن نظیر دوشاخه و سه‌شاخه به وسایل و پریزها متصل گردیده و احتمال کشیدگی سیم نیز وجود نداشته باشد.</li>
+                    <li><span class="mat-num">ماده ۵۹:</span> لامپ‌های مخصوص روشنایی محوطه بیرونی کارگاه‌ها باید پایین‌تر از هادی‌های برقدار، ترانسفورماتورها یا تجهیزات الکتریکی دیگر نصب شود مگر اینکه فواصل مناسب و ایمن بین آن‌ها و تجهیزات و خطوط برقدار رعایت گردد.</li>
+                    <li><span class="mat-num">ماده ۶۰:</span> در کارگاه‌هایی که استفاده از وسایل سیار الکتریکی ضروری است، باید به تعداد کافی پریز ثابت در نقاط مناسبی که دسترسی آسان و ایمن به آن‌ها میسر باشد، تعبیه شود.</li>
+                </ul>
+
+                <div class="card-subtitle">تجهیزات الکتریکی (مواد ۶۱ تا ۹۴)</div>
+                <ul class="material-list">
+                    <li><span class="mat-num">ماده ۶۱:</span> تجهیزات الکتریکی که برای خنک کردن آن‌ها از جریان طبیعی هوا و اصول همرفت استفاده می‌شود، باید طوری نصب شوند که دیوارها یا تجهیزات مجاور مانع عبور جریان هوا از قسمت‌های مذکور نشوند.</li>
+                    <li><span class="mat-num">ماده ۶۲:</span> باید بین دیوارهای مجاور، پایین و بالای تجهیزات الکتریکی فضای کافی برای جابه‌جایی هوا وجود داشته باشد.</li>
+                    <li><span class="mat-num">ماده ۶۳:</span> دستگاه‌های الکتریکی سیار باید دارای دسته‌هایی از جنس عایق باشند.</li>
+                    <li><span class="mat-num">ماده ۶۴:</span> تجهیزات الکتریکی باید دارای یک صفحه مشخصات (پلاک) قابل رؤیت باشند که نام تولیدکننده، علامت تجاری یا علائم تشریحی دیگر مانند نوع، اندازه، ولتاژ، ظرفیت جریان و سایر مشخصات نامی در آن درج شده باشد.</li>
+                    <li><span class="mat-num">ماده ۶۵:</span> همه وسایل قطع کننده مدارها یا موتورهای الکتریکی باید دارای پلاک مخصوص بوده به گونه‌ای که مشخص شود هر یک از آن‌ها مربوط به کدام دستگاه است.</li>
+                    <li><span class="mat-num">ماده ۶۶:</span> قرار دادن هرگونه مواد و اشیاء و همچنین استراحت افراد حتی به صورت موقت در محل استقرار تابلوهای برق و پست‌ها ممنوع است.</li>
+                    <li><span class="mat-num">ماده ۶۷:</span> در جاهایی که احتمال وارد آمدن صدمات فیزیکی به تجهیزات الکتریکی و پست‌های برق وجود دارد، نصب حفاظ و حصار با پایداری و مقاومت مناسب و فاصله کافی الزامی است.</li>
+                    <li><span class="mat-num">ماده ۶۸:</span> رعایت فاصله مناسب برای محل استقرار و استراحت افراد تا پست‌های برق و تجهیزات الکتریکی الزامی است.</li>
+                    <li><span class="mat-num">ماده ۶۹:</span> قسمت‌های برقدار تجهیزات الکتریکی باید به یکی از روش‌های قراردادن در یک تابلوی مناسب و ایمن یا قراردادن داخل یک اتاق یا محفظه قفل‌دار و یا محصور کردن توسط دیوارها و یا جداکننده‌های دایمی به طوری که از دسترس افراد متفرقه دور باشد، در برابر تماس تصادفی محافظت شوند.</li>
+                    <li><span class="mat-num">ماده ۷۰:</span> در اطراف تجهیزات الکتریکی باید فضای مناسبی برای عملکرد ایمن، تعمیر و نگهداری آن‌ها وجود داشته باشد.</li>
+                    <li><span class="mat-num">ماده ۷۱:</span> برای دسترسی به فضای اطراف تجهیزات الکتریکی باید حداقل یک درب ورودی مناسب که به طرف بیرون باز شود، تعبیه گردد.</li>
+                    <li><span class="mat-num">ماده ۷۲:</span> فضای اطراف تجهیزات سرویس‌دهی، تابلو کلیدها و مراکز کنترل باید از روشنایی کافی برخوردار باشد.</li>
+                    <li><span class="mat-num">ماده ۷۳:</span> کنترل روشنایی در اتاق‌های تجهیزات الکتریکی باید به صورت دستی انجام شود.</li>
+                    <li><span class="mat-num">ماده ۷۴:</span> روزنه‌ها یا منافذ ترانسفورماتورها و تجهیزات مشابه دیگر باید طوری طراحی شوند که در صورت ورود اشیاء خارجی از طریق آن‌ها به داخل محفظه فلزی امکان برخورد با قسمت‌های برقدار وجود نداشته باشد.</li>
+                    <li><span class="mat-num">ماده ۷۵:</span> در ورودی حصارها، اتاق‌ها و ساختمان‌هایی که محل نصب یا عبور تجهیزات الکتریکی فشار قوی می‌باشند، باید قفل بوده و کلید آن در اختیار مسئول برق باشد.</li>
+                    <li><span class="mat-num">ماده ۷۶:</span> فضای کار در اطراف تجهیزات الکتریکی با ولتاژ فشار قوی، باید به اندازه‌ای باشد که احتمال قوس الکتریکی (آرک) وجود نداشته باشد.</li>
+                    <li><span class="mat-num">ماده ۷۷:</span> محل ورودی به مکان نگهداری تجهیزات الکتریکی باید به نحوی باشد که عبور و مرور افراد به آسانی میسر باشد.</li>
+                    <li><span class="mat-num">ماده ۷۸:</span> سیستم روشنایی فضاهای کار تجهیزات الکتریکی با ولتاژهای فشار قوی باید طوری طراحی و تعبیه شود که در حین تعویض لامپ‌ها یا تعمیرات، افراد برق‌کار در معرض خطرات ناشی از قسمت‌های برقدار قرار نگیرند.</li>
+                    <li><span class="mat-num">ماده ۷۹:</span> وسیله قطع مدار الکتریکی باید طوری باشد که وضعیت باز (off) یا بسته (ON) بودن آن به سادگی تشخیص داده شود.</li>
+                    <li><span class="mat-num">ماده ۸۰:</span> کلیه تجهیزات الکتریکی باید به وسایل قطع جریان اضافی مجهز شوند.</li>
+                    <li><span class="mat-num">ماده ۸۱:</span> وسایل قطع جریان اضافی باید متناسب با مداری باشد که روی آن نصب می‌شوند.</li>
+                    <li><span class="mat-num">ماده ۸۲:</span> وسایل قطع جریان اضافی فقط باید مدار مربوط به خود را قطع کنند.</li>
+                    <li><span class="mat-num">ماده ۸۳:</span> وسایل قطع جریان اضافی باید در مکان مناسبی قرار گیرند که دسترسی سریع به آن‌ها امکان‌پذیر بوده و در معرض صدمات فیزیکی نباشند.</li>
+                    <li><span class="mat-num">ماده ۸۴:</span> استفاده از کلید محافظ جان (RCD) به عنوان جایگزین سیستم اتصال به زمین برای حفاظت در برابر برق گرفتگی ممنوع است و فقط به عنوان حفاظت مضاعف می‌توان از آن‌ها استفاده نمود؛ مگر در مواردی که در این آیین‌نامه به صراحت بیان شده است.</li>
+                    <li><span class="mat-num">ماده ۸۵:</span> نصب کلیدهای محافظ جان (RCD) باید متناسب با نوع حفاظت مورد نظر باشد.</li>
+                    <li><span class="mat-num">ماده ۸۶:</span> کلیدهای محافظ جان (RCD) باید قبل از استفاده و پس از نصب در فواصل زمانی معین و منظم آزمایش شوند تا از صحت عملکرد آن‌ها اطمینان حاصل شود.</li>
+                    <li><span class="mat-num">ماده ۸۷:</span> تمام تجهیزات سیار الکتریکی، باید به یک کلید محافظ جان (RCD) مناسب مجهز شوند.</li>
+                    <li><span class="mat-num">ماده ۸۸:</span> در صورت بکارگیری کلید محافظ جان سیار (RCD) باید طول سیم کلید تا حد امکان کوتاه بوده و از هیچ سیم اضافی دیگری استفاده نشود.</li>
+                    <li><span class="mat-num">ماده ۸۹:</span> در مکان‌های مرطوب باید از کلیدهای محافظ جان (RCD) به عنوان حفاظت مضاعف به همراه سیستم اتصال به زمین استفاده کرد.</li>
+                    <li><span class="mat-num">ماده ۹۰:</span> وسایل فرمان الکتریکی دستی باید به نحوی نصب گردد که به سهولت در دسترس بوده و تماس تصادفی با قسمت‌های برقدار امکان‌پذیر نباشد.</li>
+                    <li><span class="mat-num">ماده ۹۱:</span> وسایل فرمان الکتریکی دستی باید مجهز به سرپوش یا در باشد تا از قطع و وصل تصادفی آن‌ها ممانعت بعمل آید.</li>
+                    <li><span class="mat-num">ماده ۹۲:</span> وسیله قطع‌کننده موتور باید در معرض دید و فاصله مناسب از کاربر نصب شود.</li>
+                    <li><span class="mat-num">ماده ۹۳:</span> وسیله قطع کننده موتور باید قادر به قطع کامل موتور از تمام سیم‌های تغذیه باشد.</li>
+                    <li><span class="mat-num">ماده ۹۴:</span> کلید قطع‌کننده تجهیزات الکتریکی نباید به سیم اتصال به زمین را قطع کند.</li>
+                </ul>
+
+                <div class="card-subtitle">سایر مقررات (مواد ۹۵ تا ۱۱۸)</div>
+                <ul class="material-list">
+                    <li><span class="mat-num">ماده ۹۵:</span> هر موتور الکتریکی باید یک وسیله قطع‌کننده جداگانه داشته‌باشد و فقط در شرایط زیر می‌توان از یک وسیله قطع مشترک استفاده کرد: الف) تعدادی موتور الکتریکی قسمت‌های مشخصی از یک ماشین را راه‌اندازی می‌کنند. ب) تعدادی موتور الکتریکی توسط یک مجموعه از وسایل حفاظتی محافظت شوند.</li>
+                    <li><span class="mat-num">ماده ۹۶:</span> در مسیر عبور برق فشار قوی، نصب علائم هشداردهنده «برق فشار قوی» الزامی است.</li>
+                    <li><span class="mat-num">ماده ۹۷:</span> استفاده از چراغ‌های دستی با ولتاژ بیش از ۵۰ ولت ممنوع می‌باشد مگر اینکه به کلیدهای محافظ جان (RCD) مناسب تجهیز شوند.</li>
+                    <li><span class="mat-num">ماده ۹۸:</span> سرپیچ لامپ‌های الکتریکی باید به گونه‌ای باشد که قبل از بازنمودن کامل لامپ، احتمال تماس بدن با هیچ یک از قسمت‌های برقدار وجود نداشته باشد.</li>
+                    <li><span class="mat-num">ماده ۹۹:</span> استفاده از لامپ‌های الکتریکی سیار صرفاً در صورتی مجاز است که تأمین روشنایی ثابت و مناسب امکان‌پذیر نباشد.</li>
+                    <li><span class="mat-num">ماده ۱۰۰:</span> لامپ‌های الکتریکی سیار باید مجهز به دستگیره و نگهدارنده عایق مناسب باشد.</li>
+                    <li><span class="mat-num">ماده ۱۰۱:</span> لامپ‌های الکتریکی سیار که برای مکان‌های مرطوب و خیس بکار برده می‌شود باید از نوع ضد آب باشد.</li>
+                    <li><span class="mat-num">ماده ۱۰۲:</span> در کلیه مکان‌هایی که احتمال بروز آتشسوزی و سرایت آن وجود دارد، ترانسفورماتورهای روغنی را باید درون کانال مسقف و ایمن قرار داد.</li>
+                    <li><span class="mat-num">ماده ۱۰۳:</span> اتاق ترانسفورماتورها باید طوری ساخته شود که از دسترس افراد متفرقه محفوظ بوده و کلیدها و قفل‌ها به گونه‌ای باشد که به راحتی از داخل باز شود.</li>
+                    <li><span class="mat-num">ماده ۱۰۴:</span> اتاق ترانسفورماتورها باید تهویه مناسب داشته‌باشد.</li>
+                    <li><span class="mat-num">ماده ۱۰۵:</span> هیچگونه لوله یا داکت متفرقه نباید از اتاق ترانسفورماتورها عبور کند و همچنین قراردادن وسایل اضافی در اتاق مذکور ممنوع است.</li>
+                    <li><span class="mat-num">ماده ۱۰۶:</span> شارژ، نگهداری و تعمیر باتری فقط باید در مکان‌هایی که دارای تهویه مناسب هستند، انجام شود.</li>
+                    <li><span class="mat-num">ماده ۱۰۷:</span> در تمام ورودی‌های اتاق باتری باید علائم هشداردهنده مبنی بر ممنوعیت سیگار کشیدن و روشن کردن آتش در شعاع ۸ متری نصب شوند.</li>
+                    <li><span class="mat-num">ماده ۱۰۸:</span> باتری‌ها باید طوری نگهداری شوند که از خروج فیوم‌ها، گاز و یا مایع الکترولیت و نفوذ آن به مکان‌های دیگر جلوگیری شود.</li>
+                    <li><span class="mat-num">ماده ۱۰۹:</span> قفسه‌ها و سینی‌های موجود در اتاق باتری باید دارای استحکام کافی بوده و یک روکش مقاوم در برابر الکترولیت داشته‌باشد.</li>
+                    <li><span class="mat-num">ماده ۱۱۰:</span> به محض مشاهده اسید یا خوردگی در محل نگهداری شارژ باتری‌ها باید سریعاً نسبت به رفع نقص اقدام نمود.</li>
+                    <li><span class="mat-num">ماده ۱۱۱:</span> در نزدیکی محل شارژ باتری باید تجهیزات کمک‌های اولیه برای شستن سریع چشم‌ها و بدن تأمین شود.</li>
+                    <li><span class="mat-num">ماده ۱۱۲:</span> برای جلوگیری از خطرات ناشی از الکتریسیته ساکن، باید رطوبت نسبی هوا بیش از ۵۰ درصد (درجه هیدرومتریک) باشد و بدنه فلزی دستگاه‌ها به سیستم اتصال به زمین وصل شود.</li>
+                    <li><span class="mat-num">ماده ۱۱۳:</span> در مکان‌هایی که احتمال تجمع بارهای الکتریکی ساکن وجود دارد، باید اتصال زمین مناسب برای هدایت این بارها به زمین تأمین شود.</li>
+                    <li><span class="mat-num">ماده ۱۱۴:</span> برای جلوگیری از خطرات ناشی از الکتریسیته ساکن در محل‌هایی که مایعات از مخزن‌های ذخیره به تانکرها یا بارکش‌ها و بالعکس انتقال داده می‌شوند، باید بدنه فلزی مخزن ذخیره توسط یک هادی به بدنه فلزی تانکر یا بارکش وصل شده و هر دو به زمین متصل شوند.</li>
+                    <li><span class="mat-num">ماده ۱۱۵:</span> در اماکنی که گرد و غبار و پودرهای بسیار نرم در حال انتقال می‌باشد، باید محل انباشت بارهای الکتریکی ساکن به وسیله آشکارسازها مشخص و با سیستم اتصال به زمین مؤثر به زمین وصل گردد.</li>
+                    <li><span class="mat-num">ماده ۱۱۶:</span> در رنگ‌پاشی با پیستوله باید پیستوله و کلیه اشیای فلزی که رنگ یا لعاب با آن‌ها پاشیده می‌شود و نیز اتاقک رنگ، مخزن رنگ و وسایل تهویه به سیستم اتصال به زمین وصل شوند.</li>
+                    <li><span class="mat-num">ماده ۱۱۷:</span> روشنایی محیط‌های قابل اشتعال و انفجار باید از خارج محیط تأمین گردد و در غیر اینصورت چراغ‌های مذکور از نوع ضد انفجاری بوده و در برابر آسیب‌های مکانیکی حفاظت شوند.</li>
+                    <li><span class="mat-num">ماده ۱۱۸:</span> در محیط‌هایی که خطر انفجار وجود دارد، کلیه کلیدها و کنترل‌کننده‌ها، مدارهای فرمان، فیوزها و تمام دستگاه‌های خودکار باید خارج از محدوده خطر قرار گیرند.</li>
+                </ul>
+            </div>
+
+            <!-- ===== فصل پنجم: اقدامات اولیه در برق گرفتگی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🚑</span> فصل پنجم: اقدامات اولیه در برق گرفتگی</div>
+
+                <div class="safety-alert">
+                    <strong>⚠️ مهم‌ترین اقدام در برق گرفتگی:</strong>
+                    <p style="margin-top:5px;">قبل از هر اقدامی، <strong>جریان برق را قطع کنید</strong>. اگر نمی‌توانید برق را قطع کنید، با استفاده از یک <strong>چوب خشک</strong> یا <strong>تخته چوبی</strong> مصدوم را از مدار خارج کنید.</p>
+                </div>
+
+                <div class="card-subtitle">مراحل کمک‌های اولیه</div>
+                <ol style="padding-right:20px; margin:5px 0;">
+                    <li><strong>قطع جریان برق</strong> — اولویت اول</li>
+                    <li><strong>خارج کردن مصدوم از مدار</strong> (با چوب خشک یا تخته چوبی، هرگز با دست خالی)</li>
+                    <li><strong>بررسی علائم حیاتی</strong> (تنفس و ضربان قلب)</li>
+                    <li>در صورت عدم تنفس، بلافاصله <strong>احیای قلبی-ریوی (CPR)</strong> را شروع کنید.</li>
+                    <li>ناحیه سوخته بدن را با <strong>گاز استریل</strong> یا پارچه تمیز بپوشانید.</li>
+                    <li>هرگونه شکستگی اندام‌ها را <strong>آتل‌بندی</strong> کنید.</li>
+                </ol>
+
+                <div class="safety-alert">
+                    <strong>⚠️ هشدار مهم:</strong>
+                    <p style="margin-top:5px;">در فرد دچار برق گرفتگی، احتمال آسیب <strong>مهره‌های گردنی</strong> و متعاقباً فلج اندام‌ها بسیار زیاد است. در حمل و نقل مصدوم، <strong>هیچ گونه حرکتی به سر و گردن</strong> وی داده نشود.</p>
+                </div>
+
+                <div class="tips-grid">
+                    <div class="tip-item primary-tip">🔹 مصدومین برق گرفتگی باید <strong>حتماً به بیمارستان</strong> منتقل شوند.</div>
+                    <div class="tip-item warning-tip">⚠️ برق گرفتگی می‌تواند <strong>عوارض تأخیری</strong> خطرناک داشته باشد.</div>
+                    <div class="tip-item danger-tip">🚫 هرگز مصدوم را با <strong>دست خالی</strong> لمس نکنید مگر اینکه جریان برق قطع شده باشد.</div>
+                    <div class="tip-item primary-tip">🔹 در صورت قطع تنفس، <strong>تنفس مصنوعی</strong> انجام دهید.</div>
+                    <div class="tip-item primary-tip">🔹 در صورت قطع ضربان قلب، <strong>ماساژ قلبی</strong> انجام دهید.</div>
+                    <div class="tip-item info-tip">📌 در صورت سوختگی، از <strong>پماد یا چربی</strong> روی زخم استفاده نکنید.</div>
+                </div>
+            </div>
+
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            تهیه شده توسط <span class="highlight">شرکت معدنی و صنایع معدنی درکاو</span><br>
+            <span style="direction:ltr; display:inline-block;">📞 09178680173</span>
+        </div>
+
+    </div>
+
+    <script>
+        // اضافه کردن قابلیت کپی متن با کلیک
+        document.querySelectorAll('.tip-item, .definition-item, .material-list li, .safety-alert ul li, .safety-alert p').forEach(el => {
+            el.style.cursor = 'pointer';
+            el.addEventListener('click', function() {
+                const text = this.textContent.trim();
+                navigator.clipboard.writeText(text).then(() => {
+                    const origBg = this.style.background;
+                    this.style.background = '#d4edda';
+                    setTimeout(() => {
+                        this.style.background = origBg || '';
+                    }, 400);
+                });
+            });
+        });
+
+        console.log('✅ آموزش جامع ایمنی در برق (کامل) بارگذاری شد.');
+        console.log('📋 کلیک روی هر متن برای کپی کردن');
+        console.log('📚 شامل ۵ فصل کامل با ۱۱۸ ماده قانونی');
+    </script>
+
+<script src="hse-common.js"></script>
+
+<script src="assets/js/sw-register.js"></script>
+</body>
+</html>

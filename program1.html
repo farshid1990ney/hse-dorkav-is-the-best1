@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+
+<script>
+/* ============================================================
+   ★ امنیت: گیت احراز هویت (سمت کلاینت)
+   هیچ صفحه‌ای بدون ورود به سامانه باز نمی‌شود. محتوای صفحه
+   مخفی می‌ماند و کاربر به صفحه ورود هدایت می‌شود.
+   (لایه نمایشی؛ لایه امنیتی واقعی در بکاند اعمال می‌شود.)
+   ============================================================ */
+(function(){
+  var ok = false;
+  try {
+    var _u = JSON.parse(localStorage.getItem('hse_user_activated') || 'null');
+    ok = !!(_u && _u.personnel && _u.fullname);
+  } catch(e) { ok = false; }
+  if (ok) return; // مجاز - ادامه می‌دهد
+
+  // پنهان‌کردن کل محتوا و نمایش قفل
+  var hide = function(){
+    try {
+      var d = document;
+      // مخفی کردن همه عناصر
+      var all = d.body ? d.body.children : [];
+      for (var i=0;i<all.length;i++){ all[i].style.display='none'; }
+      var lock = d.createElement('div');
+      lock.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#0f172a;color:#f8fafc;'
+        +'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+        +'font-family:Tahoma,sans-serif;text-align:center;padding:20px;direction:rtl;';
+      lock.innerHTML = '<div style="font-size:60px;margin-bottom:10px;">🔒</div>'
+        +'<h2 style="margin:0 0 8px;">دسترسی محدود است</h2>'
+        +'<p style="margin:0 0 20px;color:#94a3b8;">لطفاً ابتدا از صفحه اصلی وارد سامانه شوید.</p>'
+        +'<a href="index.html" style="background:#ff6208;color:#fff;padding:10px 26px;'
+        +'border-radius:10px;text-decoration:none;font-weight:bold;">بازگشت به صفحه ورود</a>';
+      d.body.appendChild(lock);
+    } catch(e){}
+  };
+  if (document.body) hide(); else document.addEventListener('DOMContentLoaded', hide);
+  setTimeout(function(){ try{ location.replace('index.html'); }catch(e){} }, 2500);
+})();
+</script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#1e3c5c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HSE درکاو" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+    <title>محاسبه وزن بندیل میلگرد</title>
+    <style>
+        :root {
+            --primary: #ff6208;
+            --primary-hover: #e05300;
+            --secondary: #f39c12;
+            --success: #27ae60;
+            --safety: #2c6e4e;
+            --danger: #c0392b;
+            --dark-blue: #1e3c5c;
+            --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #dfe7f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --text-main: #1e2a2e;
+            --text-muted: #64748b;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body { padding-bottom: 75px !important;
+            background: var(--bg-gradient);
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .main-container {
+            max-width: 800px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            background: var(--dark-blue);
+            padding: 30px 20px;
+            color: white;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        .header h1 .icon {
+            margin-left: 10px;
+        }
+        .header p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        /* استایل کارت‌ها */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+        .card:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        }
+        .card-title {
+            color: var(--dark-blue);
+            font-size: 1.15rem;
+            font-weight: bold;
+            border-right: 4px solid var(--primary);
+            padding-right: 12px;
+            margin-bottom: 15px;
+        }
+        .card-title .icon {
+            margin-left: 8px;
+        }
+
+        /* فرم */
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--dark-blue);
+        }
+        .form-group label .unit {
+            font-weight: normal;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 11px 15px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius-sm);
+            font-size: 1rem;
+            transition: var(--transition);
+            background: var(--card-bg);
+            color: var(--text-main);
+            text-align: center;
+            appearance: auto;
+            cursor: pointer;
+        }
+        .form-group select:focus,
+        .form-group input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255, 98, 8, 0.15);
+        }
+        .form-group select option {
+            text-align: center;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .method-selector {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        .method-selector label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: var(--border-radius-sm);
+            border: 2px solid rgba(0, 0, 0, 0.08);
+            transition: var(--transition);
+            font-weight: 500;
+        }
+        .method-selector label:hover {
+            border-color: var(--primary);
+        }
+        .method-selector input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+        .method-selector label.active {
+            border-color: var(--primary);
+            background: rgba(255, 98, 8, 0.05);
+        }
+
+        .calculate-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 5px;
+        }
+        .calculate-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 98, 8, 0.3);
+        }
+        .calculate-btn:active {
+            transform: translateY(0);
+        }
+
+        /* نتیجه */
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: var(--border-radius-sm);
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        .result.show {
+            display: block;
+        }
+        .result.success {
+            background: rgba(39, 174, 96, 0.08);
+            border: 2px solid var(--success);
+        }
+        .result .status-icon {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .result .weight-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 8px 0;
+        }
+        .result .weight-detail {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+        .result .weight-breakdown {
+            margin-top: 10px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: var(--border-radius-sm);
+            font-size: 0.9rem;
+            text-align: right;
+        }
+        .result .weight-breakdown span {
+            display: inline-block;
+            margin: 0 5px;
+        }
+
+        /* جدول وزن استاندارد */
+        .weight-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 0.85rem;
+        }
+        .weight-table th,
+        .weight-table td {
+            padding: 8px 10px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        .weight-table th {
+            background: var(--dark-blue);
+            color: white;
+            font-weight: bold;
+        }
+        .weight-table tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .weight-table tr:hover {
+            background: rgba(255, 98, 8, 0.04);
+        }
+
+        /* راهنما */
+        .guide-section {
+            background: rgba(44, 110, 78, 0.04);
+            border-radius: var(--border-radius-sm);
+            padding: 18px;
+            margin-top: 15px;
+            border-right: 4px solid var(--safety);
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .guide-section.show {
+            display: block;
+        }
+        .guide-section h3 {
+            color: var(--safety);
+            margin-bottom: 12px;
+        }
+        .guide-section ul {
+            padding-right: 20px;
+            margin: 10px 0;
+        }
+        .guide-section ul li {
+            margin-bottom: 6px;
+        }
+        .guide-section .formula-box {
+            background: rgba(0, 0, 0, 0.03);
+            padding: 12px 15px;
+            border-radius: var(--border-radius-sm);
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            margin: 10px 0;
+            direction: ltr;
+            border: 1px dashed var(--primary);
+        }
+
+        /* دکمه‌ها */
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn-guide {
+            background: var(--safety);
+            color: white;
+        }
+        .btn-guide:hover {
+            background: #1e4f3a;
+        }
+        .btn-back {
+            background: var(--danger);
+            color: white;
+        }
+        .btn-back:hover {
+            background: #a93226;
+        }
+        .btn-reset {
+            background: var(--text-muted);
+            color: white;
+        }
+        .btn-reset:hover {
+            background: #4a5568;
+        }
+
+        /* فوتر */
+        .footer {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .footer .highlight {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media(max-width:600px) {
+            .content {
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            .method-selector {
+                flex-direction: column;
+                align-items: center;
+            }
+            .method-selector label {
+                width: 100%;
+                justify-content: center;
+            }
+            .btn-row {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            .result .weight-value {
+                font-size: 1.8rem;
+            }
+            .weight-table {
+                font-size: 0.75rem;
+            }
+            .weight-table th,
+            .weight-table td {
+                padding: 5px 6px;
+            }
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1><span class="icon">📏</span> محاسبه وزن بندیل میلگرد</h1>
+            <p>محاسبه دقیق وزن میلگرد بر اساس سایز، طول و تعداد شاخه</p>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <!-- فرم ورودی -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📝</span> مشخصات میلگرد</div>
+
+                <div class="form-group">
+                    <label>سایز میلگرد <span class="unit">(میلی‌متر)</span></label>
+                    <select id="diameter">
+                        <option value="8">8</option>
+                        <option value="10">10</option>
+                        <option value="12" selected>12</option>
+                        <option value="14">14</option>
+                        <option value="16">16</option>
+                        <option value="18">18</option>
+                        <option value="20">20</option>
+                        <option value="22">22</option>
+                        <option value="25">25</option>
+                        <option value="28">28</option>
+                        <option value="32">32</option>
+                        <option value="36">36</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>طول هر شاخه <span class="unit">(متر)</span></label>
+                        <input type="number" id="length" value="12" step="0.5" min="0.5">
+                    </div>
+                    <div class="form-group">
+                        <label>تعداد شاخه</label>
+                        <input type="number" id="count" value="50" step="1" min="1">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>روش محاسبه</label>
+                    <div class="method-selector" id="methodSelector">
+                        <label class="active">
+                            <input type="radio" name="method" value="empirical" checked> تجربی (d²/162)
+                        </label>
+                        <label>
+                            <input type="radio" name="method" value="scientific"> علمی (πd²ρ/4)
+                        </label>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" id="calculateBtn">🔢 محاسبه وزن بندیل</button>
+            </div>
+
+            <!-- نتیجه -->
+            <div id="result" class="result">
+                <span class="status-icon">✅</span>
+                <div class="weight-value" id="weightDisplay">—</div>
+                <p class="weight-detail" id="weightDetail">وزن کل بندیل</p>
+                <div class="weight-breakdown" id="weightBreakdown"></div>
+            </div>
+
+            <!-- جدول وزن استاندارد -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📊</span> وزن استاندارد میلگرد (هر متر)</div>
+                <table class="weight-table">
+                    <thead>
+                        <tr>
+                            <th>سایز (mm)</th>
+                            <th>وزن هر متر (kg)</th>
+                            <th>سایز (mm)</th>
+                            <th>وزن هر متر (kg)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="weightTableBody">
+                        <!-- توسط JS پر می‌شود -->
+                    </tbody>
+                </table>
+                <p style="font-size:0.8rem; color:var(--text-muted); margin-top:8px;">📌 وزن بر اساس چگالی ۷۸۵۰ کیلوگرم بر مترمکعب محاسبه شده است.</p>
+            </div>
+
+            <!-- راهنما -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📖</span> راهنمای استفاده</div>
+                <button class="btn btn-guide" onclick="toggleGuide()">📋 نمایش / مخفی کردن راهنما</button>
+
+                <div class="guide-section" id="guideSection">
+                    <h3>📖 راهنمای استفاده</h3>
+                    <ul>
+                        <li><strong>سایز میلگرد:</strong> از لیست کشویی سایز مورد نظر را انتخاب کنید.</li>
+                        <li><strong>طول هر شاخه:</strong> طول هر شاخه میلگرد را بر حسب متر وارد کنید (پیش‌فرض ۱۲ متر).</li>
+                        <li><strong>تعداد شاخه:</strong> تعداد شاخه‌های موجود در بندیل را وارد کنید.</li>
+                        <li><strong>روش محاسبه:</strong>
+                            <ul>
+                                <li><strong>تجربی:</strong> فرمول ساده d²/162 — مناسب محاسبات سریع کارگاهی</li>
+                                <li><strong>علمی:</strong> فرمول دقیق πd²ρ/4 — مناسب محاسبات دقیق مهندسی</li>
+                            </ul>
+                        </li>
+                        <li>دکمه <strong>"محاسبه وزن بندیل"</strong> را بزنید تا نتیجه نمایش داده شود.</li>
+                    </ul>
+
+                    <div class="formula-box">
+                        فرمول تجربی: W = (d² × L × N) ÷ 162
+                    </div>
+                    <div class="formula-box" style="margin-top:8px;">
+                        فرمول علمی: W = (π × d² × L × N × ρ) ÷ 4,000,000
+                    </div>
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin-top:8px;">
+                        که در آن: d = قطر (mm)، L = طول (m)، N = تعداد، ρ = چگالی (kg/m³)
+                    </p>
+                </div>
+            </div>
+
+            <!-- دکمه‌ها -->
+            <div class="btn-row">
+                <button class="btn btn-reset" onclick="resetForm()">🔄 پاک کردن مقادیر</button>
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            تهیه شده توسط <span class="highlight">شرکت معدنی و صنایع معدنی درکاو</span><br>
+            <span style="direction:ltr; display:inline-block;">📞 09178680173</span>
+        </div>
+    </div>
+
+    <script>
+        // داده‌های وزن استاندارد میلگرد
+        const standardWeights = {
+            8: 0.395,
+            10: 0.617,
+            12: 0.888,
+            14: 1.209,
+            16: 1.579,
+            18: 1.998,
+            20: 2.466,
+            22: 2.984,
+            25: 3.854,
+            28: 4.834,
+            32: 6.313,
+            36: 7.990
+        };
+
+        // پر کردن جدول وزن استاندارد
+        function populateWeightTable() {
+            const tbody = document.getElementById('weightTableBody');
+            const sizes = Object.keys(standardWeights);
+            let html = '';
+            for (let i = 0; i < sizes.length; i += 2) {
+                const s1 = sizes[i];
+                const s2 = sizes[i + 1] || '';
+                html += `<tr>
+                    <td>${s1}</td>
+                    <td>${standardWeights[s1].toFixed(3)}</td>
+                    <td>${s2}</td>
+                    <td>${s2 ? standardWeights[s2].toFixed(3) : '—'}</td>
+                </tr>`;
+            }
+            tbody.innerHTML = html;
+        }
+        populateWeightTable();
+
+        // انتخاب روش محاسبه
+        document.querySelectorAll('input[name="method"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                document.querySelectorAll('.method-selector label').forEach(label => {
+                    label.classList.remove('active');
+                });
+                this.closest('label').classList.add('active');
+            });
+        });
+
+        // محاسبه
+        document.getElementById('calculateBtn').addEventListener('click', function() {
+            calculate();
+        });
+
+        function calculate() {
+            const d = parseFloat(document.getElementById('diameter').value);
+            const length = parseFloat(document.getElementById('length').value);
+            const count = parseFloat(document.getElementById('count').value);
+            const method = document.querySelector('input[name="method"]:checked').value;
+
+            // اعتبارسنجی
+            if (!d || d <= 0) {
+                showToast('⚠️ لطفاً سایز میلگرد را انتخاب کنید.', 'warning');
+                return;
+            }
+            if (!length || length <= 0) {
+                showToast('⚠️ لطفاً طول معتبر وارد کنید.', 'warning');
+                return;
+            }
+            if (!count || count <= 0) {
+                showToast('⚠️ لطفاً تعداد معتبر وارد کنید.', 'warning');
+                return;
+            }
+
+            let weightPerMeter = 0;
+            let methodName = '';
+
+            if (method === 'empirical') {
+                weightPerMeter = (d * d) / 162;
+                methodName = 'فرمول تجربی (d²/162)';
+            } else {
+                const rho = 7850; // kg/m^3
+                weightPerMeter = (Math.PI / 4) * Math.pow(d / 1000, 2) * rho;
+                methodName = 'فرمول علمی (πd²ρ/4)';
+            }
+
+            const totalWeight = weightPerMeter * length * count;
+            const totalWeightKg = totalWeight;
+            const totalWeightTon = totalWeight / 1000;
+
+            // نمایش نتیجه
+            const resultDiv = document.getElementById('result');
+            const weightDisplay = document.getElementById('weightDisplay');
+            const weightDetail = document.getElementById('weightDetail');
+            const weightBreakdown = document.getElementById('weightBreakdown');
+
+            weightDisplay.textContent = totalWeightKg.toFixed(2) + ' کیلوگرم';
+            weightDetail.textContent = `وزن کل بندیل (${methodName})`;
+
+            weightBreakdown.innerHTML = `
+                <span>📌 سایز: <strong>${d} mm</strong></span>
+                <span>|</span>
+                <span>📏 طول هر شاخه: <strong>${length} m</strong></span>
+                <span>|</span>
+                <span>🔢 تعداد: <strong>${count} عدد</strong></span>
+                <span>|</span>
+                <span>⚖️ وزن هر متر: <strong>${weightPerMeter.toFixed(3)} kg</strong></span>
+                <br>
+                <span style="color:var(--primary); font-weight:bold;">📦 وزن کل: ${totalWeightKg.toFixed(2)} kg (${totalWeightTon.toFixed(3)} تن)</span>
+            `;
+
+            resultDiv.className = 'result success show';
+
+            // اسکرول به نتیجه
+            setTimeout(() => {
+                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 200);
+
+            showToast('✅ وزن بندیل با موفقیت محاسبه شد.', 'success');
+        }
+
+        // پشتیبانی از Enter
+        document.querySelectorAll('#length, #count').forEach(input => {
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('calculateBtn').click();
+                }
+            });
+        });
+
+        function toggleGuide() {
+            const guide = document.getElementById('guideSection');
+            guide.classList.toggle('show');
+            if (guide.classList.contains('show')) {
+                setTimeout(() => {
+                    guide.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 200);
+            }
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function resetForm() {
+            document.getElementById('diameter').value = '12';
+            document.getElementById('length').value = '12';
+            document.getElementById('count').value = '50';
+            document.querySelector('input[name="method"][value="empirical"]').checked = true;
+            document.querySelectorAll('.method-selector label').forEach(label => {
+                label.classList.remove('active');
+            });
+            document.querySelector('.method-selector label:first-child').classList.add('active');
+            document.getElementById('result').className = 'result';
+            document.getElementById('result').style.display = 'none';
+            showToast('🔄 مقادیر به حالت پیش‌فرض بازگردانده شدند.', 'info');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // تابع نمایش پیام Toast
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer') || createToastContainer();
+            const toast = document.createElement('div');
+            const colors = {
+                success: '#27ae60',
+                warning: '#f39c12',
+                danger: '#c0392b',
+                info: '#3498db'
+            };
+            toast.style.cssText = `
+                background: white;
+                padding: 12px 20px;
+                border-radius: 12px;
+                border-right: 5px solid ${colors[type] || colors.info};
+                box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+                margin-bottom: 10px;
+                font-weight: 500;
+                animation: slideDown 0.3s ease;
+                direction: rtl;
+            `;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-20px)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        function createToastContainer() {
+            const container = document.createElement('div');
+            container.id = 'toastContainer';
+            container.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 9999;
+                width: 90%;
+                max-width: 500px;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                pointer-events: none;
+            `;
+            document.body.appendChild(container);
+            return container;
+        }
+
+        // اضافه کردن استایل انیمیشن
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideDown {
+                from { opacity: 0; transform: translateY(-20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+
+<script src="hse-common.js"></script>
+
+<script src="assets/js/sw-register.js"></script>
+</body>
+</html>

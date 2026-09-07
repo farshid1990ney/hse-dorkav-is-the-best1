@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+
+<script>
+/* ============================================================
+   ★ امنیت: گیت احراز هویت (سمت کلاینت)
+   هیچ صفحه‌ای بدون ورود به سامانه باز نمی‌شود. محتوای صفحه
+   مخفی می‌ماند و کاربر به صفحه ورود هدایت می‌شود.
+   (لایه نمایشی؛ لایه امنیتی واقعی در بکاند اعمال می‌شود.)
+   ============================================================ */
+(function(){
+  var ok = false;
+  try {
+    var _u = JSON.parse(localStorage.getItem('hse_user_activated') || 'null');
+    ok = !!(_u && _u.personnel && _u.fullname);
+  } catch(e) { ok = false; }
+  if (ok) return; // مجاز - ادامه می‌دهد
+
+  // پنهان‌کردن کل محتوا و نمایش قفل
+  var hide = function(){
+    try {
+      var d = document;
+      // مخفی کردن همه عناصر
+      var all = d.body ? d.body.children : [];
+      for (var i=0;i<all.length;i++){ all[i].style.display='none'; }
+      var lock = d.createElement('div');
+      lock.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#0f172a;color:#f8fafc;'
+        +'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+        +'font-family:Tahoma,sans-serif;text-align:center;padding:20px;direction:rtl;';
+      lock.innerHTML = '<div style="font-size:60px;margin-bottom:10px;">🔒</div>'
+        +'<h2 style="margin:0 0 8px;">دسترسی محدود است</h2>'
+        +'<p style="margin:0 0 20px;color:#94a3b8;">لطفاً ابتدا از صفحه اصلی وارد سامانه شوید.</p>'
+        +'<a href="index.html" style="background:#ff6208;color:#fff;padding:10px 26px;'
+        +'border-radius:10px;text-decoration:none;font-weight:bold;">بازگشت به صفحه ورود</a>';
+      d.body.appendChild(lock);
+    } catch(e){}
+  };
+  if (document.body) hide(); else document.addEventListener('DOMContentLoaded', hide);
+  setTimeout(function(){ try{ location.replace('index.html'); }catch(e){} }, 2500);
+})();
+</script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#1e3c5c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HSE درکاو" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+    <title>آموزش رانندگی تدافعی در معدن - آژند همت توس</title>
+
+    <style>
+        :root {
+            --primary: #ff6208;
+            --primary-hover: #e05300;
+            --secondary: #f39c12;
+            --success: #27ae60;
+            --safety: #2c6e4e;
+            --danger: #c0392b;
+            --dark-blue: #1e3c5c;
+            --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #dfe7f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --text-main: #1e2a2e;
+            --text-muted: #64748b;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body { padding-bottom: 75px !important;
+            background: var(--bg-gradient);
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text-main);
+            line-height: 1.8;
+        }
+
+        .main-container {
+            max-width: 1000px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            background: var(--dark-blue);
+            padding: 35px 20px;
+            color: white;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+            position: relative;
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        .header h1 .icon {
+            margin-left: 10px;
+        }
+        .header p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        .header .back-home {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .header .back-home:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+        .card:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        }
+        .card-title {
+            color: var(--dark-blue);
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-right: 4px solid var(--primary);
+            padding-right: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title .icon {
+            font-size: 1.5rem;
+        }
+        .card-subtitle {
+            color: var(--primary);
+            font-size: 1.05rem;
+            font-weight: bold;
+            margin: 18px 0 10px 0;
+            border-bottom: 2px solid rgba(255, 98, 8, 0.15);
+            padding-bottom: 6px;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .tips-grid .tip-item {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 10px 14px;
+            border-radius: var(--border-radius-sm);
+            border-right: 3px solid var(--safety);
+            font-size: 0.9rem;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .tips-grid .tip-item:hover {
+            background: rgba(44, 110, 78, 0.04);
+            transform: translateX(-3px);
+        }
+        .tips-grid .tip-item.danger-tip {
+            border-right-color: var(--danger);
+        }
+        .tips-grid .tip-item.warning-tip {
+            border-right-color: var(--secondary);
+        }
+        .tips-grid .tip-item.primary-tip {
+            border-right-color: var(--primary);
+        }
+        .tips-grid .tip-item.info-tip {
+            border-right-color: #3498db;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+        .spec-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .spec-table th,
+        .spec-table td {
+            padding: 10px 12px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        .spec-table th {
+            background: var(--dark-blue);
+            color: white;
+            font-weight: bold;
+        }
+        .spec-table tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .spec-table tr:hover {
+            background: rgba(255, 98, 8, 0.04);
+        }
+
+        .btn-back {
+            background: #cbd5e1;
+            border: none;
+            padding: 10px 24px;
+            border-radius: var(--border-radius-sm);
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 12px;
+            color: #334155;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .btn-back:hover {
+            background: #b0bec5;
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .footer .highlight {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .badge-standard {
+            display: inline-block;
+            background: var(--safety);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-danger {
+            display: inline-block;
+            background: var(--danger);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-warning {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-info {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+
+        .safety-alert {
+            background: rgba(192, 57, 43, 0.04);
+            border-right: 4px solid var(--danger);
+            padding: 15px;
+            border-radius: var(--border-radius-sm);
+            margin: 10px 0;
+        }
+        .safety-alert strong {
+            color: var(--danger);
+        }
+        .safety-alert ul {
+            padding-right: 20px;
+            margin-top: 5px;
+        }
+        .safety-alert ul li {
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .highlight-box {
+            background: rgba(44, 110, 78, 0.04);
+            padding: 15px 18px;
+            border-radius: var(--border-radius-sm);
+            border-right: 4px solid var(--safety);
+            margin: 10px 0;
+        }
+        .highlight-box.danger {
+            background: rgba(192, 57, 43, 0.04);
+            border-right-color: var(--danger);
+        }
+        .highlight-box.gold {
+            background: rgba(243, 156, 18, 0.04);
+            border-right-color: var(--secondary);
+        }
+
+        .checkbox-list {
+            list-style: none;
+            padding: 0;
+        }
+        .checkbox-list li {
+            padding: 4px 30px 4px 0;
+            position: relative;
+        }
+        .checkbox-list li::before {
+            content: "☐";
+            position: absolute;
+            right: 0;
+            font-size: 1.1rem;
+            color: var(--safety);
+        }
+
+        /* ===== جدول فاصله ایمن ===== */
+        .distance-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+            margin: 10px 0;
+        }
+        .distance-table th {
+            background: var(--dark-blue);
+            color: white;
+            padding: 10px 12px;
+            text-align: center;
+        }
+        .distance-table td {
+            padding: 9px 12px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            text-align: center;
+            background: var(--card-bg);
+        }
+        .distance-table .highlight-row {
+            background: rgba(255, 98, 8, 0.08);
+            font-weight: bold;
+        }
+        .distance-table .danger-row {
+            background: rgba(192, 57, 43, 0.06);
+        }
+
+        @media(max-width:700px) {
+            .content {
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            .header .back-home {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+                left: 10px;
+                top: 15px;
+            }
+            .tips-grid {
+                grid-template-columns: 1fr;
+            }
+            .spec-table {
+                font-size: 0.75rem;
+            }
+            .spec-table th,
+            .spec-table td {
+                padding: 6px 4px;
+            }
+            .distance-table {
+                font-size: 0.75rem;
+            }
+            .distance-table th,
+            .distance-table td {
+                padding: 6px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <a href="index.html" class="back-home" title="بازگشت به صفحه اصلی">🏠</a>
+            <h1><span class="icon">🚜</span> آموزش رانندگی تدافعی در معدن</h1>
+            <p>ویژه رانندگان دامپتراک، کامیون معدنی، لودر و خودروهای سبک — بر اساس استانداردهای HSE</p>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <!-- ===== مقدمه ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📖</span> مقدمه</div>
+                <p style="margin-bottom:10px;">
+                    رانندگی در معدن با محیط‌های شهری و جاده‌های عمومی تفاوت‌های اساسی دارد. <strong>وزن سنگین، ابعاد بزرگ، نقاط کور وسیع، شیب‌های تند، گردوغبار و تردد همزمان ماشین‌آلات سنگین</strong>، ریسک حوادث را چندین برابر می‌کند.
+                </p>
+                <div class="highlight-box">
+                    <strong>🔹 رانندگی تدافعی در معدن یعنی:</strong><br>
+                    • پیش‌بینی خطرات خاص محیط معدنی<br>
+                    • درک محدودیت‌های ماشین‌آلات سنگین<br>
+                    • احترام به نقاط کور و حریم ایمنی<br>
+                    • رعایت اصول ارتباطی با سایر تجهیزات
+                </div>
+                <p style="margin-top:10px;">
+                    <strong>هدف نهایی:</strong> <span style="color:var(--primary);font-weight:700;">رسیدن ایمن به مقصد، حتی اگر سایر رانندگان یا شرایط محیطی دچار خطا شوند.</span>
+                </p>
+                <div style="margin-top:10px; padding:10px; background:rgba(44,110,78,0.04); border-radius:var(--border-radius-sm); border-right:3px solid var(--safety);">
+                    <strong>📌 منابع:</strong>
+                    <span class="badge-standard">MSHA</span>
+                    <span class="badge-standard">ICMM</span>
+                    <span class="badge-standard">دستورالعمل HSE</span>
+                </div>
+            </div>
+
+            <!-- ===== تهدیدات ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">⚠️</span> شناخت تهدیدات ویژه معدن</div>
+
+                <div class="card-subtitle">نقاط کور (Blind Spots) در ماشین‌آلات سنگین</div>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr>
+                                <th>نوع ماشین</th>
+                                <th>نقاط کور اصلی</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>دامپتراک</strong></td><td>جلو و زیر کابین، سمت راست، پشت بار</td></tr>
+                            <tr><td><strong>کامیون معدنی</strong></td><td>اطراف و پشت، خصوصاً در پیچ‌ها</td></tr>
+                            <tr><td><strong>لودر</strong></td><td>جلو و پایین، سمت راست (محل سطل)</td></tr>
+                            <tr><td><strong>بیل مکانیکی</strong></td><td>پشت و سمت راست، حین چرخش</td></tr>
+                            <tr><td><strong>خودروهای سبک (سواری، وانت)</strong></td><td>سمت راست و پشت، خصوصاً در گردوغبار</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="safety-alert">
+                    <strong>⚠️ قانون طلایی:</strong> اگر راننده دامپتراک شما را نمی‌بیند، شما در <strong>نقطه مرگ</strong> هستید. هرگز وارد شعاع ۱۵ متری اطراف دامپتراک نشوید مگر اینکه تماس چشمی برقرار کرده باشید.
+                </div>
+
+                <div class="card-subtitle">خطرات رایج در معدن</div>
+                <div class="tips-grid">
+                    <div class="tip-item danger-tip"><strong>🔴 خطرات انسانی:</strong> خستگی و خواب‌آلودگی، عجله برای تحویل بار، استفاده از تلفن همراه، عدم توجه به علائم، رانندگی در نقاط کور</div>
+                    <div class="tip-item warning-tip"><strong>🟡 خطرات محیطی:</strong> گردوغبار شدید، شیب‌های تند، ریزش سنگ، باران و گل‌آلودگی، تاریکی شب</div>
+                    <div class="tip-item primary-tip"><strong>🟠 خطرات مکانیکی:</strong> خرابی ترمز، ترکیدن لاستیک، نقص فرمان، بار اضافی</div>
+                    <div class="tip-item info-tip"><strong>🔵 خطرات ویژه خودروهای سبک:</strong> عدم دید کافی در کنار ماشین‌آلات سنگین، توقف در نقاط کور، سبقت غیرمجاز</div>
+                </div>
+            </div>
+
+            <!-- ===== فواصل ایمنی ===== -->
+            <div class="card" style="border-right-color:var(--secondary);">
+                <div class="card-title"><span class="icon">📏</span> فواصل ایمنی در معدن</div>
+                <p style="margin-bottom:10px;">
+                    <strong>رعایت فاصله ایمن</strong> یکی از مهم‌ترین اصول رانندگی تدافعی در معدن است. جدول زیر حداقل فاصله مجاز بین وسایل نقلیه را نشان می‌دهد:
+                </p>
+                <div class="table-container">
+                    <table class="distance-table">
+                        <thead>
+                            <tr>
+                                <th>نوع خودرو</th>
+                                <th>فاصله از خودروی جلویی</th>
+                                <th>فاصله از دامپتراک/کامیون</th>
+                                <th>فاصله جانبی</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="danger-row">
+                                <td><strong>دامپتراک</strong></td>
+                                <td>حداقل ۵۰ متر</td>
+                                <td>—</td>
+                                <td>حداقل ۵ متر</td>
+                            </tr>
+                            <tr class="highlight-row">
+                                <td><strong>کامیون معدنی</strong></td>
+                                <td>حداقل ۴۰ متر</td>
+                                <td>حداقل ۵۰ متر</td>
+                                <td>حداقل ۴ متر</td>
+                            </tr>
+                            <tr>
+                                <td><strong>لودر</strong></td>
+                                <td>حداقل ۳۰ متر</td>
+                                <td>حداقل ۵۰ متر</td>
+                                <td>حداقل ۳ متر</td>
+                            </tr>
+                            <tr>
+                                <td><strong>خودروی سبک (سواری، وانت)</strong></td>
+                                <td>حداقل ۲۰ متر</td>
+                                <td>حداقل ۵۰ متر</td>
+                                <td>حداقل ۲ متر</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="safety-alert" style="margin-top:10px;">
+                    <strong>⚠️ نکات مهم درباره فاصله ایمن:</strong>
+                    <ul>
+                        <li>فاصله <strong>۵۰ متری</strong> از دامپتراک و کامیون‌های معدنی <strong>الزامی</strong> است.</li>
+                        <li>در شرایط گردوغبار، باران یا شب، فاصله را <strong>۲ برابر</strong> افزایش دهید.</li>
+                        <li>در شیب‌های تند، فاصله را حداقل <strong>۵۰٪</strong> بیشتر رعایت کنید.</li>
+                        <li>هرگز در <strong>نقاط کور</strong> دامپتراک و کامیون توقف نکنید.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ===== اصول پنج‌گانه ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🧠</span> اصول پنج‌گانه رانندگی تدافعی در معدن</div>
+
+                <div class="tips-grid">
+                    <div class="tip-item primary-tip"><strong>۱. آگاهی ۳۶۰ درجه:</strong> استفاده مداوم از آینه‌ها، چک نقاط کور قبل از حرکت، رصد وضعیت سایر ماشین‌آلات</div>
+                    <div class="tip-item warning-tip"><strong>۲. حفظ فاصله ایمن:</strong> جاده خشک: ۴ ثانیه — گردوغبار: ۸ ثانیه — شیب: ۱۰-۱۲ ثانیه — دنبال دامپتراک: ۵۰ متر</div>
+                    <div class="tip-item primary-tip"><strong>۳. پیش‌بینی حرکت دیگران:</strong> دامپتراک ممکن ناگهان توقف کند، لودر بدون هشدار عقب‌روی کند، بیل‌ها حین چرخش فضای زیادی اشغال کنند</div>
+                    <div class="tip-item info-tip"><strong>۴. کنترل سرعت:</strong> جاده اصلی: ۲۰-۳۰ کیلومتر — جاده فرعی: ۱۵ کیلومتر — محوطه بارگیری: ۵-۱۰ کیلومتر — گردوغبار: کاهش تا ۱۰ کیلومتر</div>
+                    <div class="tip-item warning-tip"><strong>۵. خود را قابل دید بسازید:</strong> چراغ‌ها را حتی در روز روشن کنید، در گردوغبار از فلاشر استفاده کنید، از بوق و بیسیم استفاده کنید</div>
+                </div>
+            </div>
+
+            <!-- ===== تکنیک‌های ویژه هر ماشین ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🚛</span> تکنیک‌های ویژه هر ماشین</div>
+
+                <div class="tips-grid">
+                    <div class="tip-item primary-tip" style="border-right-color:#b45309;">
+                        <strong>🟢 دامپتراک:</strong>
+                        مرکز ثقل بالا — در پیچ‌ها سرعت را کاهش دهید. نقطه کور جلو را قبل از حرکت چک کنید. در سراشیبی از ترمز موتور استفاده کنید. هرگز در شیب تخلیه نکنید. فاصله ۵۰ متری با خودروهای جلویی الزامی است.
+                    </div>
+                    <div class="tip-item info-tip" style="border-right-color:#2563eb;">
+                        <strong>🟡 کامیون معدنی:</strong>
+                        بار را متقارن پخش کنید. حداقل ۱ متر از لبه‌های معدن فاصله بگیرید. هر چند دقیقه یکبار ترمز کنید تا از داغ شدن جلوگیری شود. فاصله ۵۰ متری با دامپتراک الزامی است.
+                    </div>
+                    <div class="tip-item danger-tip" style="border-right-color:#dc2626;">
+                        <strong>🔴 لودر:</strong>
+                        هنگام حرکت با سطل پر، دید مسدود می‌شود. از بوق معکوس و کمک شخص راهنما استفاده کنید. سطل را پایین نگه دارید تا مرکز ثقل پایین‌تر رود. فاصله ۵۰ متری با دامپتراک الزامی است.
+                    </div>
+                    <div class="tip-item info-tip" style="border-right-color:#3498db;">
+                        <strong>🔵 خودروی سبک (سواری، وانت):</strong>
+                        هرگز در نقاط کور دامپتراک و کامیون توقف نکنید. در گردوغبار سرعت را به شدت کاهش دهید. فاصله ۵۰ متری با دامپتراک و کامیون الزامی است. سبقت از ماشین‌آلات سنگین اکیداً ممنوع است. در پیچ‌ها و تقاطع‌ها با دقت کامل حرکت کنید.
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== شرایط خاص ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🌧️</span> رفتار در شرایط خاص</div>
+
+                <div class="tips-grid">
+                    <div class="tip-item warning-tip">
+                        <strong>🌫️ گردوغبار شدید:</strong>
+                        سرعت را زیر ۱۰ کیلومتر کاهش دهید. چراغ‌های خطر را روشن کنید. از چراغ‌های مه‌شکن استفاده کنید. اگر دید به صفر رسید، متوقف شوید. فاصله با دامپتراک را به ۱۰۰ متر افزایش دهید.
+                    </div>
+                    <div class="tip-item danger-tip">
+                        <strong>⛰️ شیب‌های تند (پایین):</strong>
+                        از ترمز موتور (Retarder) استفاده کنید. دنده‌های پایین‌تر (۱ یا ۲) را انتخاب کنید. هرگز در شیب پایین، کلاچ را نگیرید. فاصله ۵۰ متری با خودروی جلویی الزامی است.
+                    </div>
+                    <div class="tip-item info-tip">
+                        <strong>🌧️ باران و گل‌آلودگی:</strong>
+                        فاصله ایمن را ۲ تا ۳ برابر افزایش دهید. از لغزش در چاله‌های آب‌گرفته جلوگیری کنید. در گل از دنده‌های پایین استفاده کنید.
+                    </div>
+                    <div class="tip-item primary-tip">
+                        <strong>🌙 شب و کم‌نوری:</strong>
+                        از چراغ‌های اصلی و مه‌شکن استفاده کنید. سرعت را ۲۰٪ کاهش دهید. در صورت خستگی، توقف کرده و استراحت کنید. فاصله ۵۰ متری با دامپتراک الزامی است.
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== بازرسی روزانه ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🔧</span> بازرسی روزانه (پیش از حرکت)</div>
+
+                <div class="card-subtitle">چک‌لیست عمومی (همه ماشین‌آلات)</div>
+                <div class="tips-grid">
+                    <div class="tip-item primary-tip">
+                        <ul class="checkbox-list">
+                            <li>ترمزها (خدمت و دستی)</li>
+                            <li>فرمان و سیستم هیدرولیک</li>
+                            <li>چراغ‌ها (جلو، عقب، راهنما، خطر)</li>
+                            <li>بوق و آژیر معکوس</li>
+                        </ul>
+                    </div>
+                    <div class="tip-item primary-tip">
+                        <ul class="checkbox-list">
+                            <li>لاستیک‌ها (فشار و آج)</li>
+                            <li>آینه‌ها (تمیز و تنظیم)</li>
+                            <li>کمربند ایمنی</li>
+                            <li>کپسول آتش‌نشانی (موجود و شارژ)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card-subtitle">بازرسی ویژه دامپتراک</div>
+                <ul>
+                    <li>سیستم تخلیه (Hydraulic Hoist)</li>
+                    <li>قفل‌های ایمنی تخلیه</li>
+                    <li>ترمز موتور (Retarder)</li>
+                    <li>فشار باد لاستیک‌ها (بسیار حیاتی)</li>
+                </ul>
+
+                <div class="card-subtitle">بازرسی ویژه لودر</div>
+                <ul>
+                    <li>سطل و اتصالات آن</li>
+                    <li>سیستم هیدرولیک (شیلنگ‌ها و اتصالات)</li>
+                    <li>سیستم خنک‌کننده</li>
+                    <li>کفین (محل نصب سطل)</li>
+                </ul>
+
+                <div class="card-subtitle">بازرسی ویژه خودروهای سبک</div>
+                <ul>
+                    <li>چراغ‌های اصلی و مه‌شکن (عملکرد صحیح)</li>
+                    <li>برف‌پاک‌کن‌ها و شیشه‌شوی</li>
+                    <li>سیستم تهویه و گرمایش</li>
+                    <li>مثلث خطر و جعبه کمک‌های اولیه</li>
+                </ul>
+            </div>
+
+            <!-- ===== ارتباطات ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📡</span> ارتباط و هماهنگی در معدن</div>
+
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr>
+                                <th>موقعیت</th>
+                                <th>پیام هشدار</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>نزدیک شدن به محل بارگیری</td><td>"بارگیری، کامیون شماره ... در حال ورود"</td></tr>
+                            <tr><td>حرکت در نقاط کور</td><td>"دامپتراک، لودر در سمت راست شما"</td></tr>
+                            <tr><td>شرایط خطرناک جاده</td><td>"تمام ماشین‌آلات، ریزش سنگ در مسیر اصلی"</td></tr>
+                            <tr><td>اضطراری</td><td>"کد قرمز، کد قرمز، حادثه در رمپ شمالی"</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="highlight-box gold">
+                    <strong>👷 تعامل با راهنماها:</strong>
+                    <ul>
+                        <li>همیشه قبل از حرکت در محوطه‌های بارگیری، با راهنما تماس چشمی برقرار کنید.</li>
+                        <li>از حرکات دست استاندارد برای هدایت استفاده کنید.</li>
+                        <li>هرگز بدون تأیید راهنما عقب‌روی یا بارگیری نکنید.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ===== اقدامات اضطراری ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🆘</span> اقدامات اضطراری</div>
+
+                <div class="safety-alert">
+                    <strong>در صورت حادثه یا نقص فنی:</strong>
+                    <ol style="padding-right:20px; margin-top:5px;">
+                        <li>خودرو را در <strong>محل امن</strong> (دور از مسیر تردد) متوقف کنید.</li>
+                        <li>فلاشر را روشن کنید.</li>
+                        <li>مثلث خطر را در فاصله <strong>۱۵-۲۰ متری</strong> پشت خودرو قرار دهید.</li>
+                        <li>از بیسیم به اتاق کنترل اطلاع دهید.</li>
+                        <li>اگر حادثه جرحی دارد، از حرکت مصدوم خودداری کنید و منتظر امداد باشید.</li>
+                        <li>اگر آتش‌سوزی است، از کپسول آتش‌نشانی استفاده کنید و در صورت عدم کنترل، محل را تخلیه کنید.</li>
+                    </ol>
+                </div>
+
+                <div class="tips-grid">
+                    <div class="tip-item danger-tip">
+                        <strong>🔥 آتش‌سوزی:</strong>
+                        موتور را خاموش کنید. کپسول پودری را به سمت پایه آتش بگیرید. اگر آتش در محفظه موتور است، کاپوت را کامل باز نکنید. اگر کنترل نشد، منطقه را ترک کنید.
+                    </div>
+                    <div class="tip-item warning-tip">
+                        <strong>🛞 ترکیدن لاستیک:</strong>
+                        فرمان را محکم بگیرید. ترمز ناگهانی نزنید. سرعت را به‌تدریج کاهش دهید. خودرو را به کنار جاده هدایت کنید. از بیسیم برای درخواست کمک استفاده کنید.
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== مقررات ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📋</span> الزامات و مقررات ویژه معدن</div>
+
+                <div class="card-subtitle">مدارک و مجوزها</div>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr>
+                                <th>مورد</th>
+                                <th>توضیح</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>گواهینامه معتبر</td><td>متناسب با نوع ماشین (دامپتراک، لودر، کامیون، سواری)</td></tr>
+                            <tr><td>کارت سلامت</td><td>معتبر و به‌روز</td></tr>
+                            <tr><td>کارت معاینه فنی</td><td>معتبر (سالانه)</td></tr>
+                            <tr><td>مجوز رانندگی در معدن</td><td>صادره از واحد HSE</td></tr>
+                            <tr><td>بیمه نامه</td><td>معتبر و شامل پوشش حوادث</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card-subtitle">ممنوعیت‌های مطلق در معدن</div>
+                <div class="tips-grid">
+                    <div class="tip-item danger-tip">🚫 رانندگی با سرعت غیرمجاز</div>
+                    <div class="tip-item danger-tip">🚫 استفاده از تلفن همراه حین رانندگی</div>
+                    <div class="tip-item danger-tip">🚫 حمل مسافر در قسمت بار</div>
+                    <div class="tip-item danger-tip">🚫 استعمال دخانیات در خودرو</div>
+                    <div class="tip-item danger-tip">🚫 ورود به مناطق ممنوعه</div>
+                    <div class="tip-item danger-tip">🚫 پارک در شیب بدون ترمز دستی</div>
+                    <div class="tip-item danger-tip">🚫 سبقت از ماشین‌آلات سنگین در پیچ‌ها و تقاطع‌ها</div>
+                    <div class="tip-item danger-tip">🚫 توقف در نقاط کور دامپتراک و کامیون</div>
+                </div>
+
+                <div class="card-subtitle">علائم هشداردهنده در معدن</div>
+                <div class="tips-grid">
+                    <div class="tip-item primary-tip">🔴 تابلوهای سرعت مجاز</div>
+                    <div class="tip-item warning-tip">🟡 علائم خطر ریزش سنگ</div>
+                    <div class="tip-item info-tip">🔵 علامت محل بارگیری</div>
+                    <div class="tip-item primary-tip">🟢 مسیرهای یک‌طرفه</div>
+                    <div class="tip-item danger-tip">⚫ نقاط کور و برخورد با ماشین‌آلات سنگین</div>
+                    <div class="tip-item warning-tip">🟠 علامت فاصله ایمن ۵۰ متر</div>
+                </div>
+            </div>
+
+            <!-- ===== جمع‌بندی ===== -->
+            <div class="card" style="border-right-color:#b45309; background:rgba(255,248,240,0.4);">
+                <div class="card-title"><span class="icon">📌</span> جمع‌بندی نهایی</div>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px;">
+                    <div class="tip-item primary-tip"><strong>🔹 آگاهی</strong><br>همیشه از همه چیز اطرافتان باخبر باشید.</div>
+                    <div class="tip-item warning-tip"><strong>🔹 پیش‌بینی</strong><br>حرکت سایر ماشین‌آلات را پیش از وقوع پیش‌بینی کنید.</div>
+                    <div class="tip-item primary-tip"><strong>🔹 فاصله</strong><br>فاصله ایمن را رعایت کنید (۵۰ متر از دامپتراک الزامی).</div>
+                    <div class="tip-item info-tip"><strong>🔹 دید</strong><br>نقاط کور را بشناسید و خود را قابل دید کنید.</div>
+                    <div class="tip-item warning-tip"><strong>🔹 کنترل</strong><br>سرعت را متناسب با شرایط تنظیم کنید.</div>
+                    <div class="tip-item primary-tip"><strong>🔹 ارتباط</strong><br>با بیسیم، بوق و راهنماها هماهنگ باشید.</div>
+                    <div class="tip-item info-tip"><strong>🔹 بازرسی</strong><br>قبل از هر شیفت، خودرو را کامل چک کنید.</div>
+                </div>
+                <div class="safety-alert" style="margin-top:15px;">
+                    🚨 <strong>یادآوری نهایی:</strong> در معدن، شما فقط یک راننده نیستید؛ شما بخشی از یک <strong>سیستم پیچیده</strong> هستید. یک اشتباه کوچک می‌تواند به فاجعه‌ای بزرگ منجر شود. <strong>رانندگی تدافعی یعنی بازگشت سالم به خانه برای خود و دیگران.</strong>
+                </div>
+            </div>
+
+
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            تهیه شده توسط <span class="highlight">شرکت معدنی و صنایع معدنی درکاو</span><br>
+            <span style="direction:ltr; display:inline-block;">📞 09178680173</span>
+        </div>
+
+    </div>
+
+    <script>
+        // اضافه کردن قابلیت کپی متن با کلیک
+        document.querySelectorAll('.tip-item, .safety-alert li, .safety-alert p, .highlight-box li, .checkbox-list li, .distance-table tr td').forEach(el => {
+            el.style.cursor = 'pointer';
+            el.addEventListener('click', function() {
+                const text = this.textContent.trim();
+                navigator.clipboard.writeText(text).then(() => {
+                    const origBg = this.style.background;
+                    this.style.background = '#d4edda';
+                    setTimeout(() => {
+                        this.style.background = origBg || '';
+                    }, 400);
+                });
+            });
+        });
+
+        console.log('✅ آموزش رانندگی تدافعی در معدن (کامل) بارگذاری شد.');
+        console.log('📋 کلیک روی هر متن برای کپی کردن');
+        console.log('🚜 ویژه رانندگان دامپتراک، کامیون، لودر و خودروهای سبک');
+        console.log('📏 فاصله ۵۰ متری از دامپتراک الزامی است.');
+    </script>
+
+<script src="hse-common.js"></script>
+
+<script src="assets/js/sw-register.js"></script>
+</body>
+</html>

@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<script>window.fetchWithTimeout=window.fetchWithTimeout||function(url,options,timeoutMs){timeoutMs=timeoutMs||12000;var controller=new AbortController();var id=setTimeout(function(){controller.abort();},timeoutMs);var opts=Object.assign({},options||{},{signal:controller.signal});return fetch(url,opts).finally(function(){clearTimeout(id);});};</script>
+
+
+<script>
+/* ============================================================
+   ★ امنیت: گیت احراز هویت (سمت کلاینت)
+   هیچ صفحه‌ای بدون ورود به سامانه باز نمی‌شود. محتوای صفحه
+   مخفی می‌ماند و کاربر به صفحه ورود هدایت می‌شود.
+   (لایه نمایشی؛ لایه امنیتی واقعی در بکاند اعمال می‌شود.)
+   ============================================================ */
+(function(){
+  var ok = false;
+  try {
+    var _u = JSON.parse(localStorage.getItem('hse_user_activated') || 'null');
+    ok = !!(_u && _u.personnel && _u.fullname);
+  } catch(e) { ok = false; }
+  if (ok) return; // مجاز - ادامه می‌دهد
+
+  // پنهان‌کردن کل محتوا و نمایش قفل
+  var hide = function(){
+    try {
+      var d = document;
+      // مخفی کردن همه عناصر
+      var all = d.body ? d.body.children : [];
+      for (var i=0;i<all.length;i++){ all[i].style.display='none'; }
+      var lock = d.createElement('div');
+      lock.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#0f172a;color:#f8fafc;'
+        +'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+        +'font-family:Tahoma,sans-serif;text-align:center;padding:20px;direction:rtl;';
+      lock.innerHTML = '<div style="font-size:60px;margin-bottom:10px;">🔒</div>'
+        +'<h2 style="margin:0 0 8px;">دسترسی محدود است</h2>'
+        +'<p style="margin:0 0 20px;color:#94a3b8;">لطفاً ابتدا از صفحه اصلی وارد سامانه شوید.</p>'
+        +'<a href="index.html" style="background:#ff6208;color:#fff;padding:10px 26px;'
+        +'border-radius:10px;text-decoration:none;font-weight:bold;">بازگشت به صفحه ورود</a>';
+      d.body.appendChild(lock);
+    } catch(e){}
+  };
+  if (document.body) hide(); else document.addEventListener('DOMContentLoaded', hide);
+  setTimeout(function(){ try{ location.replace('index.html'); }catch(e){} }, 2500);
+})();
+</script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#1e3c5c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HSE درکاو" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+    <title>🦺 همیار ایمنی درکاو</title>
+    <link rel="stylesheet" href="assets/fontawesome/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        :root {
+            --bg: #eef2f7;
+            --card: #ffffff;
+            --text: #1e2a2e;
+            --border: #e2e8f0;
+            --primary: #ff6208;
+            --primary-hover: #e05300;
+            --danger: #c0392b;
+            --success: #27ae60;
+            --dark-blue: #1e3c5c;
+            --shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.15);
+            --radius: 24px;
+        }
+        .black-theme {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f1f5f9;
+            --border: #334155;
+            --shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.5);
+        }
+        body { padding-bottom: 75px !important;
+            background: var(--bg);
+            color: var(--text);
+            transition: background 0.3s, color 0.3s;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 25px 20px;
+            transition: background 0.3s;
+            position: relative;
+        }
+        /* ===== دکمه بازگشت استاندارد (هماهنگ با بقیه صفحات سامانه) ===== */
+        .back-home {
+            position: absolute;
+            right: 18px;
+            top: 18px;
+            background: var(--dark-blue);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.05rem;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            z-index: 5;
+        }
+        .back-home:hover {
+            background: var(--primary);
+            transform: scale(1.05);
+        }
+        /* ===== HEADER ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border);
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo img {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+        }
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .logo span {
+            font-size: 0.85rem;
+            color: var(--text);
+            opacity: 0.7;
+            display: block;
+        }
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .header-actions button {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: var(--text);
+            padding: 8px 12px;
+            border-radius: 40px;
+            transition: 0.2s;
+        }
+        .header-actions button:hover {
+            background: var(--border);
+        }
+        .theme-toggle {
+            background: var(--border);
+            border-radius: 40px;
+            padding: 6px 14px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        /* ===== BOT AVATAR ===== */
+        .bot-avatar {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: var(--bg);
+            padding: 15px 20px;
+            border-radius: 60px;
+            margin-bottom: 20px;
+        }
+        .bot-avatar .icon {
+            font-size: 2.5rem;
+            background: var(--primary);
+            color: #fff;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .bot-avatar .greeting {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .bot-avatar .greeting small {
+            display: block;
+            font-weight: 400;
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+        /* ===== SEARCH ===== */
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+        .search-box input {
+            flex: 1;
+            padding: 14px 18px;
+            border-radius: 60px;
+            border: 2px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-size: 1rem;
+            outline: none;
+            transition: 0.2s;
+            min-width: 150px;
+        }
+        .search-box input:focus {
+            border-color: var(--primary);
+        }
+        .search-box button {
+            padding: 12px 22px;
+            border: none;
+            border-radius: 60px;
+            background: var(--primary);
+            color: #fff;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .search-box button:hover {
+            background: var(--primary-hover);
+            transform: scale(1.02);
+        }
+        .mic-btn {
+            background: var(--danger) !important;
+        }
+        .mic-btn:hover {
+            background: #b91c1c !important;
+        }
+        /* ===== QUICK QUESTIONS ===== */
+        .quick-questions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .quick-questions .chip {
+            background: var(--bg);
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            transition: 0.2s;
+            color: var(--text);
+        }
+        .quick-questions .chip:hover {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+        /* ===== ANSWER ===== */
+        .answer-box {
+            background: var(--bg);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            min-height: 120px;
+            margin-bottom: 20px;
+            border-right: 5px solid var(--primary);
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .answer-box.show {
+            display: block;
+        }
+        .answer-box .title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        .answer-box .body { padding-bottom: 75px !important;
+            line-height: 1.9;
+            font-size: 1rem;
+        }
+        .answer-box .body ol,
+        .answer-box .body ul {
+            padding-right: 20px;
+            margin: 10px 0;
+        }
+        .answer-box .body li {
+            margin-bottom: 6px;
+        }
+        .ai-loading {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .answer-box .body a[href^="tel:"] {
+            color: var(--primary);
+            font-weight: 700;
+            text-decoration: none;
+            direction: ltr;
+            display: inline-block;
+        }
+        .answer-box .body a[href^="tel:"]:hover {
+            text-decoration: underline;
+        }
+        .answer-box .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+        }
+        .answer-box .actions a {
+            text-decoration: none;
+            color: var(--text);
+            font-size: 0.9rem;
+            padding: 6px 14px;
+            border-radius: 40px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+        .answer-box .actions a:hover {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+        /* ===== CATEGORIES ===== */
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+        .categories .cat {
+            background: var(--bg);
+            padding: 14px 10px;
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            transition: 0.2s;
+            font-size: 0.85rem;
+        }
+        .categories .cat:hover {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+        .categories .cat i {
+            font-size: 1.8rem;
+            display: block;
+            margin-bottom: 6px;
+        }
+        /* ===== FOOTER ===== */
+        .footer {
+            text-align: center;
+            font-size: 0.8rem;
+            opacity: 0.6;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+        }
+        .credits {
+            text-align: center;
+            padding: 14px 10px 4px;
+            font-size: 0.85rem;
+            color: var(--text);
+            opacity: 0.75;
+            margin-top: 12px;
+            border-top: 1px solid var(--border);
+            line-height: 1.7;
+        }
+        .credits strong {
+            color: var(--primary);
+            font-weight: 700;
+        }
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px 12px;
+            }
+            .logo h1 {
+                font-size: 1.2rem;
+            }
+            .bot-avatar .icon {
+                width: 45px;
+                height: 45px;
+                font-size: 1.8rem;
+            }
+            .search-box input {
+                font-size: 0.9rem;
+                padding: 12px 14px;
+            }
+            .search-box button {
+                padding: 10px 16px;
+                font-size: 0.9rem;
+            }
+            .quick-questions .chip {
+                font-size: 0.75rem;
+                padding: 6px 12px;
+            }
+            .categories {
+                grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+            }
+            .categories .cat {
+                padding: 10px 6px;
+                font-size: 0.75rem;
+            }
+            .categories .cat i {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="app">
+        <!-- ===== BACK HOME (استاندارد سامانه) ===== -->
+        <a href="index.html" class="back-home" title="بازگشت به صفحه اصلی">🏠</a>
+
+        <!-- ===== HEADER ===== -->
+        <div class="header">
+            <div class="logo">
+                <div style="width:45px;height:45px;background:var(--primary);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.8rem;">🤖</div>
+                <div>
+                    <h1>همیار ایمنی درکاو</h1>
+                    <span>  ویژه شرکت درکاو</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button onclick="resetChat()" title="پاک کردن"><i class="fas fa-undo-alt"></i></button>
+            </div>
+        </div>
+
+        <!-- ===== BOT AVATAR ===== -->
+        <div class="bot-avatar">
+            <div class="icon">🤖</div>
+            <div class="greeting">
+                سلام 👋
+                <small>من همیار ایمنی درکاو هستم. فقط درباره ایمنی، آتش‌نشانی، کمک‌های اولیه، مواد شیمیایی، PPE و شرایط اضطراری پاسخ می‌دهم. شماره‌های اضطراری نیز برای استفاده در شرکت درج شده‌اند.</small>
+            </div>
+        </div>
+
+        <!-- ===== SEARCH ===== -->
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="مثلاً: در برق‌گرفتگی چه کار کنم؟" />
+            <button onclick="askQuestion()"><i class="fas fa-search"></i> بپرس</button>
+            <button class="mic-btn" onclick="startVoice()" title="سوال صوتی"><i class="fas fa-microphone"></i></button>
+        </div>
+
+        <!-- ===== QUICK QUESTIONS ===== -->
+        <div class="quick-questions" id="quickQuestions">
+            <span class="chip" onclick="askQuick('برق گرفتگی')">⚡ برق گرفتگی</span>
+            <span class="chip" onclick="askQuick('آتش سوزی')">🔥 آتش سوزی</span>
+            <span class="chip" onclick="askQuick('اسید روی دست')">🧪 اسید روی دست</span>
+            <span class="chip" onclick="askQuick('CPR')">🚑 CPR</span>
+            <span class="chip" onclick="askQuick('کپسول مناسب')">🧯 کپسول مناسب</span>
+            <span class="chip" onclick="askQuick('ایمنی جرثقیل')">🏗️ ایمنی جرثقیل</span>
+            <span class="chip" onclick="askQuick('شماره های اضطراری')">☎ شماره‌های اضطراری</span>
+        </div>
+
+        <!-- ===== ANSWER BOX ===== -->
+        <div class="answer-box" id="answerBox">
+            <div class="title" id="answerTitle">🔥 پاسخ همیار</div>
+            <div class="body" id="answerBody"></div>
+            <div class="actions" id="answerActions">
+                <a href="#" onclick="showEmergencyNumbers(); return false;"><i class="fas fa-phone"></i> تماس</a>
+                <a href="#" onclick="alert('دستورالعمل کامل در بخش آموزش موجود است.');"><i class="fas fa-book"></i> دستورالعمل</a>
+                <a href="#" onclick="shareAnswer();"><i class="fas fa-share-alt"></i> اشتراک</a>
+            </div>
+        </div>
+
+        <!-- ===== CATEGORIES ===== -->
+        <div class="categories">
+            <div class="cat" onclick="askQuick('آتش سوزی')"><i class="fas fa-fire"></i> آتش‌نشانی</div>
+            <div class="cat" onclick="askQuick('کمک های اولیه')"><i class="fas fa-kit-medical"></i> کمک‌های اولیه</div>
+            <div class="cat" onclick="askQuick('برق گرفتگی')"><i class="fas fa-bolt"></i> برق</div>
+            <div class="cat" onclick="askQuick('مواد شیمیایی')"><i class="fas fa-flask"></i> شیمیایی</div>
+            <div class="cat" onclick="askQuick('PPE')"><i class="fas fa-helmet-safety"></i> PPE</div>
+            <div class="cat" onclick="askQuick('ایمنی جرثقیل')"><i class="fas fa-truck-ramp-box"></i> جرثقیل</div>
+            <div class="cat" onclick="askQuick('معدن')"><i class="fas fa-mountain"></i> معدن</div>
+        </div>
+
+        <!-- ===== FOOTER ===== -->
+        <div class="footer">
+            <i class="fas fa-shield-alt"></i> همیار ایمنی درکاو · فقط برای پرسش‌های ایمنی و شرایط اضطراری
+        </div>
+
+        <!-- ===== CREDITS ===== -->
+        <div class="credits">
+            تهیه شده توسط <strong>شرکت معدنی و صنایع معدنی درکاو</strong>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        //  AI BACKEND (DeepSeek via Google Apps Script proxy)
+        // ============================================================
+        const AI_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzDZiadFyzTOgSpMzSo9b_xQ29N_ZHD2vIOxmswrl0O2YNod2prV1qCN34myNsp653OjQ/exec';
+
+        // ============================================================
+        //  SCOPE — فقط ایمنی + شماره‌های اضطراری شرکت
+        // ============================================================
+        const SAFETY_CONTEXT = `
+شما همیار ایمنی درکاو هستید.
+فقط به پرسش‌های مرتبط با ایمنی، آتش‌نشانی، کمک‌های اولیه، PPE، مواد شیمیایی، برق، معدن، جرثقیل، باربرداری، ریگینگ، لیفتراک، کار در ارتفاع، داربست، جوشکاری و برشکاری، فضای بسته، حفاری، ماشین‌آلات، قفل و برچسب‌گذاری (LOTO) و شرایط اضطراری پاسخ بده.
+اگر سؤال خارج از حوزه ایمنی بود، خیلی کوتاه بگو: «این همیار فقط درباره ایمنی پاسخ می‌دهد.»
+شماره‌های اضطراری قابل استفاده:
+- آتش‌نشانی سرو ایرانیان: 09912769927
+- واحد HSE شرکت درکاو: 09164555987
+- اورژانس پیشگامان صنعت: 09157333115
+- اورژانس سرب و روی مهدی‌آباد: 09961629144
+پاسخ‌ها کوتاه، کاربردی و مرحله‌ای باشند.
+`;
+
+        const SAFETY_KEYWORDS = [
+            'ایمنی', 'hse', 'حادثه', 'امداد', 'اضطراری', 'خطر', 'ریسک', 'هشدار',
+            'حریق', 'آتش', 'آتش سوزی', 'آتش‌سوزی', 'خاموش کننده', 'خاموش‌کننده', 'کپسول', 'اطفاء', 'نشت گاز', 'گاز',
+            'کمک های اولیه', 'کمک‌های اولیه', 'اورژانس', 'درمانگاه', 'احیا', 'CPR', 'احیای قلبی ریوی', 'خونریزی', 'زخم', 'سوختگی', 'اسید', 'بیهوشی', 'غش',
+            'برق', 'برق گرفتگی', 'برق‌گرفتگی', 'شوک الکتریکی',
+            'مواد شیمیایی', 'sds', 'msds', 'سم', 'بخار',
+            'ppe', 'ماسک', 'دستکش', 'کلاه ایمنی', 'کفش ایمنی', 'عینک ایمنی', 'شیلد', 'گوشی ایمنی',
+            'معدن', 'تهویه', 'گازسنجی',
+            'جرثقیل', 'کرین', 'باربرداری', 'باربردار', 'لیفتینگ', 'ریگینگ', 'سیم بکسل', 'اسلینگ', 'قلاب', 'شگل', 'بار معلق',
+            'لیفتراک', 'forklift', 'استاکر',
+            'کار در ارتفاع', 'ارتفاع', 'داربست', 'هارنس', 'لنیارد', 'سقوط',
+            'جوشکاری', 'برشکاری', 'هات ورک', 'hot work',
+            'فضای بسته', 'confined space', 'مجوز کار', 'permit',
+            'حفاری', 'گودبرداری', 'ماشین آلات', 'ماشین‌آلات', 'تجهیزات دوار', 'قفل و برچسب', 'loto'
+        ];
+
+        // ============================================================
+        //  DATA — پاسخ‌های آماده ایمنی
+        // ============================================================
+        const knowledgeBase = [{
+            keywords: ["برق گرفتگی", "برق", "شوک الکتریکی", "الکتریکی"],
+            title: "⚡ برق گرفتگی",
+            answer: `<strong>اقدامات فوری:</strong>
+                <ol>
+                    <li>برق را <strong>قطع کنید</strong> (فیوز، کنتور، دوشاخه).</li>
+                    <li>تا قطع برق، به مصدوم <strong>دست نزنید</strong>.</li>
+                    <li>اگر برق قطع شد، <strong>ABC</strong> را بررسی کنید (راه هوایی، تنفس، گردش خون).</li>
+                    <li>در صورت عدم تنفس، <strong>CPR</strong> را شروع کنید.</li>
+                    <li>با <strong>اورژانس سرب و روی مهدی‌آباد (09961629144)</strong> تماس بگیرید.</li>
+                </ol>
+                <p><strong>⚠️ هشدار:</strong> از چوب خشک یا پلاستیک برای دور کردن مصدوم از برق استفاده کنید.</p>`
+        }, {
+            keywords: ["آتش سوزی", "حریق", "آتش", "fire"],
+            title: "🔥 آتش سوزی",
+            answer: `<strong>اقدامات فوری:</strong>
+                <ol>
+                    <li>محل را <strong>تخلیه</strong> کنید و درب‌ها را ببندید.</li>
+                    <li>با <strong>آتش‌نشانی سرو ایرانیان (09912769927)</strong> تماس بگیرید.</li>
+                    <li>از <strong>کپسول مناسب</strong> استفاده کنید (کلاس حریق را بشناسید).</li>
+                    <li>هرگز از <strong>آب</strong> برای حریق برق یا روغن استفاده نکنید.</li>
+                    <li>اگر آتش گسترده است، ساختمان را ترک کنید.</li>
+                </ol>
+                <p><strong>📌 یادآوری:</strong> کلاس A: جامدات · کلاس B: مایعات · کلاس C: گازها · کلاس E: برق</p>`
+        }, {
+            keywords: ["اسید روی دست", "اسید", "سوختگی شیمیایی", "مواد شیمیایی"],
+            title: "🧪 سوختگی شیمیایی (اسید)",
+            answer: `<strong>اقدامات فوری:</strong>
+                <ol>
+                    <li>لباس آلوده را <strong>خارج کنید</strong>.</li>
+                    <li>محل را حداقل <strong>۲۰ دقیقه</strong> با آب فراوان بشویید.</li>
+                    <li>محل را <strong>نمایید</strong> (نظیر نکنید).</li>
+                    <li>از مواد خنثی‌کننده <strong>استفاده نکنید</strong> مگر طبق دستور HSE.</li>
+                    <li>به <strong>درمانگاه</strong> مراجعه کنید.</li>
+                </ol>
+                <p><strong>📄 MSDS</strong> ماده را مطالعه کنید.</p>`
+        }, {
+            keywords: ["CPR", "احیای قلبی ریوی", "ماساژ قلبی"],
+            title: "🚑 CPR - احیای قلبی ریوی",
+            answer: `<strong>مراحل CPR برای بزرگسال:</strong>
+                <ol>
+                    <li><strong>پاسخ‌دهی</strong> را بررسی کنید (ضربه به شانه).</li>
+                    <li>با <strong>اورژانس سرب و روی مهدی‌آباد (09961629144)</strong> تماس بگیرید.</li>
+                    <li><strong>راه هوایی</strong> را باز کنید (سر به عقب، چانه بالا).</li>
+                    <li><strong>تنفس</strong> را بررسی کنید (۱۰ ثانیه).</li>
+                    <li><strong>۳۰ فشار</strong> قفسه سینه (عمق ۵-۶ سانتیمتر، سرعت ۱۰۰ بار در دقیقه).</li>
+                    <li><strong>۲ تنفس</strong> مصنوعی (هر کدام ۱ ثانیه).</li>
+                    <li>تکرار کنید تا اورژانس برسد.</li>
+                </ol>
+                <p><strong>⏱️ نسبت:</strong> ۳۰ فشار به ۲ تنفس</p>`
+        }, {
+            keywords: ["کپسول مناسب", "کپسول", "خاموش کننده", "اطفاء"],
+            title: "🧯 انتخاب کپسول مناسب",
+            answer: `<strong>بر اساس کلاس حریق:</strong>
+                <ul>
+                    <li><strong>کلاس A</strong> (چوب، کاغذ): ✅ آب، پودر، فوم</li>
+                    <li><strong>کلاس B</strong> (بنزین، روغن): ✅ پودر، CO₂، فوم · ❌ آب</li>
+                    <li><strong>کلاس C</strong> (گاز): ✅ پودر، CO₂</li>
+                    <li><strong>کلاس E</strong> (برق): ✅ CO₂، پودر · ❌ آب</li>
+                    <li><strong>کلاس D</strong> (فلزات): ✅ پودر خشک مخصوص</li>
+                </ul>
+                <p><strong>📌 روش PASS:</strong> Pull (کشیدن) → Aim (نشانه‌گیری) → Squeeze (فشار دادن) → Sweep (پاشیدن)</p>`
+        }, {
+            keywords: ["شماره درمانگاه", "درمانگاه", "اورژانس", "آتش نشانی", "شماره اضطراری", "شماره های اضطراری"],
+            title: "☎ شماره‌های اضطراری",
+            answer: `<ul>
+                    <li>🔥 <strong>آتش‌نشانی سرو ایرانیان:</strong> 09912769927</li>
+                    <li>🦺 <strong>واحد HSE شرکت درکاو:</strong> 09164555987</li>
+                    <li>🚑 <strong>اورژانس پیشگامان صنعت:</strong> 09157333115</li>
+                    <li>🏥 <strong>اورژانس سرب و روی مهدی‌آباد:</strong> 09961629144</li>
+                </ul>`
+        }, {
+            keywords: ["جرثقیل", "ایمنی جرثقیل", "کرین", "باربرداری", "ریگینگ", "اسلینگ", "سیم بکسل", "شگل", "قلاب"],
+            title: "🏗️ ایمنی جرثقیل و باربرداری",
+            answer: `<strong>نکات کلیدی ایمنی جرثقیل:</strong>
+                <ol>
+                    <li>قبل از شروع، <strong>ظرفیت مجاز بار</strong> و شعاع کاری را بررسی کنید.</li>
+                    <li><strong>سیم‌بکسل، قلاب، شگل و اسلینگ</strong> باید سالم و دارای تناسب ظرفیت باشند.</li>
+                    <li>استقرار جرثقیل روی سطح <strong>محکم و تراز</strong> انجام شود و در صورت نیاز اوت‌ریگرها کامل باز شوند.</li>
+                    <li>در زمان باربرداری، <strong>هیچ‌کس زیر بار معلق</strong> قرار نگیرد.</li>
+                    <li>برای هدایت بار از <strong>ریگر/سگنال‌من مجاز</strong> و علائم استاندارد استفاده شود.</li>
+                    <li>در باد شدید، دید نامناسب یا نقص فنی، عملیات را <strong>متوقف</strong> کنید.</li>
+                </ol>
+                <p><strong>⚠️</strong> حمل نفر با قلاب جرثقیل ممنوع است مگر با سبد مجاز و دستورالعمل مصوب.</p>`
+        }, {
+            keywords: ["کار در ارتفاع", "ارتفاع", "سقوط", "هارنس", "داربست", "لنیارد"],
+            title: "🧗 ایمنی کار در ارتفاع",
+            answer: `<strong>اقدامات ضروری:</strong>
+                <ol>
+                    <li>قبل از شروع، <strong>مجوز کار</strong> و ارزیابی ریسک انجام شود.</li>
+                    <li>از <strong>هارنس و لنیارد سالم</strong> با نقطه اتصال مناسب استفاده کنید.</li>
+                    <li>داربست، نردبان و سکوی کار باید <strong>بازرسی‌شده و پایدار</strong> باشند.</li>
+                    <li>لبه‌های باز، حفره‌ها و مسیرهای سقوط باید <strong>محافظ‌گذاری</strong> شوند.</li>
+                    <li>ابزار را مهار کنید تا از <strong>سقوط اجسام</strong> جلوگیری شود.</li>
+                </ol>
+                <p><strong>❌</strong> کار در ارتفاع بدون حفاظت سقوط ممنوع است.</p>`
+        }, {
+            keywords: ["لیفتراک", "forklift", "فورک لیفت", "استاکر"],
+            title: "🚜 ایمنی لیفتراک",
+            answer: `<strong>نکات مهم:</strong>
+                <ul>
+                    <li>راننده باید <strong>مجاز و آموزش‌دیده</strong> باشد.</li>
+                    <li>بار باید <strong>متعادل</strong> و در محدوده ظرفیت دستگاه باشد.</li>
+                    <li>هنگام حرکت، شاخک‌ها را پایین نگه دارید و با سرعت مجاز حرکت کنید.</li>
+                    <li>حمل نفر با شاخک ممنوع است مگر با <strong>سبد مجاز</strong>.</li>
+                    <li>در تقاطع‌ها، نقاط کور و مسیرهای مشترک با عابر، <strong>بوق و احتیاط</strong> الزامی است.</li>
+                </ul>`
+        }, {
+            keywords: ["جوشکاری", "برشکاری", "هات ورک", "hot work"],
+            title: "🔥 ایمنی جوشکاری و برشکاری",
+            answer: `<strong>قبل و حین هات‌ورک:</strong>
+                <ul>
+                    <li><strong>مجوز کار گرم</strong> دریافت کنید.</li>
+                    <li>مواد قابل اشتعال را از محل دور کنید یا پوشش دهید.</li>
+                    <li><strong>کپسول مناسب</strong> در دسترس باشد.</li>
+                    <li>از ماسک، دستکش، لباس کار مقاوم و شیلد مناسب استفاده کنید.</li>
+                    <li>پس از پایان کار، محل از نظر <strong>جرقه و آتش پنهان</strong> پایش شود.</li>
+                </ul>`
+        }, {
+            keywords: ["فضای بسته", "confined space", "چاه", "منهول", "مخزن"],
+            title: "🫧 ایمنی فضای بسته",
+            answer: `<strong>ورود به فضای بسته فقط با کنترل کامل:</strong>
+                <ol>
+                    <li><strong>مجوز ورود</strong> صادر شود.</li>
+                    <li>قبل از ورود، <strong>گازسنجی</strong> انجام شود.</li>
+                    <li>تهویه مناسب، ناظر بیرونی و تجهیزات نجات آماده باشند.</li>
+                    <li>در صورت نیاز از <strong>دستگاه تنفسی</strong> استفاده شود.</li>
+                    <li>ارتباط مداوم با فرد داخل فضا حفظ شود.</li>
+                </ol>`
+        }, {
+            keywords: ["معدن", "معدن کاری", "زیرزمینی"],
+            title: "⛏️ ایمنی معدن",
+            answer: `<strong>نکات ایمنی معدن:</strong>
+                <ul>
+                    <li>قبل از ورود، <strong>گازسنجی</strong> انجام دهید.</li>
+                    <li>از <strong>کلاه با چراغ</strong> استفاده کنید.</li>
+                    <li><strong>سیستم تهویه</strong> را بررسی کنید.</li>
+                    <li>از <strong>دستگاه تنفسی</strong> در محیط‌های آلوده استفاده کنید.</li>
+                    <li><strong>خروج اضطراری</strong> را بشناسید.</li>
+                </ul>
+                <p><strong>☎</strong> در صورت حادثه، با <strong>اورژانس سرب و روی مهدی‌آباد (09961629144)</strong> یا <strong>واحد HSE شرکت درکاو (09164555987)</strong> تماس بگیرید.</p>`
+        }, {
+            keywords: ["نشت گاز", "گاز", "بوی گاز"],
+            title: "☠ نشت گاز",
+            answer: `<strong>اقدامات فوری:</strong>
+                <ol>
+                    <li>شعله را <strong>خاموش کنید</strong>.</li>
+                    <li>از <strong>روشن کردن</strong> هرگونه وسیله برقی خودداری کنید.</li>
+                    <li>درها و پنجره‌ها را <strong>باز کنید</strong>.</li>
+                    <li>محل را <strong>تخلیه</strong> کنید.</li>
+                    <li>با <strong>آتش‌نشانی سرو ایرانیان (09912769927)</strong> تماس بگیرید.</li>
+                </ol>
+                <p><strong>⚠️</strong> از تلفن همراه در نزدیکی نشت گاز استفاده نکنید.</p>`
+        }, {
+            keywords: ["خونریزی", "خون", "زخم باز"],
+            title: "🩸 خونریزی",
+            answer: `<strong>کنترل خونریزی:</strong>
+                <ol>
+                    <li>دستکش بپوشید.</li>
+                    <li><strong>فشار مستقیم</strong> روی زخم وارد کنید.</li>
+                    <li>عضو را <strong>بالا</strong> نگه دارید.</li>
+                    <li>از <strong>پانسمان فشاری</strong> استفاده کنید.</li>
+                    <li>اگر خونریزی کنترل نشد، <strong>نقاط فشار</strong> (براکیال، فمورال) را فشار دهید.</li>
+                </ol>
+                <p><strong>⚠️</strong> شیء فرو رفته را بیرون نکشید.</p>`
+        }, {
+            keywords: ["سوختگی", "سوخته", "حرارت"],
+            title: "🔥 سوختگی حرارتی",
+            answer: `<strong>اقدامات:</strong>
+                <ol>
+                    <li>منبع حرارت را <strong>خاموش</strong> کنید.</li>
+                    <li>محل را <strong>۱۰ تا ۴۰ دقیقه</strong> با آب سرد خنک کنید.</li>
+                    <li><strong>تاول‌ها را نترکانید.</strong></li>
+                    <li>از <strong>پانسمان غیرچسبنده</strong> استفاده کنید.</li>
+                    <li>در سوختگی وسیع، با <strong>اورژانس</strong> تماس بگیرید.</li>
+                </ol>
+                <p><strong>❌</strong> از یخ مستقیم، کره یا پماد روی سوختگی استفاده نکنید.</p>`
+        }, {
+            keywords: ["غش", "بیهوشی", "از حال رفتن"],
+            title: "😵 غش کردن",
+            answer: `<strong>اقدامات:</strong>
+                <ol>
+                    <li>مصدوم را به <strong>پشت</strong> بخوابانید.</li>
+                    <li>پاها را <strong>۲۰-۳۰ سانتیمتر</strong> بالا ببرید.</li>
+                    <li>لباس‌های تنگ را <strong>شل</strong> کنید.</li>
+                    <li>اگر مصدوم پاسخ نمی‌دهد، <strong>ABC</strong> را بررسی کنید.</li>
+                    <li>با <strong>اورژانس</strong> تماس بگیرید.</li>
+                </ol>`
+        }];
+
+        // ============================================================
+        //  CORE FUNCTIONS
+        // ============================================================
+        const searchInput = document.getElementById('searchInput');
+        const answerBox = document.getElementById('answerBox');
+        const answerTitle = document.getElementById('answerTitle');
+        const answerBody = document.getElementById('answerBody');
+        const quickQuestions = document.getElementById('quickQuestions');
+
+        function normalizeText(text) {
+            return (text || '')
+                .toLowerCase()
+                .replace(/ي/g, 'ی')
+                .replace(/ك/g, 'ک')
+                .replace(/[‌‏]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function isSafetyRelated(query) {
+            const normalizedQuery = normalizeText(query);
+            return SAFETY_KEYWORDS.some(keyword => normalizedQuery.includes(normalizeText(keyword)));
+        }
+
+        function askQuestion() {
+            const query = searchInput.value.trim();
+            if (!query) {
+                alert('لطفاً سوال خود را بنویسید.');
+                return;
+            }
+            findAnswer(query);
+            searchInput.value = '';
+        }
+
+        function askQuick(text) {
+            searchInput.value = text;
+            findAnswer(text);
+        }
+
+        function findAnswer(query) {
+            const normalizedQuery = normalizeText(query);
+            let bestMatch = null;
+            let bestScore = 0;
+
+            for (const item of knowledgeBase) {
+                let score = 0;
+                for (const kw of item.keywords) {
+                    const normalizedKeyword = normalizeText(kw);
+                    if (normalizedQuery === normalizedKeyword) score += 4;
+                    if (normalizedQuery.includes(normalizedKeyword)) score += 2;
+                    if (normalizedKeyword.includes(normalizedQuery)) score += 1;
+                }
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestMatch = item;
+                }
+            }
+
+            if (bestMatch && bestScore >= 1) {
+                showAnswer(bestMatch.title, bestMatch.answer);
+            } else if (isSafetyRelated(query)) {
+                askAI(query);
+            } else {
+                showAnswer('🛑 خارج از حوزه', '<p>این همیار فقط درباره <strong>ایمنی</strong>، <strong>کمک‌های اولیه</strong>، <strong>آتش‌نشانی</strong> و <strong>شرایط اضطراری</strong> پاسخ می‌دهد.</p>');
+            }
+        }
+
+        // ============================================================
+        //  AI FALLBACK — وقتی جوابی توی دیتابیس داخلی پیدا نشد
+        // ============================================================
+        async function askAI(query) {
+            showAnswer('🤖 در حال تفکر...', '<div class="ai-loading"><i class="fas fa-spinner fa-spin"></i> همیار ایمنی در حال بررسی سؤال شما است...</div>');
+
+            try {
+                // ★ امنیت: فرار HTML برای خروجی‌های غیرقابل‌اعتماد (پاسخ AI)
+                const escHtml = function (v) {
+                    if (v === null || v === undefined) return '';
+                    return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                                    .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                };
+                let _aiUser = null;
+                try { const _au = localStorage.getItem('hse_user_activated'); if (_au) _aiUser = JSON.parse(_au); } catch (e) {}
+                const enrichedQuestion = `${SAFETY_CONTEXT}
+
+سؤال کاربر: ${query}`;
+                const aiParams = new URLSearchParams({
+                    action: 'ask_ai',
+                    personnel: (_aiUser && _aiUser.personnel) || '',
+                    question: enrichedQuestion
+                });
+                const res = await fetchWithTimeout(AI_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: aiParams.toString()
+                }, 30000);
+                const data = await res.json();
+
+                if (data.success) {
+                    // ★ امنیت: ابتدا متن را escape می‌کنیم تا هیچ HTML/اسکریپتی اجرا نشود
+                    const formatted = escHtml(data.answer || '')
+                        .replace(/\n\n/g, '</p><p>')
+                        .replace(/\n/g, '<br>');
+                    showAnswer('🤖 پاسخ همیار ایمنی', '<p>' + formatted + '</p>');
+                } else {
+                    showAnswer('⚠️ خطا', '<p>' + escHtml(data.msg || 'مشکلی در دریافت پاسخ پیش آمد. دوباره تلاش کنید.') + '</p>');
+                }
+            } catch (e) {
+                showAnswer('⚠️ خطا در اتصال', '<p>اتصال اینترنت را بررسی کنید و دوباره تلاش کنید.</p>');
+            }
+        }
+
+        function showAnswer(title, bodyHTML) {
+            answerTitle.textContent = title;
+            answerBody.innerHTML = bodyHTML;
+            answerBox.classList.add('show');
+            answerBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function resetChat() {
+            searchInput.value = '';
+            answerBox.classList.remove('show');
+            answerBody.innerHTML = '';
+            answerTitle.textContent = '🔥 پاسخ همیار';
+        }
+
+        function shareAnswer() {
+            const text = `${answerTitle.textContent}\n\n${answerBody.textContent}`;
+            if (navigator.share) {
+                navigator.share({ title: 'همیار ایمنی', text: text });
+            } else {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('پاسخ در کلیپ‌بورد کپی شد.');
+                }).catch(() => {
+                    alert('لطفاً متن را انتخاب و کپی کنید.');
+                });
+            }
+        }
+
+        function showEmergencyNumbers() {
+            showAnswer('🚨 شماره‌های اضطراری', `
+                <ul>
+                    <li>🔥 <strong>آتش‌نشانی سرو ایرانیان:</strong> <a href="tel:09912769927">09912769927</a></li>
+                    <li>🦺 <strong>واحد HSE شرکت درکاو:</strong> <a href="tel:09164555987">09164555987</a></li>
+                    <li>🚑 <strong>اورژانس پیشگامان صنعت:</strong> <a href="tel:09157333115">09157333115</a></li>
+                    <li>🏥 <strong>اورژانس سرب و روی مهدی‌آباد:</strong> <a href="tel:09961629144">09961629144</a></li>
+                </ul>
+            `);
+        }
+
+        // ============================================================
+        //  VOICE RECOGNITION
+        // ============================================================
+        function startVoice() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert('مرورگر شما از سوال صوتی پشتیبانی نمی‌کند. لطفاً از Chrome استفاده کنید.');
+                return;
+            }
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'fa-IR';
+            recognition.interimResults = false;
+
+            recognition.onstart = () => {
+                document.querySelector('.mic-btn').innerHTML = '<i class="fas fa-circle" style="color:#fff;animation:pulse 1s infinite;"></i>';
+            };
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                searchInput.value = transcript;
+                findAnswer(transcript);
+            };
+            recognition.onerror = () => {
+                alert('صدایی تشخیص داده نشد. دوباره امتحان کنید.');
+                document.querySelector('.mic-btn').innerHTML = '<i class="fas fa-microphone"></i>';
+            };
+            recognition.onend = () => {
+                document.querySelector('.mic-btn').innerHTML = '<i class="fas fa-microphone"></i>';
+            };
+            recognition.start();
+        }
+
+        // ============================================================
+        //  ENTER KEY
+        // ============================================================
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') askQuestion();
+        });
+
+        // ============================================================
+        //  INIT — SHOW WELCOME
+        // ============================================================
+        setTimeout(() => {
+            askQuick('شماره های اضطراری');
+        }, 300);
+    </script>
+
+    <script src="hse-common.js"></script>
+<script src="assets/js/sw-register.js"></script>
+</body>
+</html>

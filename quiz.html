@@ -1,0 +1,1793 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+
+<script>
+/* ============================================================
+   ★ امنیت: گیت احراز هویت (سمت کلاینت)
+   هیچ صفحه‌ای بدون ورود به سامانه باز نمی‌شود. محتوای صفحه
+   مخفی می‌ماند و کاربر به صفحه ورود هدایت می‌شود.
+   (لایه نمایشی؛ لایه امنیتی واقعی در بکاند اعمال می‌شود.)
+   ============================================================ */
+(function(){
+  var ok = false;
+  try {
+    var _u = JSON.parse(localStorage.getItem('hse_user_activated') || 'null');
+    ok = !!(_u && _u.personnel && _u.fullname);
+  } catch(e) { ok = false; }
+  if (ok) return; // مجاز - ادامه می‌دهد
+
+  // پنهان‌کردن کل محتوا و نمایش قفل
+  var hide = function(){
+    try {
+      var d = document;
+      // مخفی کردن همه عناصر
+      var all = d.body ? d.body.children : [];
+      for (var i=0;i<all.length;i++){ all[i].style.display='none'; }
+      var lock = d.createElement('div');
+      lock.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#0f172a;color:#f8fafc;'
+        +'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+        +'font-family:Tahoma,sans-serif;text-align:center;padding:20px;direction:rtl;';
+      lock.innerHTML = '<div style="font-size:60px;margin-bottom:10px;">🔒</div>'
+        +'<h2 style="margin:0 0 8px;">دسترسی محدود است</h2>'
+        +'<p style="margin:0 0 20px;color:#94a3b8;">لطفاً ابتدا از صفحه اصلی وارد سامانه شوید.</p>'
+        +'<a href="index.html" style="background:#ff6208;color:#fff;padding:10px 26px;'
+        +'border-radius:10px;text-decoration:none;font-weight:bold;">بازگشت به صفحه ورود</a>';
+      d.body.appendChild(lock);
+    } catch(e){}
+  };
+  if (document.body) hide(); else document.addEventListener('DOMContentLoaded', hide);
+  setTimeout(function(){ try{ location.replace('index.html'); }catch(e){} }, 2500);
+})();
+</script>
+
+    <meta charset="UTF-8" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#1e3c5c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HSE درکاو" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+    <title>آزمون تخصصی HSE | آژند همت توس [v3.1]</title>
+
+    <style>
+        :root {
+            --primary: #ff6208;
+            --primary-hover: #e05300;
+            --secondary: #f39c12;
+            --success: #27ae60;
+            --safety: #2c6e4e;
+            --danger: #c0392b;
+            --dark-blue: #1e3c5c;
+            --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #dfe7f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --text-main: #1e2a2e;
+            --text-muted: #64748b;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body { padding-bottom: 75px !important;
+            background: var(--bg-gradient);
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text-main);
+            line-height: 1.8;
+        }
+
+        .main-container {
+            max-width: 1000px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            background: var(--dark-blue);
+            padding: 35px 20px;
+            color: white;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+            position: relative;
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        .header h1 .icon {
+            margin-left: 10px;
+        }
+        .header p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        .header .back-home {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .header .back-home:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+        .card:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        }
+        .card-title {
+            color: var(--dark-blue);
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-right: 4px solid var(--primary);
+            padding-right: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title .icon {
+            font-size: 1.5rem;
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 22px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .toolbar .left {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 22px;
+            border: none;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+            background: #eef2f7;
+            color: #1e2a2e;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.05);
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+        .btn-primary:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+        }
+        .btn-success:hover {
+            background: #1e8b4c;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #cbd5e1;
+        }
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: #a93226;
+        }
+        .btn-secondary {
+            background: #6c7a89;
+            color: #fff;
+        }
+        .btn-secondary:hover {
+            background: #576574;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .stats {
+            background: #f8fafc;
+            padding: 10px 20px;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            color: var(--dark-blue);
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .stats span {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .timer-box {
+            background: #f8fafc;
+            padding: 10px 20px;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            color: var(--dark-blue);
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 2px solid #e2e8f0;
+            min-width: 120px;
+            justify-content: center;
+        }
+        .timer-box.warning {
+            border-color: var(--danger);
+            background: #fef2f2;
+            color: var(--danger);
+            animation: pulse 1s infinite;
+        }
+        .timer-box .time-icon {
+            font-size: 1.2rem;
+        }
+
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.6;
+            }
+        }
+
+        .topic-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f8fafc;
+            padding: 6px 16px 6px 6px;
+            border-radius: 60px;
+            border: 1px solid #e2e8f0;
+        }
+        .topic-selector label {
+            font-weight: 600;
+            color: var(--dark-blue);
+            font-size: 0.9rem;
+        }
+        .topic-selector select {
+            padding: 8px 16px;
+            border-radius: 40px;
+            border: 1px solid #d0d9e5;
+            background: #fff;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #1e2a2e;
+            cursor: pointer;
+            outline: none;
+            min-width: 150px;
+        }
+        .topic-selector select:focus {
+            border-color: var(--primary);
+        }
+        .topic-selector select:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .topic-selector .badge-count {
+            background: var(--dark-blue);
+            color: #fff;
+            border-radius: 40px;
+            padding: 2px 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .question-card {
+            background: #fafcff;
+            border: 1px solid #e9edf2;
+            border-radius: 20px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            transition: 0.2s;
+        }
+        .question-card:hover {
+            border-color: #d0d9e5;
+        }
+        .question-card .q-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        .question-card .q-num {
+            background: var(--dark-blue);
+            color: #fff;
+            border-radius: 40px;
+            padding: 2px 14px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            white-space: nowrap;
+            height: 26px;
+            display: inline-flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .question-card .q-text {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #0b1a26;
+            flex: 1;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px 16px;
+            margin-top: 10px;
+            padding-right: 4px;
+        }
+        @media (max-width: 600px) {
+            .options {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .opt-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 7px 14px;
+            border-radius: 40px;
+            background: #f8fafc;
+            border: 1px solid transparent;
+            transition: 0.15s;
+            cursor: pointer;
+            font-size: 0.92rem;
+        }
+        .opt-label:hover {
+            background: #eef2f7;
+            border-color: #cbd5e1;
+        }
+        .opt-label input[type="radio"] {
+            accent-color: var(--primary);
+            width: 17px;
+            height: 17px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .opt-label .letter {
+            font-weight: 700;
+            color: #64748b;
+            min-width: 20px;
+        }
+
+        .opt-label.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .opt-label.disabled:hover {
+            background: #f8fafc;
+            border-color: transparent;
+        }
+        .opt-label.disabled input[type="radio"] {
+            cursor: not-allowed;
+        }
+
+        /* ===== رنگ‌بندی گزینه‌ها بعد از تصحیح ===== */
+        .opt-label.opt-correct {
+            background: #dcfce7;
+            border-color: var(--success);
+            box-shadow: 0 0 0 1px var(--success) inset;
+        }
+        .opt-label.opt-correct .letter { color: var(--success); }
+        .opt-label.opt-correct::after {
+            content: '✔';
+            color: var(--success);
+            font-weight: 800;
+            margin-right: auto;
+        }
+        .opt-label.opt-wrong-selected {
+            background: #fee2e2;
+            border-color: var(--danger);
+            box-shadow: 0 0 0 1px var(--danger) inset;
+        }
+        .opt-label.opt-wrong-selected .letter { color: var(--danger); }
+        .opt-label.opt-wrong-selected::after {
+            content: '✘';
+            color: var(--danger);
+            font-weight: 800;
+            margin-right: auto;
+        }
+
+        .feedback-area {
+            margin-top: 16px;
+            padding: 14px 20px;
+            border-radius: 16px;
+            background: #f1f5f9;
+            display: none;
+            font-size: 0.93rem;
+            border-right: 4px solid var(--primary);
+        }
+        .feedback-area.show {
+            display: block;
+        }
+        .feedback-area .badge-answer {
+            display: inline-block;
+            padding: 2px 16px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-left: 8px;
+            color: #fff;
+        }
+        .feedback-area .badge-answer.correct {
+            background: var(--success);
+        }
+        .feedback-area .badge-answer.wrong {
+            background: var(--danger);
+        }
+        .feedback-area .badge-answer.missing {
+            background: var(--secondary);
+        }
+        .feedback-area .explain {
+            color: #334155;
+            margin-top: 5px;
+            font-size: 0.88rem;
+        }
+
+        .pagination {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 28px;
+        }
+        .page-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 1px solid #dde3ea;
+            background: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s;
+            font-size: 0.8rem;
+        }
+        .page-btn:hover {
+            border-color: var(--primary);
+            background: #fff6ed;
+        }
+        .page-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .page-btn:disabled:hover {
+            border-color: #dde3ea;
+            background: #fff;
+        }
+
+        .result-banner {
+            background: var(--dark-blue);
+            color: #fff;
+            border-radius: 20px;
+            padding: 18px 26px;
+            margin: 28px 0 16px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .result-banner.show {
+            display: flex;
+        }
+        .result-banner .score {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        .result-banner .score span {
+            color: #f3c26b;
+        }
+        .result-banner .msg {
+            font-size: 0.95rem;
+        }
+        .result-banner .timeout-msg {
+            background: rgba(192, 57, 43, 0.2);
+            padding: 4px 16px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            color: #f3c26b;
+        }
+
+        .btn-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 20px;
+            justify-content: center;
+            padding-top: 16px;
+            border-top: 1px solid #e9edf2;
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .footer .highlight {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+        }
+        .empty-state .icon {
+            font-size: 4rem;
+            display: block;
+            margin-bottom: 16px;
+        }
+        .empty-state .title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark-blue);
+            margin-bottom: 8px;
+        }
+        .empty-state .desc {
+            font-size: 0.95rem;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: #fff;
+            padding: 14px 28px;
+            border-radius: 60px;
+            font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            z-index: 999;
+            opacity: 0;
+            transition: 0.3s;
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        #questionList {
+            min-height: 200px;
+        }
+
+        .exam-locked .opt-label {
+            cursor: not-allowed;
+        }
+        .exam-locked .opt-label input[type="radio"] {
+            cursor: not-allowed;
+        }
+
+        @media(max-width:700px) {
+            .content {
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            .header .back-home {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+                left: 10px;
+            }
+            .topic-selector {
+                flex-wrap: wrap;
+            }
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .toolbar .left {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .stats {
+                text-align: center;
+            }
+            .timer-box {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="main-container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <a href="index.html?v=202606300519" class="back-home" title="بازگشت به صفحه اصلی">🏠</a>
+            <h1><span class="icon">🧪</span> آزمون تخصصی HSE</h1>
+            <p>انتخاب موضوع → ۱۵ سوال تصادفی از هر بخش | زمان: ۱۵ دقیقه</p>
+        </div>
+
+        <!-- USER BAR -->
+        <div id="userBar" style="background:rgba(255,98,8,0.07); border-bottom:1px solid rgba(255,98,8,0.15); padding:7px 18px; font-size:0.8rem; color:#64748b; display:none; justify-content:space-between; align-items:center;">
+            <span>👤 کاربر فعال:</span>
+            <span id="userBarName" style="font-weight:700; color:#ff6208;"></span>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <div class="card">
+                <div class="card-title"><span class="icon">📋</span> تنظیمات آزمون</div>
+
+                <div class="toolbar">
+                    <div class="left">
+                        <div class="topic-selector">
+                            <label>📂 موضوع:</label>
+                            <select id="topicSelect">
+                                <option value="bargh">⚡ ایمنی برق</option>
+                                <option value="jarsaghil">🏗️ جرثقیل و باربرداری</option>
+                                <option value="darbast">🪜 داربست</option>
+                                <option value="faza">⛑️ فضای بسته</option>
+                                <option value="kardarertefa">🧗 کار در ارتفاع</option>
+                                <option value="ranandegi">🚜 رانندگی تدافعی</option>
+                                <option value="anbar">📦 انبار و 5S</option>
+                                <option value="oummi">📘 ایمنی عمومی</option>
+                            </select>
+                            <span class="badge-count" id="topicCount">۱۵</span>
+                        </div>
+
+                        <button class="btn btn-primary" id="shuffleBtn">🔀 شروع آزمون</button>
+                    </div>
+                    <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+                        <div class="timer-box" id="timerBox">
+                            <span class="time-icon">⏱️</span>
+                            <span id="timerDisplay">۱۵:۰۰</span>
+                        </div>
+                        <div class="stats" id="statsBar">📊 پاسخ‌ها: <span id="answeredCount">۰</span> / <span id="totalCount">۱۵</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="questionList">
+                <div class="empty-state">
+                    <span class="icon">📋</span>
+                    <div class="title">آزمونی شروع نشده است</div>
+                    <div class="desc">لطفاً موضوع مورد نظر را انتخاب کرده و دکمه <strong>«شروع آزمون»</strong> را بزنید.</div>
+                </div>
+            </div>
+
+            <div class="pagination" id="pagination"></div>
+
+            <div class="result-banner" id="resultBanner">
+                <div class="score">نمره: <span id="finalScore">۰</span> از <span id="totalQuestionsDisplay">۱۵</span></div>
+                <div class="msg" id="resultMsg">✅ عالی! شما قبول شدید.</div>
+                <div id="wheelBtnWrap" style="display:none; margin-top:16px; text-align:center;">
+                    <a id="wheelBtn" href="gardooneh.html?v=202606300519" style="display:inline-block; background:linear-gradient(135deg,#C9A24B,#E4C77E); color:#1A1206; padding:14px 32px; border-radius:14px; font-weight:800; font-size:1rem; text-decoration:none; box-shadow:0 6px 18px rgba(201,162,75,0.4);">
+                        🎡 برو گردونه شانس رو بچرخون!
+                    </a>
+                </div>
+                <div id="gradeStatus" style="font-size:0.75rem; color:#64748b; margin-top:8px; text-align:center;"></div>
+            </div>
+
+            <!-- دکمه‌های پایین -->
+            <div class="btn-row">
+                <button class="btn btn-success" id="submitBtn">📤 تصحیح آزمون</button>
+                <button class="btn btn-secondary" id="restartBtn">🔄 شروع مجدد</button>
+                <button class="btn btn-outline" id="resetBtn">🗑️ بازنشانی کامل</button>
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            تهیه شده توسط <span class="highlight">شرکت معدنی و صنایع معدنی درکاو</span><br>
+            <span style="direction:ltr; display:inline-block;">📞 09178680173</span>
+        </div>
+
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ============================================================
+        // 1. بانک سوالات (۸ دسته - هر کدام ۵۰+ سوال تخصصی)
+        // ============================================================
+        function buildQuestionBank() {
+            // ---------- برق (بارق) ----------
+            const bargh = [
+                { q: "حداکثر ولتاژ تماس مجاز در شرایط عادی و خشک (فرکانس ۵۰ هرتز) چقدر است؟", o: ["۵۰ ولت", "۶۵ ولت", "۳۰ ولت", "۱۰۰ ولت"], a: 0, e: "استاندارد انگلستان ۵۰ ولت را مجاز می‌داند." },
+                { q: "رنگ سیم نول در سیم‌کشی استاندارد کدام است؟", o: ["قرمز", "آبی", "زرد-سبز", "مشکی"], a: 1, e: "طبق ماده ۳۵ آیین‌نامه برق، رنگ سیم نول آبی است." },
+                { q: "رنگ سیم ارت در سیم‌کشی استاندارد کدام است؟", o: ["قرمز", "آبی", "زرد-سبز", "قهوه‌ای"], a: 2, e: "سیم ارت با رنگ زرد-سبز مشخص می‌شود." },
+                { q: "حداقل مقاومت چاه ارت برای حفاظت افراد چند اهم است؟", o: ["کمتر از ۲ اهم", "کمتر از ۵ اهم", "کمتر از ۱۰ اهم", "کمتر از ۱ اهم"], a: 0, e: "مقاومت چاه ارت باید زیر ۲ اهم باشد." },
+                { q: "کلید محافظ جان (RCD) در جریان نشتی بیش از چند میلی‌آمپر مدار را قطع می‌کند؟", o: ["۱۰ میلی‌آمپر", "۳۰ میلی‌آمپر", "۵۰ میلی‌آمپر", "۱۰۰ میلی‌آمپر"], a: 1, e: "بدن انسان توان تحمل ۳۰ میلی‌آمپر را تا ۲۰۰ میلی‌ثانیه دارد." },
+                { q: "کلید محافظ جان جایگزین کدام سیستم نمی‌شود؟", o: ["سیستم ارت", "فیوز", "کلید مینیاتوری", "کلید هوایی"], a: 0, e: "RCD فقط به عنوان حفاظت مضاعف است و جایگزین ارت نمی‌شود." },
+                { q: "حداقل فاصله ایمنی از خطوط برق فشار ضعیف (تا ۱۰۰۰ ولت) چند سانتی‌متر است؟", o: ["۱۳۰ سانتی‌متر", "۲۱۰ سانتی‌متر", "۵۰ سانتی‌متر", "۱۰۰ سانتی‌متر"], a: 0, e: "حریم خطوط فشار ضعیف ۱۳۰ سانتی‌متر است." },
+                { q: "حداقل فاصله ایمنی از خطوط برق فشار متوسط (۲۰ کیلوولت) چند سانتی‌متر است؟", o: ["۱۳۰ سانتی‌متر", "۲۱۰ سانتی‌متر", "۳۰۰ سانتی‌متر", "۱۵۰ سانتی‌متر"], a: 1, e: "حریم خطوط ۲۰ کیلوولت ۲۱۰ سانتی‌متر است." },
+                { q: "در هنگام برق‌گرفتگی، اولین اقدام چیست؟", o: ["قطع جریان برق", "تماس با اورژانس", "ماساژ قلبی", "خارج کردن مصدوم با دست خالی"], a: 0, e: "قبل از هر اقدامی، جریان برق را قطع کنید." },
+                { q: "برای خارج کردن مصدوم از مدار برق، از چه وسیله‌ای باید استفاده کرد؟", o: ["چوب خشک", "سیم فلزی", "دست خالی", "پارچه مرطوب"], a: 0, e: "با چوب خشک یا تخته چوبی مصدوم را از مدار خارج کنید." },
+                { q: "جریان مستقیم (DC) چه ویژگی دارد؟", o: ["جهت ثابت", "جهت متغیر", "فرکانس ۵۰ هرتز", "ولتاژ متغیر"], a: 0, e: "جریان مستقیم جهت و شدت ثابتی دارد." },
+                { q: "فرکانس برق شهری در ایران چند هرتز است؟", o: ["۵۰ هرتز", "۶۰ هرتز", "۴۰ هرتز", "۱۰۰ هرتز"], a: 0, e: "فرکانس برق شهری در ایران ۵۰ هرتز است." },
+                { q: "قانون اهم چه رابطه‌ای را بیان می‌کند؟", o: ["V = I × R", "P = V × I", "I = V / R", "هر دو گزینه A و C"], a: 3, e: "قانون اهم: V = I × R و I = V / R" },
+                { q: "رساناها چه ویژگی دارند؟", o: ["الکترون‌های آزاد زیاد", "الکترون‌های آزاد کم", "مقاومت بالا", "عایق هستند"], a: 0, e: "رساناها اجازه حرکت آزادانه الکترون‌ها را می‌دهند." },
+                { q: "کدام یک از موارد زیر عایق محسوب می‌شود؟", o: ["مس", "شیشه", "آلومینیوم", "نقره"], a: 1, e: "شیشه یک عایق الکتریکی است." },
+                { q: "کدام یک از موارد زیر رسانا محسوب می‌شود؟", o: ["پلاستیک", "مس", "چوب خشک", "لاستیک"], a: 1, e: "مس یک رسانای عالی است." },
+                { q: "مقاومت بدن انسان در ولتاژهای پایین چگونه است؟", o: ["بیشتر از ولتاژ بالا", "کمتر از ولتاژ بالا", "ثابت است", "صفر است"], a: 0, e: "مقاومت بدن در ولتاژهای پایین بیشتر است." },
+                { q: "خطرناک‌ترین مسیر عبور جریان از بدن کدام است؟", o: ["دست چپ به پای راست", "دست راست به پای چپ", "مسیر قلب و ریه", "پاها"], a: 2, e: "مسیر عبور از قلب و ریه‌ها خطرناک‌ترین است." },
+                { q: "کلیدهای چاقویی باید به چه صورت نصب شوند؟", o: ["افقی", "عمودی", "مورب", "به دلخواه"], a: 1, e: "کلیدهای چاقویی باید عمودی نصب شوند." },
+                { q: "استفاده از سیم ارت به جای سیم نول چه حکمی دارد؟", o: ["مجاز است", "ممنوع است", "در مواقع ضروری مجاز است", "بستگی به ولتاژ دارد"], a: 1, e: "استفاده از سیم ارت به جای نول و بالعکس ممنوع است." },
+                { q: "در تابلو برق، فاصله کالاها از تابلو حداقل چند متر است؟", o: ["۰.۵ متر", "۱ متر", "۱.۵ متر", "۲ متر"], a: 3, e: "برای دسترسی سریع در مواقع اضطراری، حریم تابلو برق ۲ متر است." },
+                { q: "رنگ سیم فاز در سیم‌کشی استاندارد کدام است؟", o: ["آبی", "زرد-سبز", "قرمز یا قهوه‌ای", "سفید"], a: 2, e: "رنگ سیم فاز قرمز، مشکی یا قهوه‌ای است." },
+                { q: "کلید محافظ جان (RCD) باید هر چند وقت یکبار تست شود؟", o: ["ماهانه", "سه ماهه", "شش ماهه", "سالانه"], a: 0, e: "کلیدهای RCD باید ماهانه تست شوند." },
+                { q: "کدام یک از موارد زیر برای اطفای حریق برق مناسب است؟", o: ["آب", "کف (فوم)", "CO₂", "پودر مخصوص فلزات"], a: 2, e: "CO₂ برای حریق برق مناسب است (غیررسانا)." },
+                { q: "در محیط‌های مرطوب، ولتاژ مجاز برای چراغ‌های دستی چند ولت است؟", o: ["۲۴ ولت", "۵۰ ولت", "۱۱۰ ولت", "۲۲۰ ولت"], a: 0, e: "در محیط‌های مرطوب ولتاژ چراغ دستی حداکثر ۲۴ ولت است." },
+                { q: "سیستم LOTO در ایمنی برق مخفف چیست؟", o: ["Lockout-Tagout", "Load-Torque", "Line-Output", "Loop-Test"], a: 0, e: "LOTO = قفل‌زنی و برچسب‌گذاری تجهیزات." },
+                { q: "در هنگام تعمیرات برق، اولین اقدام کدام است؟", o: ["قطع برق و قفل‌زنی", "شروع تعمیر", "گزارش به مدیر", "استفاده از دستکش"], a: 0, e: "قبل از هر تعمیر، برق را قطع و قفل کنید." },
+                { q: "کابل‌های آسیب‌دیده در کارگاه چه حکمی دارند؟", o: ["می‌توان از آنها استفاده کرد", "باید فوری تعویض شوند", "با نوار چسب قابل تعمیرند", "فقط در شب قابل استفاده‌اند"], a: 1, e: "کابل‌های آسیب‌دیده باید فوری تعویض شوند." },
+                { q: "در تابلوهای برق، درب‌ها باید چه وضعیتی داشته باشند؟", o: ["باز", "بسته", "نیمه‌باز", "بدون درب"], a: 1, e: "درب تابلوهای برق باید همیشه بسته باشند." },
+                { q: "حداکثر فاصله مجاز کابل‌های فشار قوی از فشار ضعیف چند متر است؟", o: ["۰.۵ متر", "۱ متر", "۲ متر", "۳ متر"], a: 2, e: "کابل‌های فشار قوی و ضعیف باید حداقل ۲ متر فاصله داشته باشند." },
+                { q: "برقکار موظف است قبل از کار چه کاری انجام دهد؟", o: ["اطمینان از سلامت وسایل", "شروع فوری کار", "گزارش به سرپرست", "استفاده از دستکش"], a: 0, e: "برقکار باید از سلامت وسایل خود اطمینان حاصل کند." },
+                { q: "در هنگام آتش‌سوزی برق، از چه خاموش‌کننده‌ای نباید استفاده کرد؟", o: ["CO₂", "پودر خشک", "آب", "هالوژنه"], a: 2, e: "هرگز از آب برای حریق برق استفاده نکنید (خطر برق‌گرفتگی)." },
+                { q: "سیستم ارت حفاظتی برای چه هدفی است؟", o: ["ایمنی افراد", "بهبود کیفیت برق", "کاهش مصرف", "افزایش ولتاژ"], a: 0, e: "ارت حفاظتی برای ایمنی افراد در برابر برق‌گرفتگی است." },
+                { q: "حداقل سطح مقطع سیم ارت در تابلو برق چند میلی‌متر مربع است؟", o: ["۲.۵", "۴", "۶", "۱۰"], a: 1, e: "سیم ارت تابلو برق حداقل ۴ میلی‌متر مربع است." },
+                { q: "فیوزها برای چه منظوری استفاده می‌شوند؟", o: ["حفاظت در برابر جریان اضافی", "تنظیم ولتاژ", "افزایش توان", "کاهش مصرف"], a: 0, e: "فیوزها از تجهیزات در برابر جریان اضافی محافظت می‌کنند." },
+                { q: "در صورت برق‌گرفتگی، مصدوم را به کجا منتقل کنیم؟", o: ["به بیمارستان", "به خانه", "به محل کار", "به اتاق استراحت"], a: 0, e: "مصدومین برق‌گرفتگی باید حتماً به بیمارستان منتقل شوند." },
+                { q: "عوارض تأخیری برق‌گرفتگی شامل چه مواردی است؟", o: ["مشکلات قلبی", "مشکلات کلیوی", "مشکلات عصبی", "همه موارد"], a: 3, e: "برق‌گرفتگی می‌تواند عوارض تأخیری خطرناک داشته باشد." },
+                { q: "در هنگام کار با برق، استفاده از چه تجهیزاتی الزامی است؟", o: ["دستکش عایق", "کفش ایمنی", "عینک", "همه موارد"], a: 3, e: "استفاده از دستکش عایق، کفش ایمنی و عینک الزامی است." },
+                { q: "حداکثر ولتاژ مجاز برای چراغ‌های دستی در محیط خشک چند ولت است؟", o: ["۵۰ ولت", "۱۱۰ ولت", "۲۲۰ ولت", "۳۸۰ ولت"], a: 0, e: "ولتاژ چراغ دستی در محیط خشک حداکثر ۵۰ ولت است." },
+                { q: "کدام یک از موارد زیر از علائم برق‌گرفتگی شدید است؟", o: ["سوختگی", "ایست قلبی", "قطع عضو", "همه موارد"], a: 3, e: "برق‌گرفتگی شدید می‌تواند باعث سوختگی، ایست قلبی و قطع عضو شود." },
+                { q: "در سیستم ارت، مقاومت زمین باید کمتر از چند اهم باشد؟", o: ["۱", "۲", "۵", "۱۰"], a: 1, e: "مقاومت زمین برای حفاظت افراد باید کمتر از ۲ اهم باشد." },
+                { q: "نیمه‌هادی‌ها در چه شرایطی مانند رسانا عمل می‌کنند؟", o: ["هنگامیکه نیروی الکتریکی در یک جهت وارد شود", "همیشه", "هرگز", "فقط در دمای بالا"], a: 0, e: "نیمه‌هادی‌ها در یک جهت مانند رسانا عمل می‌کنند." },
+                { q: "بارهای الکتریکی هم‌نام چه رفتاری دارند؟", o: ["جذب یکدیگر", "دفع یکدیگر", "هیچ", "تخریب می‌شوند"], a: 1, e: "بارهای هم‌نام یکدیگر را دفع می‌کنند." },
+                { q: "ولتاژ گامی چیست؟", o: ["اختلاف پتانسیل بین دو پا", "ولتاژ بین فاز و نول", "ولتاژ باتری", "ولتاژ خطوط انتقال"], a: 0, e: "ولتاژ گامی اختلاف پتانسیل بین دو پای فرد است." },
+                { q: "مقاومت بدن پس از مرگ چه تغییری می‌کند؟", o: ["افزایش ۶۵٪", "کاهش ۵۰٪", "ثابت می‌ماند", "صفر می‌شود"], a: 0, e: "مقاومت بدن پس از مرگ حدود ۶۵٪ افزایش می‌یابد." },
+                { q: "حداقل ولتاژ کشنده برای انسان چند ولت است؟", o: ["۴۰-۵۰ ولت", "۱۰۰ ولت", "۲۲۰ ولت", "۳۸۰ ولت"], a: 0, e: "حداقل ولتاژ کشنده ۴۰ تا ۵۰ ولت است." },
+                { q: "در فرکانس بالای ۱۰ کیلوهرتز، جریان برق چه رفتاری دارد؟", o: ["در سطح بدن عبور می‌کند", "از قلب عبور می‌کند", "باعث مرگ می‌شود", "مقاومت بدن را کاهش می‌دهد"], a: 0, e: "در فرکانس بالای ۱۰ کیلوهرتز، جریان در سطح بدن عبور می‌کند." },
+                { q: "کلیدهای قطع کننده مدار باید چه مشخصه‌ای داشته باشند؟", o: ["مشخص بودن وضعیت باز/بسته", "بدون برچسب", "رنگ قرمز", "دستگیره چرخان"], a: 0, e: "وضعیت باز یا بسته بودن باید به سادگی قابل تشخیص باشد." },
+                { q: "استفاده از کلید محافظ جان به عنوان جایگزین سیستم ارت چه حکمی دارد؟", o: ["مجاز است", "ممنوع است", "فقط در موارد خاص مجاز است", "در همه موارد مجاز است"], a: 1, e: "استفاده از RCD به عنوان جایگزین سیستم ارت ممنوع است." },
+                { q: "در مکان‌های مرطوب، علاوه بر سیستم ارت از چه تجهیزی باید استفاده کرد؟", o: ["RCD", "فیوز", "کلید مینیاتوری", "کلید هوایی"], a: 0, e: "در مکان‌های مرطوب از RCD به عنوان حفاظت مضاعف استفاده شود." },
+                { q: "سیم‌کشی موقت در کارگاه‌های ساختمانی چه شرایطی دارد؟", o: ["فقط در زمان تخریب، ساخت و تعمیرات مجاز است", "همیشه مجاز است", "هرگز مجاز نیست", "فقط در شب مجاز است"], a: 0, e: "سیم‌کشی موقت فقط در زمان تخریب، ساخت و تعمیرات مجاز است." },
+                { q: "حداقل ارتفاع سیم‌کشی موقت در محل‌های عبور و مرور چند متر است؟", o: ["۲ متر", "۳ متر", "۴ متر", "۵ متر"], a: 1, e: "سیم‌کشی موقت در محل‌های عبور و مرور باید حداقل ۳ متر ارتفاع داشته باشد." },
+                { q: "در اتاق باتری، ممنوعیت استعمال دخانیات در چه شعاعی اعمال می‌شود؟", o: ["۵ متر", "۸ متر", "۱۰ متر", "۱۵ متر"], a: 1, e: "در شعاع ۸ متری اتاق باتری، استعمال دخانیات ممنوع است." },
+                { q: "برای جلوگیری از الکتریسیته ساکن، رطوبت نسبی هوا باید چند درصد باشد؟", o: ["بیش از ۵۰٪", "کمتر از ۳۰٪", "بین ۲۰-۳۰٪", "بیش از ۸۰٪"], a: 0, e: "رطوبت نسبی هوا باید بیش از ۵۰٪ باشد." }
+            ];
+
+            // ---------- جرثقیل و باربرداری (جرثقیل) ----------
+            const jarsaghil = [
+                { q: "حداقل فاصله ایمنی از خطوط برق زیر ۵۰ کیلوولت برای جرثقیل چند متر است؟", o: ["۳ متر", "۵ متر", "۶ متر", "۱۰ متر"], a: 0, e: "فاصله ایمن از خطوط زیر ۵۰ کیلوولت حداقل ۳ متر است." },
+                { q: "حداقل فاصله ایمنی از خطوط برق بالای ۵۰ کیلوولت برای جرثقیل چند متر است؟", o: ["۳ متر", "۵ متر", "۶ متر", "۱۰ متر"], a: 2, e: "فاصله ایمن از خطوط بالای ۵۰ کیلوولت حداقل ۶ متر است." },
+                { q: "اسلینگ فولادی در چه شرایطی باید ریجکت (رد) شود؟", o: ["ساییدگی بیش از ۳۰٪ قطر", "زنگ‌زدگی سطحی", "کمی کثیفی", "تاب‌خوردگی جزئی"], a: 0, e: "ساییدگی بیش از ۳۰٪ قطر اسلینگ باعث ریجکت می‌شود." },
+                { q: "اسلینگ نساجی در چه شرایطی باید ریجکت شود؟", o: ["بریدگی در لبه‌ها", "کمی رنگ‌پریدگی", "چروکیدگی", "گرم شدن"], a: 0, e: "بریدگی در لبه‌های اسلینگ نساجی باعث ریجکت می‌شود." },
+                { q: "ضریب ایمنی استاندارد برای سیم‌بکسل‌ها چند است؟", o: ["۳ تا ۵", "۱ تا ۲", "۱۰ تا ۱۵", "۲۰ تا ۳۰"], a: 0, e: "ضریب ایمنی سیم‌بکسل‌ها معمولاً ۳ تا ۵ است." },
+                { q: "ضریب پایداری برای جرثقیل‌های متحرک چند است؟", o: ["۱.۲۵ تا ۱.۵", "۲ تا ۳", "۵ تا ۱۰", "۲۰"], a: 0, e: "ضریب پایداری جرثقیل‌های متحرک ۱.۲۵ تا ۱.۵ است." },
+                { q: "مغزی فولادی (IWRC) در سیم‌بکسل چه ویژگی دارد؟", o: ["مقاوم‌ترین نوع", "انعطاف‌پذیرترین", "سبک‌ترین", "ارزان‌ترین"], a: 0, e: "مغزی فولادی مقاوم‌ترین نوع سیم‌بکسل است." },
+                { q: "در لود چارت، با افزایش شعاع کاری چه اتفاقی می‌افتد؟", o: ["ظرفیت بار کاهش می‌یابد", "ظرفیت بار افزایش می‌یابد", "ظرفیت بار ثابت می‌ماند", "جرثقیل واژگون می‌شود"], a: 0, e: "با افزایش شعاع کاری، ظرفیت بار به شدت کاهش می‌یابد." },
+                { q: "کدام یک از موارد زیر از علل اصلی واژگونی جرثقیل است؟", o: ["بار بیش‌ازحد", "باد شدید", "زمین نرم", "همه موارد"], a: 3, e: "بار بیش‌ازحد، باد شدید و زمین نرم همگی از علل واژگونی هستند." },
+                { q: "سیستم LMI در جرثقیل چه کاربردی دارد؟", o: ["نشان دادن لحظه‌ای بار", "کنترل سرعت", "تنظیم زاویه بوم", "خنک‌کاری موتور"], a: 0, e: "LMI (Load Moment Indicator) بار لحظه‌ای را نمایش می‌دهد." },
+                { q: "سیستم آنتی دو بلوک (Anti Two-Block) از چه چیزی جلوگیری می‌کند؟", o: ["برخورد بلوک قرقره به نوک بوم", "واژگونی", "برخورد با خطوط برق", "سقوط بار"], a: 0, e: "سیستم آنتی دو بلوک از برخورد بلوک قرقره به نوک بوم جلوگیری می‌کند." },
+                { q: "حداکثر سرعت باد برای عملیات با جرثقیل چند گره است؟", o: ["۲۰ گره", "۳۰ گره", "۴۰ گره", "۱۰ گره"], a: 0, e: "در سرعت باد بیش از ۲۰ گره، عملیات باید متوقف شود." },
+                { q: "اسلینگ زنجیری برای چه شرایطی مناسب است؟", o: ["بارهای داغ", "بارهای سبک", "بارهای شکننده", "بارهای مرطوب"], a: 0, e: "اسلینگ زنجیری برای بارهای داغ و شرایط سخت مناسب است." },
+                { q: "در جرثقیل ماشینی (Truck Mounted)، چند کابین وجود دارد؟", o: ["دو کابین", "یک کابین", "سه کابین", "بدون کابین"], a: 0, e: "جرثقیل ماشینی دارای دو کابین است." },
+                { q: "جرثقیل بوم خشک (Crawler) چه ویژگی دارد؟", o: ["بدون نیاز به Outrigger", "نیاز به Outrigger دارد", "فقط روی آسفالت کار می‌کند", "سرعت بالایی دارد"], a: 0, e: "جرثقیل بوم خشک به دلیل شنی بودن، بدون نیاز به Outrigger است." },
+                { q: "در جرثقیل کارگاهی (Rough Terrain)، حرکت خرچنگی به چه معناست؟", o: ["چرخ‌ها در یک جهت می‌چرخند", "چرخ‌ها به صورت مورب می‌چرخند", "جرثقیل می‌چرخد", "بوم می‌چرخد"], a: 0, e: "حرکت خرچنگی یعنی چرخ‌ها در یک جهت می‌چرخند." },
+                { q: "حداقل فاصله پایه‌های تعادلی (Outrigger) از لبه گودال چند متر است؟", o: ["۱ متر", "۲ متر", "۳ متر", "۰.۵ متر"], a: 0, e: "Outriggerها باید حداقل ۱ متر از لبه گودال فاصله داشته باشند." },
+                { q: "قبل از هر باربرداری، چه سندی باید صادر شود؟", o: ["پرمیت کار", "گواهی فنی", "برگه تحویل", "فاکتور"], a: 0, e: "قبل از باربرداری باید پرمیت کار صادر شود." },
+                { q: "در باربرداری با جرثقیل، سیگنال‌دهنده باید چند نفر باشد؟", o: ["حداقل یک نفر", "حداقل دو نفر", "حداقل سه نفر", "هیچ"], a: 0, e: "حداقل یک سیگنال‌دهنده برای هماهنگی لازم است." },
+                { q: "کدام یک از موارد زیر در ریجکت سیم‌بکسل مؤثر است؟", o: ["شکستگی سیم‌ها", "رنگ‌پریدگی", "کمی گرد و غبار", "حرارت جزئی"], a: 0, e: "شکستگی سیم‌ها یکی از دلایل اصلی ریجکت سیم‌بکسل است." },
+                { q: "حداکثر کاهش قطر مجاز برای سیم‌بکسل چند درصد است؟", o: ["۱۰٪", "۲۰٪", "۳۰٪", "۵۰٪"], a: 0, e: "کاهش قطر بیش از ۱۰٪ باعث ریجکت سیم‌بکسل می‌شود." },
+                { q: "در جرثقیل برجی، حداکثر سرعت باد برای کار چند کیلومتر بر ساعت است؟", o: ["۳۷ کیلومتر", "۵۰ کیلومتر", "۶۰ کیلومتر", "۲۰ کیلومتر"], a: 0, e: "سرعت باد مجاز برای جرثقیل برجی ۳۷ کیلومتر بر ساعت است." },
+                { q: "کدام یک از موارد زیر در لود چارت درج نمی‌شود؟", o: ["رنگ جرثقیل", "شعاع کاری", "طول بوم", "ظرفیت بار"], a: 0, e: "رنگ جرثقیل در لود چارت درج نمی‌شود." },
+                { q: "حداقل ضریب ایمنی برای پایداری جرثقیل چقدر است؟", o: ["۱.۲۵", "۲", "۳", "۵"], a: 0, e: "ضریب ایمنی پایداری جرثقیل حداقل ۱.۲۵ است." },
+                { q: "کدام یک از موارد زیر از وظایف ریگر (Rigger) است؟", o: ["مهار و اتصال بار", "رانندگی جرثقیل", "صدور پرمیت", "نظارت بر ترافیک"], a: 0, e: "ریگر مسئول مهار و اتصال بار است." },
+                { q: "در جرثقیل‌های سیار، Outriggerها برای چه منظوری استفاده می‌شوند؟", o: ["افزایش پایداری", "افزایش سرعت", "کاهش وزن", "تنظیم ارتفاع"], a: 0, e: "Outriggerها برای افزایش پایداری جرثقیل استفاده می‌شوند." },
+                { q: "حداکثر فاصله بین دو Outrigger در جرثقیل چقدر است؟", o: ["۳ متر", "۵ متر", "۱۰ متر", "۲ متر"], a: 1, e: "فاصله Outriggerها معمولاً حدود ۵ متر است." },
+                { q: "کدام یک از موارد زیر در بازرسی روزانه جرثقیل باید چک شود؟", o: ["ترمزها", "رنگ بدنه", "برچسب‌ها", "نوع روغن"], a: 0, e: "ترمزها باید در بازرسی روزانه چک شوند." },
+                { q: "حداکثر وزن مجاز برای هر شاخه اسلینگ سه‌شاخه با بار ۱۰۰۰ کیلوگرم چقدر است؟", o: ["حدود ۵۰۰ کیلوگرم", "حدود ۳۰۰ کیلوگرم", "حدود ۱۰۰۰ کیلوگرم", "حدود ۲۰۰ کیلوگرم"], a: 0, e: "هر شاخه حدود ۵۰۰ کیلوگرم نیرو تحمل می‌کند." },
+                { q: "در صورت برخورد بوم جرثقیل با خطوط برق، اولین اقدام چیست؟", o: ["قطع برق و تماس با شرکت برق", "خروج از کابین", "ادامه کار", "تماس با مدیر"], a: 0, e: "اولین اقدام قطع برق و تماس با شرکت برق است." },
+                { q: "حداکثر ارتفاع جرثقیل برجی برای استفاده بدون مهار چند متر است؟", o: ["۴۵ متر", "۳۰ متر", "۶۰ متر", "۱۰۰ متر"], a: 0, e: "حداکثر ارتفاع بدون مهار در جرثقیل برجی ۴۵ متر است." },
+                { q: "کدام یک از موارد زیر از استانداردهای جرثقیل است؟", o: ["ASME B30", "ISO 9001", "NFPA 70", "API 650"], a: 0, e: "ASME B30 استاندارد ایمنی جرثقیل‌ها است." },
+                { q: "در جرثقیل‌های موبایل، چرا باید از لود چارت استفاده کرد؟", o: ["برای تعیین ظرفیت بار", "برای تنظیم موتور", "برای تعویض روغن", "برای تنظیم ترمز"], a: 0, e: "لود چارت برای تعیین ظرفیت بار در شعاع‌های مختلف است." },
+                { q: "حداقل فاصله ایمنی از لبه پرتگاه برای استقرار جرثقیل چقدر است؟", o: ["۳ متر", "۵ متر", "۱۰ متر", "۱ متر"], a: 0, e: "حداقل فاصله از لبه پرتگاه ۳ متر است." },
+                { q: "در عملیات باربرداری، چه کسی مسئول نهایی ایمنی است؟", o: ["اپراتور جرثقیل", "ریگر", "ناظر HSE", "سرپرست کارگاه"], a: 2, e: "ناظر HSE مسئول نهایی ایمنی عملیات است." },
+                { q: "کدام یک از موارد زیر در جلسه Toolbox باید بررسی شود؟", o: ["خطرات و اقدامات کنترلی", "برنامه تولید", "حقوق کارگران", "تعطیلات"], a: 0, e: "جلسه Toolbox برای بررسی خطرات و اقدامات کنترلی است." },
+                { q: "حداکثر بار کاری (WLL) در اسلینگ‌ها بر چه اساسی تعیین می‌شود؟", o: ["حداقل بار گسیختگی تقسیم بر ضریب ایمنی", "حداکثر بار گسیختگی", "وزن بار", "طول اسلینگ"], a: 0, e: "WLL = MBL / ضریب ایمنی" },
+                { q: "در جرثقیل‌های بوم خشک، حرکت روی چه سطوحی امکان‌پذیر است؟", o: ["زمین‌های ناهموار", "فقط آسفالت", "فقط بتن", "فقط سطوح صاف"], a: 0, e: "جرثقیل بوم خشک روی زمین‌های ناهموار حرکت می‌کند." },
+                { q: "کدام یک از موارد زیر از اجزای اصلی جرثقیل است؟", o: ["بوم", "موتور", "گیربکس", "همه موارد"], a: 3, e: "بوم، موتور و گیربکس همگی از اجزای جرثقیل هستند." },
+                { q: "در جرثقیل‌های سیار، چرخ‌ها باید چه مشخصه‌ای داشته باشند؟", o: ["قطر مناسب برای زمین", "رنگ قرمز", "ساخته شده از چوب", "بدون ترمز"], a: 0, e: "چرخ‌ها باید متناسب با زمین انتخاب شوند." },
+                { q: "حداقل تعداد لایه‌های وینچ برای بلند کردن بار چند لایه است؟", o: ["۳ لایه", "۲ لایه", "۴ لایه", "۵ لایه"], a: 0, e: "حداقل ۳ لایه برای وینچ توصیه می‌شود." }
+            ];
+
+            // ---------- داربست (داربست) ----------
+            const darbast = [
+                { q: "حداکثر فاصله بین دو استاندارد مجاور در طول داربست (Bay Length) چند متر است؟", o: ["۲ متر", "۲.۴ متر", "۳ متر", "۱.۵ متر"], a: 0, e: "فاصله بین دو استاندارد حداکثر ۲ متر است." },
+                { q: "حداکثر فاصله ترانزوم‌ها در سکوهای کاری ۵ تخته‌ای چند متر است؟", o: ["۱.۲ متر", "۱.۵ متر", "۲ متر", "۰.۸ متر"], a: 0, e: "فاصله ترانزوم‌ها برای سکوی ۵ تخته‌ای ۱.۲ متر است." },
+                { q: "ارتفاع نرده محافظ از سطح سکو چند سانتی‌متر است؟", o: ["۱۰۰ سانتی‌متر", "۹۰ سانتی‌متر", "۱۱۰ سانتی‌متر", "۸۰ سانتی‌متر"], a: 0, e: "نرده محافظ باید در ارتفاع ۱ متری نصب شود." },
+                { q: "ارتفاع قرنیز (Toe Board) در سکوهای کاری چند سانتی‌متر است؟", o: ["۱۵۰ میلی‌متر", "۱۰۰ میلی‌متر", "۲۰۰ میلی‌متر", "۵۰ میلی‌متر"], a: 0, e: "ارتفاع قرنیز باید حداقل ۱۵۰ میلی‌متر باشد." },
+                { q: "حداکثر ارتفاع داربست مستقل بدون محاسبات مهندسی چند متر است؟", o: ["۴۵ متر", "۳۰ متر", "۶۰ متر", "۲۰ متر"], a: 0, e: "حداکثر ارتفاع داربست مستقل ۴۵ متر است." },
+                { q: "بست حامل بار (Load Bearing) با چه گشتاوری باید بسته شود؟", o: ["۵۰-۶۰ نیوتن‌متر", "۲۰-۳۰ نیوتن‌متر", "۱۰۰ نیوتن‌متر", "۱۰ نیوتن‌متر"], a: 0, e: "گشتاور بست حامل بار ۵۰ تا ۶۰ نیوتن‌متر است." },
+                { q: "حداقل ابعاد سول پلیت (Sole Plate) برای زمین نرم چند میلی‌متر است؟", o: ["۷۶۵×۲۲۵×۳۵", "۵۰۰×۲۲۵×۳۵", "۱۰۰۰×۳۰۰×۴۰", "۴۰۰×۲۰۰×۳۰"], a: 0, e: "ابعاد سول پلیت برای زمین نرم ۷۶۵×۲۲۵×۳۵ میلی‌متر است." },
+                { q: "حداقل ابعاد سول پلیت برای دو پایه مجاور در زمین نرم چند میلی‌متر است؟", o: ["۱۰۵۵×۲۲۵×۳۵", "۸۰۰×۲۲۵×۳۵", "۱۵۰۰×۳۰۰×۴۰", "۵۰۰×۲۰۰×۳۰"], a: 0, e: "ابعاد سول پلیت برای دو پایه مجاور ۱۰۵۵×۲۲۵×۳۵ میلی‌متر است." },
+                { q: "زاویه نردبان با سطح افقی چند درجه است؟", o: ["۷۵ درجه", "۶۰ درجه", "۸۰ درجه", "۴۵ درجه"], a: 0, e: "زاویه نردبان با سطح افقی ۷۵ درجه (نسبت ۱:۴) است." },
+                { q: "حداکثر ارتفاع نردبان قابل حمل چند متر است؟", o: ["۱۰ متر", "۸ متر", "۱۲ متر", "۶ متر"], a: 0, e: "حداکثر طول نردبان قابل حمل ۱۰ متر است." },
+                { q: "در نردبان‌های ثابت، فاصله پله‌ها چند سانتی‌متر است؟", o: ["۲۵-۳۵ سانتی‌متر", "۱۵-۲۰ سانتی‌متر", "۴۰-۵۰ سانتی‌متر", "۱۰-۱۵ سانتی‌متر"], a: 0, e: "فاصله پله‌های نردبان ثابت ۲۵ تا ۳۵ سانتی‌متر است." },
+                { q: "حداقل تعداد تخته برای سکوی استاندارد داربست چند عدد است؟", o: ["۵ تخته", "۳ تخته", "۶ تخته", "۴ تخته"], a: 0, e: "سکوی استاندارد از ۵ تخته تشکیل می‌شود." },
+                { q: "عرض سکوی استاندارد داربست چند میلی‌متر است؟", o: ["۴۳۲ میلی‌متر", "۳۰۰ میلی‌متر", "۵۰۰ میلی‌متر", "۶۰۰ میلی‌متر"], a: 0, e: "عرض سکوی استاندارد ۴۳۲ میلی‌متر است." },
+                { q: "حداکثر فاصله بین تیرهای اتصال (Tie) در داربست چند متر است؟", o: ["۴ متر", "۶ متر", "۸ متر", "۱۰ متر"], a: 0, e: "تیرهای اتصال حداکثر ۴ متر فاصله دارند." },
+                { q: "حداکثر فاصله مهاربندی نمای داربست چند متر است؟", o: ["۱۰ متر", "۸ متر", "۱۲ متر", "۶ متر"], a: 0, e: "مهاربندی نمای داربست در حداکثر ۱۰ متر تکرار می‌شود." },
+                { q: "حداقل ارتفاع نرده محافظ در سطوح شیب‌دار چند سانتی‌متر است؟", o: ["۷۵ سانتی‌متر", "۹۰ سانتی‌متر", "۱۰۰ سانتی‌متر", "۱۱۰ سانتی‌متر"], a: 0, e: "در سطوح شیب‌دار، ارتفاع نرده ۷۵ سانتی‌متر است." },
+                { q: "در داربست متحرک برجی، نسبت ارتفاع به عرض حداکثر چند است؟", o: ["۳:۱", "۴:۱", "۵:۱", "۲:۱"], a: 0, e: "نسبت ارتفاع به عرض در داربست متحرک حداکثر ۳:۱ است." },
+                { q: "حداکثر ارتفاع داربست متحرک برجی بدون مهار چند متر است؟", o: ["۹.۶ متر", "۶ متر", "۱۲ متر", "۱۵ متر"], a: 0, e: "حداکثر ارتفاع داربست متحرک ۹.۶ متر است." },
+                { q: "در داربست ثابت برجی، نسبت ارتفاع به عرض حداکثر چند است؟", o: ["۴:۱", "۳:۱", "۵:۱", "۶:۱"], a: 0, e: "نسبت ارتفاع به عرض در داربست ثابت حداکثر ۴:۱ است." },
+                { q: "حداقل قطر خارجی چرخ‌های داربست متحرک چند سانتی‌متر است؟", o: ["۱۲.۵ سانتی‌متر", "۱۰ سانتی‌متر", "۱۵ سانتی‌متر", "۲۰ سانتی‌متر"], a: 0, e: "قطر خارجی چرخ‌ها حداقل ۱۲.۵ سانتی‌متر است." },
+                { q: "حداکثر تعداد تخته‌های روی هم در انبار چند عدد است؟", o: ["۲۰ عدد", "۱۵ عدد", "۳۰ عدد", "۱۰ عدد"], a: 0, e: "تخته‌ها نباید بیش از ۲۰ عدد روی هم انبار شوند." },
+                { q: "حداقل ابعاد بیس پلیت (Base Plate) برای کفشک دایره‌ای چند سانتی‌متر مربع است؟", o: ["۷۰ سانتی‌متر مربع", "۵۰ سانتی‌متر مربع", "۱۰۰ سانتی‌متر مربع", "۳۰ سانتی‌متر مربع"], a: 0, e: "بیس پلیت دایره‌ای حداقل ۷۰ سانتی‌متر مربع است." },
+                { q: "ضخامت بیس پلیت مربعی چند میلی‌متر است؟", o: ["۵ میلی‌متر", "۳ میلی‌متر", "۸ میلی‌متر", "۱۰ میلی‌متر"], a: 0, e: "ضخامت بیس پلیت مربعی ۵ میلی‌متر است." },
+                { q: "حداکثر طول دستک‌ها (ترانزوم‌های پیش‌آمده) چند سانتی‌متر است؟", o: ["۱۵۰ سانتی‌متر", "۱۰۰ سانتی‌متر", "۲۰۰ سانتی‌متر", "۵۰ سانتی‌متر"], a: 0, e: "حداکثر طول دستک‌ها ۱۵۰ سانتی‌متر است." },
+                { q: "حداقل فاصله جایگاه کار از انتهای پایه‌های عمودی چند متر است؟", o: ["۱ متر", "۰.۵ متر", "۱.۵ متر", "۲ متر"], a: 0, e: "جایگاه کار باید حداقل ۱ متر از انتهای پایه‌ها فاصله داشته باشد." },
+                { q: "حداقل تعداد نقاط مهار در هر طبقه داربست چند عدد است؟", o: ["۱ عدد", "۲ عدد", "۳ عدد", "۴ عدد"], a: 0, e: "حداقل یک نقطه مهار در هر طبقه لازم است." },
+                { q: "حداکثر فاصله بین نقاط مهار در ارتفاع چند متر است؟", o: ["۴ متر", "۶ متر", "۸ متر", "۱۰ متر"], a: 0, e: "نقاط مهار در ارتفاع حداکثر ۴ متر فاصله دارند." },
+                { q: "در داربست قفسی (Birdcage)، فاصله استانداردها چند متر است؟", o: ["۲.۵ متر", "۲ متر", "۳ متر", "۱.۵ متر"], a: 0, e: "فاصله استانداردها در داربست قفسی ۲.۵ متر است." },
+                { q: "حداکثر ارتفاع طبقات در داربست قفسی چند متر است؟", o: ["۲.۵ متر", "۲ متر", "۳ متر", "۱.۵ متر"], a: 0, e: "ارتفاع طبقات در داربست قفسی ۲.۵ متر است." },
+                { q: "در داربست آویزان، حداکثر فاصله آویزها چند متر است؟", o: ["۲.۵ متر", "۲ متر", "۳ متر", "۱.۵ متر"], a: 0, e: "آویزها در داربست آویزان حداکثر ۲.۵ متر فاصله دارند." },
+                { q: "حداقل ضریب ایمنی برای داربست‌ها چند است؟", o: ["۴", "۳", "۵", "۲"], a: 0, e: "داربست باید تحمل ۴ برابر بار وارده را داشته باشد." },
+                { q: "حداقل تعداد افرادی که باید در بازرسی هفتگی داربست شرکت کنند؟", o: ["۱ نفر", "۲ نفر", "۳ نفر", "۴ نفر"], a: 0, e: "بازرسی هفتگی توسط یک شخص ذی‌صلاح انجام می‌شود." },
+                { q: "در داربست‌های متحرک، جابجایی با نفر روی آن چه حکمی دارد؟", o: ["ممنوع است", "مجاز است", "فقط در صورت لزوم مجاز است", "بستگی به ارتفاع دارد"], a: 0, e: "جابجایی داربست متحرک با نفر روی آن ممنوع است." },
+                { q: "حداقل فاصله از دیوار برای نصب داربست چند سانتی‌متر است؟", o: ["۳۰ سانتی‌متر", "۵۰ سانتی‌متر", "۱۰۰ سانتی‌متر", "۲۰ سانتی‌متر"], a: 0, e: "داربست باید حداقل ۳۰ سانتی‌متر از دیوار فاصله داشته باشد." },
+                { q: "حداکثر تعداد افراد مجاز روی یک سکوی داربست چند نفر است؟", o: ["۲ نفر", "۳ نفر", "۴ نفر", "۵ نفر"], a: 0, e: "حداکثر ۲ نفر روی یک سکو مجاز هستند." },
+                { q: "در برچیدن داربست، از چه نقطه‌ای شروع می‌شود؟", o: ["از بالاترین نقطه", "از پایین‌ترین نقطه", "از وسط", "هر نقطه"], a: 0, e: "برچیدن داربست از بالاترین نقطه شروع می‌شود." },
+                { q: "حداقل ارتفاع نرده میانی از سطح سکو چند سانتی‌متر است؟", o: ["۵۰۰ میلی‌متر", "۴۰۰ میلی‌متر", "۶۰۰ میلی‌متر", "۳۰۰ میلی‌متر"], a: 0, e: "نرده میانی در ارتفاع ۵۰۰ میلی‌متری نصب می‌شود." },
+                { q: "حداکثر دهانه مجاز برای هر تخته داربست چند متر است؟", o: ["۱.۲ متر", "۱.۵ متر", "۲ متر", "۰.۸ متر"], a: 0, e: "حداکثر دهانه هر تخته ۱.۲ متر است." },
+                { q: "در داربست‌های سیستمی، بر اساس چه دستورالعملی باید نصب شوند؟", o: ["دستورالعمل سازنده", "سلیقه کارگر", "استاندارد قدیمی", "بدون دستورالعمل"], a: 0, e: "داربست سیستمی طبق دستورالعمل سازنده نصب می‌شود." },
+                { q: "حداقل فاصله تور ایمنی از تراز کاری چند متر است؟", o: ["۲.۴ متر", "۳ متر", "۴ متر", "۱.۵ متر"], a: 0, e: "تور ایمنی حداقل ۲.۴ متر پایین‌تر نصب می‌شود." },
+                { q: "حداکثر فاصله تور ایمنی از تراز کاری چند متر است؟", o: ["۴.۶ متر", "۵ متر", "۶ متر", "۳ متر"], a: 0, e: "تور ایمنی حداکثر ۴.۶ متر پایین‌تر نصب می‌شود." },
+                { q: "حداقل گستردگی تور ایمنی از هر طرف ناحیه کاری چند متر است؟", o: ["۲.۴ متر", "۳ متر", "۴ متر", "۱.۵ متر"], a: 0, e: "تور ایمنی باید ۲.۴ متر از هر طرف ادامه داشته باشد." },
+                { q: "حداکثر ارتفاع سقوط قابل جذب توسط تور ایمنی چند متر است؟", o: ["۶ متر", "۸ متر", "۱۰ متر", "۴ متر"], a: 0, e: "تور ایمنی تا ارتفاع ۶ متر را جذب می‌کند." },
+                { q: "در داربست‌های فلزی، رسانایی الکتریسیته چه خطری دارد؟", o: ["برق‌گرفتگی", "آتش‌سوزی", "انفجار", "همه موارد"], a: 3, e: "داربست‌های فلزی رسانا هستند و خطر برق‌گرفتگی دارند." },
+                { q: "حداقل فاصله از خطوط برق برای داربست فلزی چند متر است؟", o: ["۳ متر", "۵ متر", "۶ متر", "۱۰ متر"], a: 0, e: "فاصله ایمن از خطوط برق حداقل ۳ متر است." },
+                { q: "در داربست‌های چوبی، تخته‌ها باید چه ویژگی داشته باشند؟", o: ["کندسوز", "ضد آب", "رنگ شده", "سبک"], a: 0, e: "تخته‌های داربست باید کندسوز باشند." },
+                { q: "حداقل ضخامت تخته‌های داربست چند میلی‌متر است؟", o: ["۳۵ میلی‌متر", "۲۵ میلی‌متر", "۵۰ میلی‌متر", "۲۰ میلی‌متر"], a: 0, e: "ضخامت تخته‌ها حداقل ۳۵ میلی‌متر است." },
+                { q: "حداکثر فاصله بین لجرها در داربست چند متر است؟", o: ["۲ متر", "۲.۴ متر", "۳ متر", "۱.۵ متر"], a: 0, e: "فاصله لجرها حداکثر ۲ متر است." },
+                { q: "حداقل ارتفاع پله در راه‌پله داربست چند سانتی‌متر است؟", o: ["۱۵ سانتی‌متر", "۲۰ سانتی‌متر", "۱۰ سانتی‌متر", "۲۵ سانتی‌متر"], a: 0, e: "ارتفاع پله در راه‌پله ۱۵ سانتی‌متر است." },
+                { q: "حداقل عرض پله در راه‌پله داربست چند سانتی‌متر است؟", o: ["۳۰ سانتی‌متر", "۲۵ سانتی‌متر", "۴۰ سانتی‌متر", "۲۰ سانتی‌متر"], a: 0, e: "عرض پله در راه‌پله ۳۰ سانتی‌متر است." }
+            ];
+
+            // ---------- فضای بسته (فضا) ----------
+            const faza = [
+                { q: "حداقل درصد اکسیژن مجاز برای ورود به فضای بسته چند درصد است؟", o: ["۱۹.۵٪", "۲۰٪", "۱۸٪", "۲۱٪"], a: 0, e: "اکسیژن باید حداقل ۱۹.۵٪ باشد." },
+                { q: "حداکثر درصد اکسیژن مجاز برای ورود به فضای بسته چند درصد است؟", o: ["۲۳.۵٪", "۲۲٪", "۲۵٪", "۲۰٪"], a: 0, e: "اکسیژن نباید از ۲۳.۵٪ بیشتر باشد." },
+                { q: "حداکثر غلظت مجاز گازهای قابل احتراق (LEL) برای ورود به فضای بسته چند درصد است؟", o: ["۱۰٪ LEL", "۵٪ LEL", "۲۰٪ LEL", "۰٪ LEL"], a: 0, e: "غلظت گازهای قابل احتراق باید کمتر از ۱۰٪ LEL باشد." },
+                { q: "حداکثر غلظت مجاز منوکسید کربن (CO) در فضای بسته چند ppm است؟", o: ["۲۵ ppm", "۵۰ ppm", "۱۰ ppm", "۱۰۰ ppm"], a: 0, e: "غلظت CO باید کمتر از ۲۵ ppm باشد." },
+                { q: "SCBA با فشار ۳۰۰ بار چند دقیقه می‌تواند تنفس دهد؟", o: ["۳۶ دقیقه", "۲۴ دقیقه", "۱۸ دقیقه", "۴۵ دقیقه"], a: 0, e: "SCBA ۳۰۰ بار به مدت ۳۶ دقیقه کار می‌کند." },
+                { q: "SCBA با فشار ۲۰۰ بار چند دقیقه می‌تواند تنفس دهد؟", o: ["۲۴ دقیقه", "۱۸ دقیقه", "۳۶ دقیقه", "۳۰ دقیقه"], a: 0, e: "SCBA ۲۰۰ بار به مدت ۲۴ دقیقه کار می‌کند." },
+                { q: "چه نوع ماسکی برای فضای بسته مناسب است؟", o: ["SCBA", "ماسک کارتریج‌دار", "ماسک پارچه‌ای", "ماسک ساده"], a: 0, e: "فقط SCBA برای فضای بسته مناسب است." },
+                { q: "در فضای بسته، شخص مراقب (Standby) چه وظیفه‌ای دارد؟", o: ["نظارت مستمر و ارتباط با فرد داخل", "خروج از محل", "انجام کار دیگر", "استراحت"], a: 0, e: "مراقب باید مستمراً وضعیت را پایش کند." },
+                { q: "حداکثر زمان اعتبار پرمیت فضای بسته چقدر است؟", o: ["یک شیفت کاری", "۲۴ ساعت", "یک هفته", "یک ماه"], a: 0, e: "پرمیت فضای بسته حداکثر برای یک شیفت معتبر است." },
+                { q: "ماسک‌های تصفیه کننده هوا در فضای بسته چه مشکلی دارند؟", o: ["در کمبود اکسیژن کار نمی‌کنند", "گران هستند", "سنگین هستند", "به راحتی خراب می‌شوند"], a: 0, e: "ماسک‌های تصفیه‌کننده در کمبود اکسیژن کار نمی‌کنند." },
+                { q: "گاز سولفید هیدروژن (H2S) چه بویی دارد؟", o: ["تخم‌مرغ گندیده", "بی‌بو", "بوی شیرین", "بوی سوخته"], a: 0, e: "H2S بوی تخم‌مرغ گندیده دارد." },
+                { q: "در چه غلظتی از H2S، حس بویایی از بین می‌رود؟", o: ["۱۰۰ ppm", "۱۰ ppm", "۵۰ ppm", "۵۰۰ ppm"], a: 0, e: "در ۱۰۰ ppm حس بویایی از بین می‌رود." },
+                { q: "حداکثر غلظت مجاز H2S برای مواجهه ۸ ساعته چند ppm است؟", o: ["۱۰ ppm", "۵ ppm", "۲۰ ppm", "۱ ppm"], a: 0, e: "حد مجاز مواجهه ۸ ساعته H2S، ۱۰ ppm است." },
+                { q: "گاز منوکسید کربن (CO) چه ویژگی دارد؟", o: ["بی‌بو و بی‌رنگ", "بوی تند دارد", "رنگ زرد دارد", "سنگین‌تر از هواست"], a: 0, e: "CO گازی بی‌بو و بی‌رنگ است." },
+                { q: "تمایل CO به هموگلوبین خون چند برابر اکسیژن است؟", o: ["۲۵۰ برابر", "۱۰۰ برابر", "۵۰۰ برابر", "۵۰ برابر"], a: 0, e: "تمایل CO به هموگلوبین ۲۵۰ برابر بیشتر است." },
+                { q: "در غلظت ۱۲۸۰۰ ppm CO، مرگ در چه مدت رخ می‌دهد؟", o: ["۱ تا ۳ دقیقه", "۵ دقیقه", "۱۰ دقیقه", "۳۰ دقیقه"], a: 0, e: "در ۱۲۸۰۰ ppm، مرگ در ۱ تا ۳ دقیقه رخ می‌دهد." },
+                { q: "در فضای بسته، تهویه باید چگونه باشد؟", o: ["مستمر و مکانیکی", "طبیعی", "فقط در ابتدا", "هیچ"], a: 0, e: "تهویه باید مستمر و مکانیکی باشد." },
+                { q: "فن‌های الکتریکی در فضای بسته حاوی گازهای نفتی چه مشکلی دارند؟", o: ["خطر جرقه و انفجار", "خطر برق‌گرفتگی", "کمبود توان", "صدا"], a: 0, e: "فن‌های الکتریکی ممکن است جرقه ایجاد کنند." },
+                { q: "چه نوع فن‌هایی برای فضای بسته مناسب هستند؟", o: ["پنوماتیک (باد)", "الکتریکی", "دیزلی", "بنزینی"], a: 0, e: "فن‌های پنوماتیک مناسب هستند." },
+                { q: "حداقل تعداد نفرات برای ورود به فضای بسته چند نفر است؟", o: ["۳ نفر", "۲ نفر", "۴ نفر", "۵ نفر"], a: 0, e: "حداقل ۳ نفر (ورود، مراقب، آماده‌باش) لازم است." },
+                { q: "در فضای بسته، گروه امدادی باید چند نفر باشند؟", o: ["حداقل ۲ نفر", "حداقل ۳ نفر", "حداقل ۴ نفر", "۱ نفر"], a: 0, e: "گروه امدادی حداقل ۲ نفر است." },
+                { q: "در فضای بسته، از چه نوع روشنایی باید استفاده کرد؟", o: ["ضد انفجار (Flame Proof)", "معمولی", "چراغ قوه", "شمع"], a: 0, e: "روشنایی باید ضد انفجار باشد." },
+                { q: "ولتاژ مجاز روشنایی در فضای بسته چند ولت است؟", o: ["۲۴ ولت", "۵۰ ولت", "۱۱۰ ولت", "۲۲۰ ولت"], a: 0, e: "ولتاژ روشنایی در فضای بسته ۲۴ ولت است." },
+                { q: "در فضای بسته، ارتباط با فرد داخل چگونه باید باشد؟", o: ["مداوم و مستقیم", "هر ۱۰ دقیقه", "هر ۳۰ دقیقه", "فقط در ابتدا"], a: 0, e: "ارتباط باید مداوم و مستقیم باشد." },
+                { q: "حداکثر عمق حفاری برای نیاز به پرمیت فضای بسته چند سانتی‌متر است؟", o: ["۱۲۰ سانتی‌متر", "۶۰ سانتی‌متر", "۱۸۰ سانتی‌متر", "۳۰ سانتی‌متر"], a: 0, e: "عمق بیش از ۱۲۰ سانتی‌متر نیاز به پرمیت دارد." },
+                { q: "در فضای بسته، قبل از ورود چه اقداماتی باید انجام شود؟", o: ["تست گاز، تهویه، ایزولاسیون", "فقط تست گاز", "فقط تهویه", "هیچ"], a: 0, e: "هر سه اقدام تست گاز، تهویه و ایزولاسیون الزامی است." },
+                { q: "کدام یک از موارد زیر فضای بسته محسوب می‌شود؟", o: ["مخزن", "اتاق اداری", "سالن کنفرانس", "راهرو"], a: 0, e: "مخزن یک فضای بسته است." },
+                { q: "در فضای بسته، استفاده از هارنس با چه مشخصه‌ای الزامی است؟", o: ["با حلقه اتصال پشتی و جلویی", "فقط با حلقه پشتی", "فقط با حلقه جلویی", "بدون حلقه"], a: 0, e: "هارنس باید حلقه پشتی و جلویی داشته باشد." },
+                { q: "حداکثر زمان تخلیه SCBA در شرایط اضطراری چقدر است؟", o: ["۵ دقیقه", "۱۰ دقیقه", "۱۵ دقیقه", "۳ دقیقه"], a: 0, e: "زمان تخلیه SCBA حدود ۵ دقیقه است." },
+                { q: "در فضای بسته، گازسنج باید چه ویژگی داشته باشد؟", o: ["قابل حمل و مستمر", "ثابت", "دستی", "فقط در ابتدا"], a: 0, e: "گازسنج باید قابل حمل و مستمر باشد." },
+                { q: "حداکثر فاصله فرد مراقب از درب ورودی فضای بسته چند متر است؟", o: ["۳ متر", "۵ متر", "۱۰ متر", "۱ متر"], a: 0, e: "مراقب باید در فاصله ۳ متری درب ورودی باشد." },
+                { q: "در فضای بسته، تجهیزات نجات باید شامل چه مواردی باشد؟", o: ["سه پایه، وینچ، طناب", "فقط طناب", "فقط هارنس", "هیچ"], a: 0, e: "تجهیزات نجات شامل سه پایه، وینچ و طناب است." },
+                { q: "حداقل ارتفاع سه پایه نجات چند متر است؟", o: ["۲.۴ متر", "۳ متر", "۴ متر", "۱.۵ متر"], a: 0, e: "سه پایه باید حداقل ۲.۴ متر ارتفاع داشته باشد." },
+                { q: "در فضای بسته، آیا ماسک کارتریج‌دار قابل استفاده است؟", o: ["خیر، فقط SCBA", "بله", "فقط در صورت لزوم", "بستگی به نوع کارتریج دارد"], a: 0, e: "فقط SCBA در فضای بسته قابل استفاده است." },
+                { q: "حداکثر مدت زمان ماندگاری در فضای بسته با SCBA چند دقیقه است؟", o: ["۳۶ دقیقه", "۲۰ دقیقه", "۴۵ دقیقه", "۱۰ دقیقه"], a: 0, e: "حداکثر ۳۶ دقیقه با SCBA ۳۰۰ بار." },
+                { q: "در فضای بسته، پایش هوا باید چند بار انجام شود؟", o: ["مستمر", "هر ۱۵ دقیقه", "هر ۳۰ دقیقه", "فقط در ابتدا"], a: 0, e: "پایش هوا باید مستمر باشد." },
+                { q: "در فضای بسته، اگر هشدار تخلیه فعال شود، چه باید کرد؟", o: ["سریعاً خارج شوید", "به کار ادامه دهید", "با مراقب تماس بگیرید", "منتظر بمانید"], a: 0, e: "در صورت هشدار، سریعاً خارج شوید." },
+                { q: "حداقل تعداد افرادی که باید دوره کمک‌های اولیه را گذرانده باشند؟", o: ["حداقل ۱ نفر از تیم", "همه افراد", "هیچ", "فقط مراقب"], a: 0, e: "حداقل یک نفر باید کمک‌های اولیه را بلد باشد." },
+                { q: "در فضای بسته، ایزولاسیون به چه معناست؟", o: ["قطع کامل انرژی و مواد", "قطع برق", "قطع آب", "قطع گاز"], a: 0, e: "ایزولاسیون یعنی قطع کامل انرژی و مواد." },
+                { q: "در فضای بسته، از چه نوع ابزاری باید استفاده کرد؟", o: ["ضد جرقه", "معمولی", "برقی", "دستی"], a: 0, e: "ابزار باید ضد جرقه باشد." },
+                { q: "حداکثر دمای مجاز در فضای بسته چند درجه سانتی‌گراد است؟", o: ["۴۰ درجه", "۵۰ درجه", "۳۰ درجه", "۶۰ درجه"], a: 0, e: "دمای فضای بسته نباید از ۴۰ درجه بیشتر شود." },
+                { q: "در فضای بسته، اگر فردی دچار حادثه شود، اولین اقدام چیست؟", o: ["خارج کردن فرد با تجهیزات نجات", "ورود به فضا", "تماس با اورژانس", "ادامه کار"], a: 0, e: "فرد باید با تجهیزات نجات خارج شود." },
+                { q: "حداقل فاصله فضای بسته از مواد قابل اشتعال چند متر است؟", o: ["۱۵ متر", "۱۰ متر", "۲۰ متر", "۵ متر"], a: 0, e: "مواد قابل اشتعال باید حداقل ۱۵ متر فاصله داشته باشند." },
+                { q: "در فضای بسته، قبل از شروع کار، چه کسی باید گازسنجی را تأیید کند؟", o: ["آزمایشگر", "کارگر", "ناظر", "مدیر"], a: 0, e: "آزمایشگر باید گازسنجی را تأیید کند." },
+                { q: "حداکثر مدت زمان نگهداری پرمیت‌های فضای بسته چند سال است؟", o: ["۱ سال", "۶ ماه", "۲ سال", "۳ سال"], a: 0, e: "پرمیت‌ها باید حداقل ۱ سال نگهداری شوند." },
+                { q: "در فضای بسته، چه کسی مسئول نهایی ایمنی است؟", o: ["کارفرما", "ناظر", "کارگر", "آزمایشگر"], a: 0, e: "کارفرما مسئول نهایی ایمنی است." },
+                { q: "در فضای بسته، استفاده از کدام یک از موارد زیر ممنوع است؟", o: ["شعله باز", "چراغ LED", "ابزار دستی", "هارنس"], a: 0, e: "شعله باز در فضای بسته ممنوع است." },
+                { q: "در فضای بسته، اگر اکسیژن به ۱۸٪ کاهش یابد، چه باید کرد؟", o: ["فوراً خارج شوید", "تهویه را افزایش دهید", "ادامه دهید", "SCBA بپوشید"], a: 0, e: "در اکسیژن زیر ۱۹.۵٪ باید فوراً خارج شد." },
+                { q: "حداکثر تعداد افراد در فضای بسته در یک زمان چند نفر است؟", o: ["۲ نفر", "۳ نفر", "۴ نفر", "۱ نفر"], a: 0, e: "حداکثر ۲ نفر در یک زمان در فضای بسته." },
+                { q: "در فضای بسته، چه نوع ارتباطی با فرد داخل باید برقرار شود؟", o: ["بی‌سیم یا طناب سیگنال", "فریاد", "چراغ", "هیچ"], a: 0, e: "ارتباط باید از طریق بی‌سیم یا طناب سیگنال باشد." },
+                { q: "حداقل فاصله تور ایمنی در فضای بسته از کف چند متر است؟", o: ["۲.۴ متر", "۳ متر", "۴ متر", "۱.۵ متر"], a: 0, e: "تور ایمنی باید ۲.۴ متر از کف فاصله داشته باشد." }
+            ];
+
+            // ---------- کار در ارتفاع (کاردرارتفاع) ----------
+            const kardarertefa = [
+                { q: "از چه ارتفاعی به بالا، کار در ارتفاع محسوب می‌شود؟", o: ["۱.۲ متر", "۲ متر", "۳ متر", "۰.۵ متر"], a: 0, e: "کار در ارتفاع از ۱.۲ متر به بالا محسوب می‌شود." },
+                { q: "حداقل ارتفاع نرده حفاظتی چند سانتی‌متر است؟", o: ["۹۰ سانتی‌متر", "۱۰۰ سانتی‌متر", "۱۱۰ سانتی‌متر", "۸۰ سانتی‌متر"], a: 0, e: "ارتفاع نرده حداقل ۹۰ سانتی‌متر است." },
+                { q: "نرده‌های حفاظتی باید تحمل چه نیرویی را داشته باشند؟", o: ["۱۰۰ کیلوگرم", "۵۰ کیلوگرم", "۲۰۰ کیلوگرم", "۳۰۰ کیلوگرم"], a: 0, e: "نرده باید تحمل ۱۰۰ کیلوگرم را داشته باشد." },
+                { q: "حداکثر فاصله میله‌های عمودی نرده چند متر است؟", o: ["۲ متر", "۲.۴ متر", "۳ متر", "۱.۵ متر"], a: 0, e: "فاصله میله‌های عمودی حداکثر ۲ متر است." },
+                { q: "برای حفره کمتر از ۴۵ سانتی‌متر، ضخامت پوشش چوبی چند میلی‌متر است؟", o: ["۲۵ میلی‌متر", "۵۰ میلی‌متر", "۱۰ میلی‌متر", "۳۵ میلی‌متر"], a: 0, e: "ضخامت پوشش برای حفره کمتر از ۴۵ سانتی‌متر ۲۵ میلی‌متر است." },
+                { q: "برای حفره بیشتر از ۴۵ سانتی‌متر، ضخامت پوشش چوبی چند میلی‌متر است؟", o: ["۵۰ میلی‌متر", "۲۵ میلی‌متر", "۱۰۰ میلی‌متر", "۳۵ میلی‌متر"], a: 0, e: "ضخامت پوشش برای حفره بیشتر از ۴۵ سانتی‌متر ۵۰ میلی‌متر است." },
+                { q: "وزن مجاز برای هارنس چند کیلوگرم است؟", o: ["۱۳۰ کیلوگرم", "۱۰۰ کیلوگرم", "۱۵۰ کیلوگرم", "۲۰۰ کیلوگرم"], a: 0, e: "وزن مجاز هارنس ۱۳۰ کیلوگرم (شامل ابزار) است." },
+                { q: "هارنس باید هر چند وقت یکبار توسط کارشناس بازرسی شود؟", o: ["۶ ماه", "۳ ماه", "۱ سال", "۲ سال"], a: 0, e: "هارنس هر ۶ ماه یکبار بازرسی شود." },
+                { q: "حداکثر طول طناب مهار بدون جاذب شوک چند متر است؟", o: ["۲ متر", "۳ متر", "۵ متر", "۱ متر"], a: 0, e: "طول طناب بدون جاذب شوک حداکثر ۲ متر است." },
+                { q: "حداکثر طول طناب مهار با جاذب شوک چند متر است؟", o: ["۶ متر", "۵ متر", "۱۰ متر", "۳ متر"], a: 0, e: "طول طناب با جاذب شوک حداکثر ۶ متر است." },
+                { q: "پس از هر سقوط، هارنس چه وضعیتی پیدا می‌کند؟", o: ["باید تعویض شود", "می‌توان دوباره استفاده کرد", "نیاز به تعمیر دارد", "بدون مشکل است"], a: 0, e: "پس از هر سقوط، هارنس باید تعویض شود." },
+                { q: "در نردبان، نسبت فاصله پای نردبان از دیوار به ارتفاع تکیه‌گاه چقدر است؟", o: ["۱:۴", "۱:۳", "۱:۵", "۱:۲"], a: 0, e: "نسبت ۱:۴ برای نردبان استاندارد است." },
+                { q: "حداقل ارتفاع انتهای نردبان از بالای تکیه‌گاه چند متر است؟", o: ["۱ متر", "۰.۵ متر", "۱.۵ متر", "۲ متر"], a: 0, e: "نردبان باید ۱ متر از بالای تکیه‌گاه بیشتر باشد." },
+                { q: "حداکثر ارتفاع نردبان طنابی چند متر است؟", o: ["۳۰ متر", "۲۰ متر", "۴۰ متر", "۱۵ متر"], a: 0, e: "حداکثر ارتفاع نردبان طنابی ۳۰ متر است." },
+                { q: "در نردبان ثابت بالای چند متر نیاز به پاگرد دارد؟", o: ["۳ متر", "۶ متر", "۹ متر", "۱۲ متر"], a: 0, e: "نردبان ثابت بالای ۳ متر نیاز به پاگرد دارد." },
+                { q: "در نردبان ثابت عمودی بالای چند متر نیاز به حفاظ حلقوی دارد؟", o: ["۲.۲ متر", "۳ متر", "۴ متر", "۱.۵ متر"], a: 0, e: "بالای ۲.۲ متر نیاز به حفاظ حلقوی دارد." },
+                { q: "حداقل فاصله تور ایمنی از تراز کاری چند متر است؟", o: ["۲.۴ متر", "۳ متر", "۴ متر", "۱.۵ متر"], a: 0, e: "تور ایمنی حداقل ۲.۴ متر پایین‌تر نصب می‌شود." },
+                { q: "حداکثر فاصله تور ایمنی از تراز کاری چند متر است؟", o: ["۴.۶ متر", "۵ متر", "۶ متر", "۳ متر"], a: 0, e: "تور ایمنی حداکثر ۴.۶ متر پایین‌تر نصب می‌شود." },
+                { q: "حداقل گستردگی تور ایمنی از هر طرف ناحیه کاری چند متر است؟", o: ["۲.۴ متر", "۳ متر", "۴ متر", "۱.۵ متر"], a: 0, e: "تور ایمنی باید ۲.۴ متر از هر طرف ادامه داشته باشد." },
+                { q: "حداکثر ارتفاع سقوط قابل جذب توسط تور ایمنی چند متر است؟", o: ["۶ متر", "۸ متر", "۱۰ متر", "۴ متر"], a: 0, e: "تور ایمنی تا ارتفاع ۶ متر را جذب می‌کند." },
+                { q: "در چه سرعت بادی، کار در ارتفاع باید متوقف شود؟", o: ["۴۰-۵۰ کیلومتر/ساعت", "۳۰ کیلومتر/ساعت", "۶۰ کیلومتر/ساعت", "۲۰ کیلومتر/ساعت"], a: 0, e: "در باد ۴۰-۵۰ کیلومتر/ساعت، کار متوقف شود." },
+                { q: "حداقل تعداد افرادی که باید در کار روی سقف شکننده حضور داشته باشند؟", o: ["۲ نفر", "۳ نفر", "۴ نفر", "۱ نفر"], a: 0, e: "حداقل ۲ نفر برای کار روی سقف شکننده." },
+                { q: "در کار در ارتفاع، چند نقطه تماس با نردبان باید رعایت شود؟", o: ["۳ نقطه", "۲ نقطه", "۴ نقطه", "۱ نقطه"], a: 0, e: "سه نقطه تماس (دو پا و یک دست) باید رعایت شود." },
+                { q: "حداکثر ارتفاع داربست متحرک برجی بدون مهار چند متر است؟", o: ["۹.۶ متر", "۶ متر", "۱۲ متر", "۱۵ متر"], a: 0, e: "حداکثر ارتفاع داربست متحرک ۹.۶ متر است." },
+                { q: "در داربست متحرک برجی، نسبت ارتفاع به عرض حداکثر چند است؟", o: ["۳:۱", "۴:۱", "۵:۱", "۲:۱"], a: 0, e: "نسبت ارتفاع به عرض در داربست متحرک حداکثر ۳:۱ است." },
+                { q: "در داربست ثابت برجی، نسبت ارتفاع به عرض حداکثر چند است؟", o: ["۴:۱", "۳:۱", "۵:۱", "۶:۱"], a: 0, e: "نسبت ارتفاع به عرض در داربست ثابت حداکثر ۴:۱ است." },
+                { q: "حداقل قطر خارجی چرخ‌های داربست متحرک چند سانتی‌متر است؟", o: ["۱۲.۵ سانتی‌متر", "۱۰ سانتی‌متر", "۱۵ سانتی‌متر", "۲۰ سانتی‌متر"], a: 0, e: "قطر خارجی چرخ‌ها حداقل ۱۲.۵ سانتی‌متر است." },
+                { q: "جابجایی داربست متحرک با نفر روی آن چه حکمی دارد؟", o: ["ممنوع است", "مجاز است", "فقط در صورت لزوم مجاز است", "بستگی به ارتفاع دارد"], a: 0, e: "جابجایی داربست متحرک با نفر روی آن ممنوع است." },
+                { q: "حداقل فاصله از لبه پرتگاه برای کار در ارتفاع چند متر است؟", o: ["۲ متر", "۳ متر", "۵ متر", "۱ متر"], a: 0, e: "حداقل فاصله از لبه پرتگاه ۲ متر است." },
+                { q: "در کار در ارتفاع، استفاده از چه تجهیزاتی الزامی است؟", o: ["هارنس و طناب مهار", "فقط کلاه ایمنی", "فقط کفش ایمنی", "هیچ"], a: 0, e: "هارنس و طناب مهار الزامی است." },
+                { q: "حداقل تعداد افراد برای عملیات نجات در ارتفاع چند نفر است؟", o: ["۲ نفر", "۳ نفر", "۴ نفر", "۱ نفر"], a: 0, e: "حداقل ۲ نفر برای عملیات نجات لازم است." },
+                { q: "در کار در ارتفاع، جلسه Toolbox باید چه مواردی را پوشش دهد؟", o: ["خطرات و اقدامات کنترلی", "برنامه تولید", "حقوق کارگران", "تعطیلات"], a: 0, e: "جلسه Toolbox برای بررسی خطرات و اقدامات کنترلی است." },
+                { q: "حداکثر زمان کار در ارتفاع بدون استراحت چند ساعت است؟", o: ["۲ ساعت", "۴ ساعت", "۶ ساعت", "۸ ساعت"], a: 0, e: "حداکثر ۲ ساعت کار در ارتفاع بدون استراحت." },
+                { q: "در کار در ارتفاع، از چه نوع کفشی باید استفاده کرد؟", o: ["کفش ضد لغزش", "کفش معمولی", "دمپایی", "کفش پاشنه بلند"], a: 0, e: "کفش باید ضد لغزش باشد." },
+                { q: "حداقل دمای مجاز برای کار در ارتفاع چند درجه سانتی‌گراد است؟", o: ["۵- درجه", "۰ درجه", "۱۰ درجه", "۱۵ درجه"], a: 0, e: "در دمای زیر ۵- درجه، کار متوقف شود." },
+                { q: "حداکثر دمای مجاز برای کار در ارتفاع چند درجه سانتی‌گراد است؟", o: ["۴۰ درجه", "۳۵ درجه", "۴۵ درجه", "۵۰ درجه"], a: 0, e: "در دمای بالای ۴۰ درجه، کار متوقف شود." },
+                { q: "در کار در ارتفاع، فاصله ایمن از خطوط برق چند متر است؟", o: ["۳ متر", "۵ متر", "۶ متر", "۱۰ متر"], a: 0, e: "حداقل فاصله از خطوط برق ۳ متر است." },
+                { q: "در کار در ارتفاع، چه نوع طنابی برای مهار استفاده می‌شود؟", o: ["طناب استاتیک", "طناب دینامیک", "طناب نایلونی", "طناب کنفی"], a: 0, e: "طناب استاتیک برای مهار استفاده می‌شود." },
+                { q: "حداقل قطر طناب استاتیک برای کار در ارتفاع چند میلی‌متر است؟", o: ["۱۳ میلی‌متر", "۱۰ میلی‌متر", "۱۶ میلی‌متر", "۲۰ میلی‌متر"], a: 0, e: "قطر طناب استاتیک حداقل ۱۳ میلی‌متر است." },
+                { q: "حداکثر تغییر شکل طناب استاتیک در ۹ متر چند میلی‌متر است؟", o: ["۴۰ میلی‌متر", "۵۰ میلی‌متر", "۳۰ میلی‌متر", "۶۰ میلی‌متر"], a: 0, e: "تغییر شکل در ۹ متر حداکثر ۴۰ میلی‌متر است." },
+                { q: "در کار در ارتفاع، چه کسی مسئول نهایی ایمنی است؟", o: ["کارفرما", "ناظر", "کارگر", "سرپرست"], a: 0, e: "کارفرما مسئول نهایی ایمنی است." },
+                { q: "حداکثر فاصله بین دو نقطه اتصال طناب افقی چند متر است؟", o: ["۹ متر", "۶ متر", "۱۲ متر", "۱۵ متر"], a: 0, e: "فاصله نقاط اتصال طناب افقی حداکثر ۹ متر است." },
+                { q: "حداکثر شکم‌دهی (Sag) طناب افقی چند متر است؟", o: ["۱.۲ متر", "۱.۵ متر", "۲ متر", "۰.۸ متر"], a: 0, e: "شکم‌دهی طناب افقی حداکثر ۱.۲ متر است." },
+                { q: "حداقل تحمل نقطه تکیه‌گاهی در کار در ارتفاع چند کیلوگرم است؟", o: ["۲۲۰۰ کیلوگرم", "۱۰۰۰ کیلوگرم", "۳۰۰۰ کیلوگرم", "۱۵۰۰ کیلوگرم"], a: 0, e: "نقطه تکیه‌گاهی باید ۲۲۰۰ کیلوگرم تحمل کند." },
+                { q: "در کار در ارتفاع، جلسات بازآموزی هر چند وقت یکبار برگزار شود؟", o: ["۶ ماه", "۳ ماه", "۱ سال", "۲ سال"], a: 0, e: "بازآموزی هر ۶ ماه یکبار برگزار شود." },
+                { q: "حداقل سن برای کار در ارتفاع چند سال است؟", o: ["۱۸ سال", "۲۰ سال", "۱۶ سال", "۲۱ سال"], a: 0, e: "حداقل سن برای کار در ارتفاع ۱۸ سال است." },
+                { q: "در کار در ارتفاع، چه کسانی مجاز به کار هستند؟", o: ["افراد آموزش‌دیده و دارای گواهی", "همه افراد", "فقط افراد با تجربه", "فقط مردان"], a: 0, e: "فقط افراد آموزش‌دیده و دارای گواهی مجاز هستند." },
+                { q: "حداکثر مدت زمان اعتبار گواهی کار در ارتفاع چند سال است؟", o: ["۲ سال", "۱ سال", "۳ سال", "۵ سال"], a: 0, e: "گواهی کار در ارتفاع ۲ سال اعتبار دارد." },
+                { q: "در کار در ارتفاع، اگر باران ببارد، چه باید کرد؟", o: ["کار متوقف شود", "کار ادامه یابد", "فقط با چتر کار شود", "هیچ"], a: 0, e: "در باران، کار در ارتفاع متوقف شود." }
+            ];
+
+            // ---------- رانندگی تدافعی (رانندگی) ----------
+            const ranandegi = [
+                { q: "حداقل فاصله ایمنی از دامپتراک برای خودروهای سبک چند متر است؟", o: ["۵۰ متر", "۳۰ متر", "۲۰ متر", "۱۰۰ متر"], a: 0, e: "فاصله ایمن از دامپتراک ۵۰ متر است." },
+                { q: "حداقل فاصله جانبی از دامپتراک برای خودروهای سبک چند متر است؟", o: ["۲ متر", "۳ متر", "۵ متر", "۱ متر"], a: 0, e: "فاصله جانبی از دامپتراک ۲ متر است." },
+                { q: "حداکثر سرعت مجاز در محوطه بارگیری معدن چند کیلومتر بر ساعت است؟", o: ["۵-۱۰ کیلومتر", "۱۵ کیلومتر", "۲۰ کیلومتر", "۳۰ کیلومتر"], a: 0, e: "سرعت در محوطه بارگیری ۵ تا ۱۰ کیلومتر است." },
+                { q: "حداکثر سرعت مجاز در جاده اصلی معدن چند کیلومتر بر ساعت است؟", o: ["۲۰-۳۰ کیلومتر", "۴۰ کیلومتر", "۵۰ کیلومتر", "۱۰ کیلومتر"], a: 0, e: "سرعت در جاده اصلی ۲۰ تا ۳۰ کیلومتر است." },
+                { q: "حداکثر سرعت مجاز در جاده فرعی معدن چند کیلومتر بر ساعت است؟", o: ["۱۵ کیلومتر", "۲۰ کیلومتر", "۳۰ کیلومتر", "۱۰ کیلومتر"], a: 0, e: "سرعت در جاده فرعی ۱۵ کیلومتر است." },
+                { q: "در گردوغبار شدید، سرعت باید به چند کیلومتر کاهش یابد؟", o: ["۱۰ کیلومتر", "۱۵ کیلومتر", "۲۰ کیلومتر", "۵ کیلومتر"], a: 0, e: "در گردوغبار شدید، سرعت به ۱۰ کیلومتر کاهش یابد." },
+                { q: "در شیب‌های تند، فاصله ایمن را چند درصد افزایش دهیم؟", o: ["۵۰٪", "۲۵٪", "۱۰۰٪", "۱۰٪"], a: 0, e: "در شیب‌های تند، فاصله ۵۰٪ افزایش یابد." },
+                { q: "در شرایط گردوغبار، فاصله ایمن را چند برابر کنیم؟", o: ["۲ برابر", "۳ برابر", "۱.۵ برابر", "۴ برابر"], a: 0, e: "در گردوغبار، فاصله ۲ برابر شود." },
+                { q: "در شرایط بارانی، فاصله ایمن را چند برابر کنیم؟", o: ["۲ تا ۳ برابر", "۱.۵ برابر", "۴ برابر", "۵ برابر"], a: 0, e: "در باران، فاصله ۲ تا ۳ برابر شود." },
+                { q: "نقاط کور در دامپتراک شامل چه مناطقی است؟", o: ["جلو، سمت راست، پشت", "فقط جلو", "فقط پشت", "سمت چپ"], a: 0, e: "نقاط کور دامپتراک شامل جلو، سمت راست و پشت است." },
+                { q: "در معدن، استفاده از تلفن همراه حین رانندگی چه حکمی دارد؟", o: ["ممنوع است", "مجاز است", "فقط در شرایط اضطراری مجاز است", "بستگی به سرعت دارد"], a: 0, e: "استفاده از تلفن همراه حین رانندگی ممنوع است." },
+                { q: "در معدن، حمل مسافر در قسمت بار چه حکمی دارد؟", o: ["ممنوع است", "مجاز است", "فقط با مجوز", "بستگی به نوع خودرو دارد"], a: 0, e: "حمل مسافر در قسمت بار ممنوع است." },
+                { q: "در معدن، استعمال دخانیات در خودرو چه حکمی دارد؟", o: ["ممنوع است", "مجاز است", "فقط در زمان توقف", "بستگی به نوع خودرو دارد"], a: 0, e: "استعمال دخانیات در خودرو ممنوع است." },
+                { q: "در معدن، سبقت از ماشین‌آلات سنگین در پیچ‌ها چه حکمی دارد؟", o: ["ممنوع است", "مجاز است", "فقط با احتیاط", "بستگی به سرعت دارد"], a: 0, e: "سبقت در پیچ‌ها ممنوع است." },
+                { q: "در معدن، توقف در نقاط کور دامپتراک چه حکمی دارد؟", o: ["ممنوع است", "مجاز است", "فقط در صورت لزوم", "بستگی به زمان دارد"], a: 0, e: "توقف در نقاط کور دامپتراک ممنوع است." },
+                { q: "در معدن، در صورت ترکیدن لاستیک، اولین اقدام چیست؟", o: ["فرمان را محکم بگیرید", "ترمز ناگهانی بزنید", "از خودرو خارج شوید", "با بیسیم تماس بگیرید"], a: 0, e: "در ترکیدن لاستیک، فرمان را محکم بگیرید." },
+                { q: "در معدن، در صورت آتش‌سوزی خودرو، اولین اقدام چیست؟", o: ["موتور را خاموش کنید", "از خودرو خارج شوید", "با کپسول خاموش کنید", "با بیسیم تماس بگیرید"], a: 0, e: "در آتش‌سوزی، موتور را خاموش کنید." },
+                { q: "در معدن، در صورت نقص فنی، مثلث خطر را در چه فاصله‌ای قرار دهید؟", o: ["۱۵-۲۰ متر", "۱۰ متر", "۳۰ متر", "۵ متر"], a: 0, e: "مثلث خطر در ۱۵ تا ۲۰ متری پشت خودرو قرار دهید." },
+                { q: "در معدن، حداقل تعداد افرادی که باید در تیم امداد باشند؟", o: ["۲ نفر", "۳ نفر", "۴ نفر", "۱ نفر"], a: 0, e: "تیم امداد حداقل ۲ نفر است." },
+                { q: "در معدن، چه نوع کفشی برای رانندگان الزامی است؟", o: ["کفش ایمنی", "کفش معمولی", "دمپایی", "کفش پاشنه بلند"], a: 0, e: "کفش ایمنی برای رانندگان الزامی است." },
+                { q: "در معدن، چه نوع کلاهی برای رانندگان الزامی است؟", o: ["کلاه ایمنی", "کلاه معمولی", "کلاه کاسکت", "هیچ"], a: 0, e: "کلاه ایمنی برای رانندگان الزامی است." },
+                { q: "در معدن، بازرسی روزانه خودرو شامل چه مواردی است؟", o: ["ترمز، چراغ، لاستیک", "فقط موتور", "فقط رنگ بدنه", "هیچ"], a: 0, e: "بازرسی روزانه شامل ترمز، چراغ و لاستیک است." },
+                { q: "در معدن، جلسه Toolbox قبل از شروع شیفت چه هدفی دارد؟", o: ["بررسی خطرات و اقدامات کنترلی", "برنامه تولید", "حقوق کارگران", "تعطیلات"], a: 0, e: "جلسه Toolbox برای بررسی خطرات است." },
+                { q: "در معدن، حداقل فاصله از لبه پرتگاه برای پارک خودرو چند متر است؟", o: ["۳ متر", "۵ متر", "۱۰ متر", "۱ متر"], a: 0, e: "حداقل فاصله از لبه پرتگاه ۳ متر است." },
+                { q: "در معدن، در شیب‌های تند، از کدام تکنیک رانندگی استفاده کنیم؟", o: ["ترمز موتور (Retarder)", "ترمز دستی", "کلاچ", "دنده خنثی"], a: 0, e: "در شیب‌های تند از ترمز موتور استفاده کنید." },
+                { q: "در معدن، حداکثر شیب مجاز برای حرکت دامپتراک چند درجه است؟", o: ["۲۰ درجه", "۱۵ درجه", "۳۰ درجه", "۱۰ درجه"], a: 0, e: "حداکثر شیب مجاز برای دامپتراک ۲۰ درجه است." },
+                { q: "در معدن، حداقل عرض جاده برای تردد دوطرفه چند متر است؟", o: ["۸ متر", "۶ متر", "۱۰ متر", "۱۲ متر"], a: 0, e: "عرض جاده برای تردد دوطرفه حداقل ۸ متر است." },
+                { q: "در معدن، سرعت در نزدیکی محل بارگیری باید چند کیلومتر باشد؟", o: ["۵ کیلومتر", "۱۰ کیلومتر", "۱۵ کیلومتر", "۲۰ کیلومتر"], a: 0, e: "سرعت در محل بارگیری ۵ کیلومتر است." },
+                { q: "در معدن، چه نوع ارتباطی بین رانندگان و کنترل استفاده می‌شود؟", o: ["بی‌سیم", "تلفن", "ایمیل", "نامه"], a: 0, e: "ارتباط از طریق بی‌سیم انجام می‌شود." },
+                { q: "در معدن، حداقل فاصله از دامپتراک در گردوغبار چند متر است؟", o: ["۱۰۰ متر", "۵۰ متر", "۷۵ متر", "۲۰۰ متر"], a: 0, e: "در گردوغبار، فاصله از دامپتراک ۱۰۰ متر است." },
+                { q: "در معدن، در شب، سرعت را چند درصد کاهش دهیم؟", o: ["۲۰٪", "۱۰٪", "۵۰٪", "۳۰٪"], a: 0, e: "در شب، سرعت را ۲۰٪ کاهش دهید." },
+                { q: "در معدن، چه زمانی کار با خودرو متوقف شود؟", o: ["در باد شدید و گردوغبار", "در باران", "در شب", "همیشه"], a: 0, e: "در باد شدید و گردوغبار کار متوقف شود." },
+                { q: "در معدن، چه کسی مسئول نهایی ایمنی رانندگی است؟", o: ["کارفرما", "راننده", "ناظر", "سرپرست"], a: 0, e: "کارفرما مسئول نهایی ایمنی است." },
+                { q: "در معدن، چند نقطه کور در دامپتراک وجود دارد؟", o: ["۳ نقطه اصلی", "۲ نقطه", "۴ نقطه", "۵ نقطه"], a: 0, e: "دامپتراک دارای ۳ نقطه کور اصلی است." },
+                { q: "در معدن، حداقل فاصله از خودروی جلویی برای کامیون چند متر است؟", o: ["۴۰ متر", "۳۰ متر", "۵۰ متر", "۲۰ متر"], a: 0, e: "فاصله از خودروی جلویی برای کامیون ۴۰ متر است." },
+                { q: "در معدن، حداقل فاصله از خودروی جلویی برای لودر چند متر است؟", o: ["۳۰ متر", "۲۰ متر", "۴۰ متر", "۵۰ متر"], a: 0, e: "فاصله از خودروی جلویی برای لودر ۳۰ متر است." },
+                { q: "در معدن، حداقل فاصله از خودروی جلویی برای خودروی سبک چند متر است؟", o: ["۲۰ متر", "۳۰ متر", "۴۰ متر", "۱۰ متر"], a: 0, e: "فاصله از خودروی جلویی برای خودروی سبک ۲۰ متر است." },
+                { q: "در معدن، استفاده از بوق و فلاشر در گردوغبار چه هدفی دارد؟", o: ["قابل دید بودن", "سرگرمی", "هشدار به حیوانات", "هیچ"], a: 0, e: "بوق و فلاشر برای قابل دید بودن است." },
+                { q: "در معدن، چه زمانی باید از چراغ‌های مه‌شکن استفاده کرد؟", o: ["در گردوغبار و مه", "در شب", "در روز", "همیشه"], a: 0, e: "چراغ‌های مه‌شکن در گردوغبار و مه استفاده می‌شوند." },
+                { q: "در معدن، حداقل فاصله از دامپتراک برای لودر چند متر است؟", o: ["۵۰ متر", "۳۰ متر", "۴۰ متر", "۲۰ متر"], a: 0, e: "فاصله لودر از دامپتراک ۵۰ متر است." },
+                { q: "در معدن، حداقل فاصله از دامپتراک برای کامیون چند متر است؟", o: ["۵۰ متر", "۳۰ متر", "۴۰ متر", "۲۰ متر"], a: 0, e: "فاصله کامیون از دامپتراک ۵۰ متر است." },
+                { q: "در معدن، حداقل فاصله از دامپتراک برای خودروی سبک چند متر است؟", o: ["۵۰ متر", "۳۰ متر", "۴۰ متر", "۲۰ متر"], a: 0, e: "فاصله خودروی سبک از دامپتراک ۵۰ متر است." },
+                { q: "در معدن، حداقل فاصله جانبی از دامپتراک برای کامیون چند متر است؟", o: ["۴ متر", "۳ متر", "۵ متر", "۲ متر"], a: 0, e: "فاصله جانبی کامیون از دامپتراک ۴ متر است." },
+                { q: "در معدن، حداقل فاصله جانبی از دامپتراک برای لودر چند متر است؟", o: ["۳ متر", "۴ متر", "۵ متر", "۲ متر"], a: 0, e: "فاصله جانبی لودر از دامپتراک ۳ متر است." },
+                { q: "در معدن، حداقل فاصله جانبی از دامپتراک برای خودروی سبک چند متر است؟", o: ["۲ متر", "۳ متر", "۴ متر", "۱ متر"], a: 0, e: "فاصله جانبی خودروی سبک از دامپتراک ۲ متر است." },
+                { q: "در معدن، چه نوع گواهینامه‌ای برای رانندگی دامپتراک لازم است؟", o: ["گواهینامه ویژه معدن", "گواهینامه پایه ۱", "گواهینامه پایه ۲", "گواهینامه بین‌المللی"], a: 0, e: "رانندگی دامپتراک نیاز به گواهینامه ویژه معدن دارد." },
+                { q: "در معدن، کارت سلامت راننده هر چند وقت یکبار تمدید شود؟", o: ["۱ سال", "۶ ماه", "۲ سال", "۳ سال"], a: 0, e: "کارت سلامت سالانه تمدید می‌شود." },
+                { q: "در معدن، معاینه فنی خودرو هر چند وقت یکبار انجام شود؟", o: ["سالانه", "۶ ماه", "۲ سال", "۳ سال"], a: 0, e: "معاینه فنی سالانه انجام می‌شود." },
+                { q: "در معدن، چه کسی مسئول صدور مجوز رانندگی است؟", o: ["واحد HSE", "مدیریت", "راننده", "نگهبان"], a: 0, e: "واحد HSE مسئول صدور مجوز رانندگی است." },
+                { q: "در معدن، حداقل تعداد افراد برای عملیات نجات در تصادف چند نفر است؟", o: ["۲ نفر", "۳ نفر", "۴ نفر", "۱ نفر"], a: 0, e: "حداقل ۲ نفر برای عملیات نجات لازم است." },
+                { q: "در معدن، چه نوع کپسول آتش‌نشانی در خودروها الزامی است؟", o: ["پودری", "آبی", "CO₂", "فوم"], a: 0, e: "کپسول پودری در خودروها الزامی است." }
+            ];
+
+            // ---------- انبار و 5S (انبار) ----------
+            const anbar = [
+                { q: "فاصله استاندارد کالاها از دیوار جانبی در انبار چند سانتی‌متر است؟", o: ["۶۰-۱۰۰ سانتی‌متر", "۳۰-۵۰ سانتی‌متر", "۱۰۰-۱۵۰ سانتی‌متر", "۲۰-۴۰ سانتی‌متر"], a: 0, e: "فاصله کالاها از دیوار ۶۰ تا ۱۰۰ سانتی‌متر است." },
+                { q: "فاصله استاندارد بین هر ردیف کالا در انبار چند متر است؟", o: ["۲ متر", "۱.۵ متر", "۳ متر", "۴ متر"], a: 0, e: "فاصله بین ردیف‌ها ۲ متر است." },
+                { q: "حداکثر ارتفاع چیدمان کالا در انبار چند متر است؟", o: ["۴.۵ متر", "۳ متر", "۶ متر", "۵ متر"], a: 0, e: "حداکثر ارتفاع چیدمان ۴.۵ متر است." },
+                { q: "فاصله استاندارد سقف تا نزدیکترین روشنایی در انبار چند متر است؟", o: ["۱ متر", "۰.۵ متر", "۲ متر", "۱.۵ متر"], a: 0, e: "فاصله سقف تا روشنایی ۱ متر است." },
+                { q: "در 5S، S اول (ساماندهی) به چه معناست؟", o: ["جداسازی ضروری از غیرضروری", "نظم و ترتیب", "پاکیزه‌سازی", "استانداردسازی"], a: 0, e: "S1 = جداسازی ضروری از غیرضروری." },
+                { q: "در 5S، S دوم (نظم و ترتیب) به چه معناست؟", o: ["هر چیزی در جای خود", "جداسازی ضروری از غیرضروری", "پاکیزه‌سازی", "استانداردسازی"], a: 0, e: "S2 = هر چیزی در جای خود." },
+                { q: "در 5S، S سوم (پاکیزه‌سازی) به چه معناست؟", o: ["تمیز کردن و پاکیزه‌داری", "جداسازی ضروری از غیرضروری", "نظم و ترتیب", "استانداردسازی"], a: 0, e: "S3 = تمیز کردن و پاکیزه‌داری." },
+                { q: "در 5S، S چهارم (استانداردسازی) به چه معناست؟", o: ["یکنواخت کردن روش‌ها", "جداسازی ضروری از غیرضروری", "نظم و ترتیب", "پاکیزه‌سازی"], a: 0, e: "S4 = یکنواخت کردن روش‌ها." },
+                { q: "در 5S، S پنجم (انضباط) به چه معناست؟", o: ["فرهنگ‌سازی و عادت‌سازی", "جداسازی ضروری از غیرضروری", "نظم و ترتیب", "پاکیزه‌سازی"], a: 0, e: "S5 = فرهنگ‌سازی و عادت‌سازی." },
+                { q: "در انبار، کف انبار باید چه ویژگی‌هایی داشته باشد؟", o: ["صاف، غیرلغزنده و قابل تمیز کردن", "ناصاف", "لغزنده", "شکننده"], a: 0, e: "کف انبار باید صاف، غیرلغزنده و قابل تمیز کردن باشد." },
+                { q: "مواد شیمیایی قابل اشتعال باید در چه فاصله‌ای از سایر مواد نگهداری شوند؟", o: ["۱۵ متر", "۱۰ متر", "۲۰ متر", "۵ متر"], a: 0, e: "فاصله مواد قابل اشتعال از سایر مواد ۱۵ متر است." },
+                { q: "در انبار، مایعات قابل اشتعال در چه ظروفی نگهداری شوند؟", o: ["ظروف سربسته", "ظروف باز", "ظروف پلاستیکی", "ظروف کاغذی"], a: 0, e: "مایعات قابل اشتعال در ظروف سربسته نگهداری شوند." },
+                { q: "در انبار، مواد شیمیایی باید در چه ارتفاعی از زمین قرار گیرند؟", o: ["حداقل ۵ سانتی‌متر", "روی زمین", "حداقل ۱۰ سانتی‌متر", "حداقل ۲۰ سانتی‌متر"], a: 0, e: "مواد شیمیایی باید حداقل ۵ سانتی‌متر از زمین فاصله داشته باشند." },
+                { q: "در انبار، استفاده از لیفتراک برقی در چه نوع انبارهایی مجاز است؟", o: ["انبارهای پوشیده", "انبارهای روباز", "همه انبارها", "هیچ"], a: 0, e: "لیفتراک برقی در انبارهای پوشیده مجاز است." },
+                { q: "در انبار، چه نوع تهویه‌ای الزامی است؟", o: ["تهویه مناسب", "تهویه طبیعی", "هیچ", "فقط در تابستان"], a: 0, e: "تهویه مناسب در انبار الزامی است." },
+                { q: "در انبار، فاصله کالاها از وسایل برقی چند متر است؟", o: ["۱ متر", "۰.۵ متر", "۲ متر", "۳ متر"], a: 0, e: "کالاها باید ۱ متر از وسایل برقی فاصله داشته باشند." },
+                { q: "در انبار، کلیدهای برق باید چه ویژگی داشته باشند؟", o: ["پوشش ایمنی", "بدون پوشش", "رنگ قرمز", "دستگیره چرخان"], a: 0, e: "کلیدهای برق باید پوشش ایمنی داشته باشند." },
+                { q: "در انبار، سیم‌کشی برق باید چگونه باشد؟", o: ["توکار و استاندارد", "روکار", "بدون لوله", "سیم‌های لخت"], a: 0, e: "سیم‌کشی باید توکار و استاندارد باشد." },
+                { q: "در انبار، مواد شیمیایی باید برچسب‌گذاری شوند؟", o: ["بله", "خیر", "فقط مواد سمی", "فقط مواد قابل اشتعال"], a: 0, e: "همه مواد شیمیایی باید برچسب‌گذاری شوند." },
+                { q: "در انبار، درب‌های خروج اضطراری باید چگونه باشند؟", o: ["باز و قابل دسترس", "بسته", "قفل", "مسدود"], a: 0, e: "درب‌های خروج اضطراری باید باز و قابل دسترس باشند." },
+                { q: "در انبار، زباله‌ها باید در چه ظروفی جمع‌آوری شوند؟", o: ["ظروف فلزی درپوش‌دار", "ظروف پلاستیکی", "کیسه‌های پارچه‌ای", "روی زمین"], a: 0, e: "زباله‌ها در ظروف فلزی درپوش‌دار جمع‌آوری شوند." },
+                { q: "در انبار، روزانه چه کاری باید انجام شود؟", o: ["خروج زباله‌ها", "باز کردن درب‌ها", "روشن کردن چراغ‌ها", "همه موارد"], a: 0, e: "زباله‌ها باید روزانه از انبار خارج شوند." },
+                { q: "در انبار، کپسول‌های آتش‌نشانی در چه فواصلی نصب شوند؟", o: ["حداکثر ۳۰ متر", "حداکثر ۲۰ متر", "حداکثر ۴۰ متر", "حداکثر ۱۰ متر"], a: 0, e: "فاصله کپسول‌ها حداکثر ۳۰ متر است." },
+                { q: "در انبار، سیستم‌های اعلام حریق باید شامل چه مواردی باشد؟", o: ["کشف‌کننده دود و حرارت", "فقط کپسول", "فقط آب", "هیچ"], a: 0, e: "سیستم اعلام حریق شامل کشف‌کننده دود و حرارت است." },
+                { q: "در انبار، آزمایش لوله‌های آب هر چند وقت یکبار انجام شود؟", o: ["سالانه", "ماهانه", "هفته‌ای", "روزانه"], a: 0, e: "آزمایش لوله‌های آب سالانه انجام شود." },
+                { q: "در انبار، در صورت آتش‌سوزی، کارکنان باید چه کنند؟", o: ["فوراً به مأمورین اطلاع دهند", "ادامه کار", "خارج شوند", "با آب خاموش کنند"], a: 0, e: "کارکنان باید فوراً آتش‌سوزی را اطلاع دهند." },
+                { q: "در انبار، وسایل اعلام خطر با چه رنگی مشخص می‌شوند؟", o: ["قرمز", "زرد", "سبز", "آبی"], a: 0, e: "وسایل اعلام خطر با رنگ قرمز مشخص می‌شوند." },
+                { q: "در انبار، جعبه کمک‌های اولیه باید در چه محلی نصب شود؟", o: ["محل قابل دسترس", "انبار", "اتاق مدیر", "خارج از انبار"], a: 0, e: "جعبه کمک‌های اولیه در محل قابل دسترس نصب شود." },
+                { q: "در انبار، چه کسی مسئول بازدید روزانه ایمنی است؟", o: ["مسئول ایمنی", "کارگر", "مدیر", "نگهبان"], a: 0, e: "مسئول ایمنی بازدید روزانه انجام دهد." },
+                { q: "در انبار، علائم هشداردهنده استعمال دخانیات باید نصب شوند؟", o: ["بله", "خیر", "فقط در انبارهای مواد قابل اشتعال", "فقط در انبارهای مواد شیمیایی"], a: 0, e: "علائم هشداردهنده استعمال دخانیات در همه انبارها نصب شوند." },
+                { q: "در انبار، فاصله ایمن از مواد قابل اشتعال تا وسایل گرمایشی چند متر است؟", o: ["۲ متر", "۱ متر", "۳ متر", "۰.۵ متر"], a: 0, e: "فاصله از وسایل گرمایشی ۲ متر است." },
+                { q: "در انبار، استفاده از پالت برای انبار کردن مواد چه مزیتی دارد؟", o: ["جلوگیری از تماس با زمین", "افزایش ارتفاع", "کاهش هزینه", "همه موارد"], a: 0, e: "پالت از تماس مواد با زمین جلوگیری می‌کند." },
+                { q: "در انبار، راه‌های عبور باید چگونه باشند؟", o: ["علامت‌گذاری و قابل دسترس", "پر از کالا", "مسدود", "باریک"], a: 0, e: "راه‌های عبور باید علامت‌گذاری و قابل دسترس باشند." },
+                { q: "در انبار، مواد شیمیایی با قابلیت اشتعال در چه فاصله‌ای از سایر مواد قرار گیرند؟", o: ["۱۵ متر", "۱۰ متر", "۲۰ متر", "۵ متر"], a: 0, e: "مواد قابل اشتعال ۱۵ متر از سایر مواد فاصله داشته باشند." },
+                { q: "در انبار، ظروف و بشکه‌های خالی چگونه نگهداری شوند؟", o: ["با درب بسته", "باز", "روی هم", "خارج از انبار"], a: 0, e: "ظروف خالی با درب بسته نگهداری شوند." },
+                { q: "در انبار، مواد شیمیایی در معرض تابش مستقیم نور خورشید قرار نگیرند؟", o: ["بله", "خیر", "فقط در تابستان", "فقط در زمستان"], a: 0, e: "مواد شیمیایی نباید در معرض نور مستقیم خورشید باشند." },
+                { q: "در انبار، بسته‌بندی آسیب دیده چگونه برچسب‌گذاری شود؟", o: ["با برچسب مشخص", "بدون برچسب", "با رنگ قرمز", "با رنگ زرد"], a: 0, e: "بسته‌بندی آسیب دیده با برچسب مشخص شود." },
+                { q: "در انبار، تجهیزات آتش‌نشانی هر چند وقت یکبار تست شوند؟", o: ["منظم", "یکبار", "هرگز", "فقط در زمان حریق"], a: 0, e: "تجهیزات آتش‌نشانی به طور منظم تست شوند." },
+                { q: "در انبار، مواد فسادپذیر چگونه نگهداری شوند؟", o: ["در دمای مناسب", "در دمای اتاق", "در فضای باز", "در رطوبت بالا"], a: 0, e: "مواد فسادپذیر در دمای مناسب نگهداری شوند." },
+                { q: "در انبار، مواد فله‌ای چگونه انبار شوند؟", o: ["در سیلوها", "روی زمین", "در کیسه‌ها", "در قفسه‌ها"], a: 0, e: "مواد فله‌ای در سیلوها انبار شوند." },
+                { q: "در انبار، قطعات یدکی چگونه طبقه‌بندی شوند؟", o: ["بر اساس نوع و کاربرد", "بر اساس اندازه", "بر اساس رنگ", "بر اساس قیمت"], a: 0, e: "قطعات یدکی بر اساس نوع و کاربرد طبقه‌بندی شوند." },
+                { q: "در انبار، کالاهای پر مصرف در کجا قرار گیرند؟", o: ["دسترس‌ترین محل", "دورترین محل", "زیر قفسه", "بالای قفسه"], a: 0, e: "کالاهای پر مصرف در دسترس‌ترین محل قرار گیرند." },
+                { q: "در انبار، کدگذاری محل استقرار کالاها چه هدفی دارد؟", o: ["دسترسی سریع", "تزیین", "افزایش هزینه", "کاهش فضا"], a: 0, e: "کدگذاری برای دسترسی سریع به کالاها است." },
+                { q: "در انبار، خط‌کشی راهروها چه هدفی دارد؟", o: ["تعیین مسیر تردد", "تزیین", "افزایش هزینه", "کاهش فضا"], a: 0, e: "خط‌کشی برای تعیین مسیر تردد است." },
+                { q: "در انبار، رنگ‌آمیزی قفسه‌ها با چه رنگی انجام شود؟", o: ["رنگ‌های مناسب و استاندارد", "رنگ قرمز", "رنگ سیاه", "هیچ"], a: 0, e: "رنگ‌آمیزی با رنگ‌های مناسب و استاندارد انجام شود." },
+                { q: "در انبار، محل‌های خطرناک با چه رنگی مشخص شوند؟", o: ["قرمز", "زرد", "سبز", "آبی"], a: 0, e: "محل‌های خطرناک با رنگ قرمز مشخص شوند." },
+                { q: "در انبار، سیستم تهویه چه نقشی دارد؟", o: ["خروج بخارات سمی", "خنک‌سازی", "گرمایش", "همه موارد"], a: 0, e: "سیستم تهویه برای خروج بخارات سمی است." },
+                { q: "در انبار، استفاده از لیفتراک دیزلی در انبارهای پوشیده چه حکمی دارد؟", o: ["ممنوع است", "مجاز است", "فقط با تهویه", "فقط در شب"], a: 0, e: "لیفتراک دیزلی در انبارهای پوشیده ممنوع است." },
+                { q: "در انبار، مواد قابل اشتعال باید در چه نوع انبارهایی نگهداری شوند؟", o: ["انبارهای جداگانه", "انبارهای مشترک", "روی زمین", "در فضای باز"], a: 0, e: "مواد قابل اشتعال در انبارهای جداگانه نگهداری شوند." }
+            ];
+
+            // ---------- ایمنی عمومی (عمومی) ----------
+            const oummi = [
+                { q: "تعریف ایمنی بر اساس OHSAS 18001 چیست؟", o: ["میزان فرار از خطرات", "دور بودن از خطر", "عدم وجود خطر", "کنترل خطرات"], a: 0, e: "ایمنی = میزان درجه فرار از خطرات." },
+                { q: "مثلث هاینریش چه نسبتی را نشان می‌دهد؟", o: ["۱:۲۹:۳۰۰", "۱:۱۰:۱۰۰", "۱:۵۰:۵۰۰", "۱:۲۰:۲۰۰"], a: 0, e: "نسبت ۱:۲۹:۳۰۰ در مثلث هاینریش." },
+                { q: "شبه حادثه (Near Miss) چیست؟", o: ["رویداد بدون آسیب با پتانسیل حادثه", "حادثه با آسیب جزئی", "حادثه با آسیب شدید", "حادثه مرگبار"], a: 0, e: "شبه حادثه رویداد بدون آسیب با پتانسیل حادثه است." },
+                { q: "در مثلث هاینریش، به ازای هر حادثه مرگبار، چند حادثه با آسیب جزئی رخ می‌دهد؟", o: ["۲۹", "۱۰", "۵۰", "۱۰۰"], a: 0, e: "۲۹ حادثه با آسیب جزئی." },
+                { q: "در مثلث هاینریش، به ازای هر حادثه مرگبار، چند شبه‌حادثه رخ می‌دهد؟", o: ["۳۰۰", "۱۰۰", "۵۰۰", "۲۰۰"], a: 0, e: "۳۰۰ شبه‌حادثه." },
+                { q: "ارگونومی به بررسی چه روابطی می‌پردازد؟", o: ["انسان، ماشین و محیط کار", "انسان و حیوان", "ماشین و محیط", "فقط انسان"], a: 0, e: "ارگونومی روابط انسان، ماشین و محیط کار را بررسی می‌کند." },
+                { q: "حداکثر وزن مجاز برای بلند کردن دستی بار چقدر است؟", o: ["۲۳ کیلوگرم", "۳۰ کیلوگرم", "۴۰ کیلوگرم", "۵۰ کیلوگرم"], a: 0, e: "حداکثر وزن مجاز ۲۳ کیلوگرم است." },
+                { q: "کدام یک از موارد زیر از عوامل زیان‌آور فیزیکی است؟", o: ["سر و صدا", "مواد شیمیایی", "ویروس‌ها", "استرس"], a: 0, e: "سر و صدا یک عامل فیزیکی است." },
+                { q: "کدام یک از موارد زیر از عوامل زیان‌آور شیمیایی است؟", o: ["گرد و غبار سیلیس", "سر و صدا", "ارتعاش", "روشنایی"], a: 0, e: "گرد و غبار سیلیس یک عامل شیمیایی است." },
+                { q: "کدام یک از موارد زیر از عوامل زیان‌آور بیولوژیک است؟", o: ["ویروس هپاتیت", "سر و صدا", "مواد شیمیایی", "ارگونومی"], a: 0, e: "ویروس هپاتیت یک عامل بیولوژیک است." },
+                { q: "کدام یک از موارد زیر از عوامل زیان‌آور روانی است؟", o: ["استرس", "سر و صدا", "گرد و غبار", "ارتعاش"], a: 0, e: "استرس یک عامل روانی است." },
+                { q: "MSDS چیست؟", o: ["فرم اطلاعات ایمنی مواد", "سیستم مدیریت ایمنی", "دستورالعمل ایمنی", "گزارش ایمنی"], a: 0, e: "MSDS = فرم اطلاعات ایمنی مواد." },
+                { q: "MSDS شامل چه اطلاعاتی است؟", o: ["خطرات، ویژگی‌ها، اقدامات پیشگیرانه", "فقط نام ماده", "فقط قیمت", "فقط تاریخ تولید"], a: 0, e: "MSDS شامل خطرات، ویژگی‌ها و اقدامات پیشگیرانه است." },
+                { q: "لوزی خطر NFPA دارای چند بخش رنگی است؟", o: ["۴ بخش", "۳ بخش", "۵ بخش", "۲ بخش"], a: 0, e: "لوزی NFPA دارای ۴ بخش رنگی است." },
+                { q: "رنگ قرمز در لوزی NFPA نشان‌دهنده چیست؟", o: ["خطر آتش‌سوزی", "خطر سلامتی", "خطر واکنش‌پذیری", "خطر ویژه"], a: 0, e: "رنگ قرمز نشان‌دهنده خطر آتش‌سوزی است." },
+                { q: "رنگ آبی در لوزی NFPA نشان‌دهنده چیست؟", o: ["خطر سلامتی", "خطر آتش‌سوزی", "خطر واکنش‌پذیری", "خطر ویژه"], a: 0, e: "رنگ آبی نشان‌دهنده خطر سلامتی است." },
+                { q: "رنگ زرد در لوزی NFPA نشان‌دهنده چیست؟", o: ["خطر واکنش‌پذیری", "خطر آتش‌سوزی", "خطر سلامتی", "خطر ویژه"], a: 0, e: "رنگ زرد نشان‌دهنده خطر واکنش‌پذیری است." },
+                { q: "رنگ سفید در لوزی NFPA نشان‌دهنده چیست؟", o: ["خطر ویژه", "خطر آتش‌سوزی", "خطر سلامتی", "خطر واکنش‌پذیری"], a: 0, e: "رنگ سفید نشان‌دهنده خطر ویژه (خورنده، اکسیدکننده و ...) است." },
+                { q: "در لوزی NFPA، عدد ۴ به چه معناست؟", o: ["خطر بسیار شدید", "خطر کم", "خطر متوسط", "بی‌خطر"], a: 0, e: "عدد ۴ به معنای خطر بسیار شدید است." },
+                { q: "در لوزی NFPA، عدد ۰ به چه معناست؟", o: ["بی‌خطر", "خطر کم", "خطر متوسط", "خطر شدید"], a: 0, e: "عدد ۰ به معنای بی‌خطر است." },
+                { q: "کلاس حریق A مربوط به چه موادی است؟", o: ["مواد جامد", "مایعات قابل اشتعال", "گازها", "تجهیزات برقی"], a: 0, e: "کلاس A مربوط به مواد جامد است." },
+                { q: "کلاس حریق B مربوط به چه موادی است؟", o: ["مایعات قابل اشتعال", "مواد جامد", "گازها", "تجهیزات برقی"], a: 0, e: "کلاس B مربوط به مایعات قابل اشتعال است." },
+                { q: "کلاس حریق C مربوط به چه موادی است؟", o: ["گازها", "مواد جامد", "مایعات قابل اشتعال", "تجهیزات برقی"], a: 0, e: "کلاس C مربوط به گازها است." },
+                { q: "کلاس حریق D مربوط به چه موادی است؟", o: ["فلزات", "مواد جامد", "مایعات قابل اشتعال", "تجهیزات برقی"], a: 0, e: "کلاس D مربوط به فلزات است." },
+                { q: "کلاس حریق E مربوط به چه موادی است؟", o: ["تجهیزات برقی", "مواد جامد", "مایعات قابل اشتعال", "گازها"], a: 0, e: "کلاس E مربوط به تجهیزات برقی است." },
+                { q: "کلاس حریق F مربوط به چه موادی است؟", o: ["روغن‌های خوراکی", "مواد جامد", "مایعات قابل اشتعال", "گازها"], a: 0, e: "کلاس F مربوط به روغن‌های خوراکی است." },
+                { q: "برای حریق کلاس A، چه خاموش‌کننده‌ای مناسب است؟", o: ["آب", "CO₂", "پودر مخصوص فلزات", "کف"], a: 0, e: "آب برای حریق کلاس A مناسب است." },
+                { q: "برای حریق کلاس B، چه خاموش‌کننده‌ای مناسب است؟", o: ["کف", "آب", "پودر مخصوص فلزات", "هیچ"], a: 0, e: "کف برای حریق کلاس B مناسب است." },
+                { q: "برای حریق کلاس C، چه خاموش‌کننده‌ای مناسب است؟", o: ["CO₂", "آب", "کف", "پودر مخصوص فلزات"], a: 0, e: "CO₂ برای حریق کلاس C مناسب است." },
+                { q: "برای حریق کلاس D، چه خاموش‌کننده‌ای مناسب است؟", o: ["پودر مخصوص فلزات", "آب", "CO₂", "کف"], a: 0, e: "پودر مخصوص فلزات برای حریق کلاس D مناسب است." },
+                { q: "برای حریق کلاس E، چه خاموش‌کننده‌ای مناسب است؟", o: ["CO₂", "آب", "کف", "پودر مخصوص فلزات"], a: 0, e: "CO₂ برای حریق کلاس E مناسب است." },
+                { q: "مثلث آتش شامل چه عناصری است؟", o: ["سوخت، حرارت، اکسیژن", "سوخت، دود، حرارت", "اکسیژن، آب، حرارت", "سوخت، آب، اکسیژن"], a: 0, e: "مثلث آتش شامل سوخت، حرارت و اکسیژن است." },
+                { q: "با حذف کدام یک از عناصر مثلث آتش، آتش خاموش می‌شود؟", o: ["هر یک از سه عنصر", "فقط سوخت", "فقط حرارت", "فقط اکسیژن"], a: 0, e: "با حذف هر یک از سه عنصر، آتش خاموش می‌شود." },
+                { q: "نقطه اشتعال (Flash Point) چیست؟", o: ["پایین‌ترین دمایی که بخار قابل اشتعال تولید می‌شود", "دمای احتراق", "دمای انفجار", "دمای ذوب"], a: 0, e: "نقطه اشتعال پایین‌ترین دمای تولید بخار قابل اشتعال است." },
+                { q: "LEL مخفف چیست؟", o: ["حد پایین انفجار", "حد بالای انفجار", "حد پایین اشتعال", "حد بالای اشتعال"], a: 0, e: "LEL = حد پایین انفجار." },
+                { q: "UEL مخفف چیست؟", o: ["حد بالای انفجار", "حد پایین انفجار", "حد پایین اشتعال", "حد بالای اشتعال"], a: 0, e: "UEL = حد بالای انفجار." },
+                { q: "در سطوح لغزنده، از چه روشی برای جلوگیری از سقوط استفاده می‌شود؟", o: ["کفش ضد لغزش", "کفش معمولی", "دمپایی", "کفش پاشنه بلند"], a: 0, e: "کفش ضد لغزش برای جلوگیری از سقوط استفاده می‌شود." },
+                { q: "کمبود روشنایی در محیط کار چه تأثیری دارد؟", o: ["افزایش حوادث", "افزایش بهره‌وری", "کاهش خستگی", "بهبود کیفیت"], a: 0, e: "کمبود روشنایی باعث افزایش حوادث می‌شود." },
+                { q: "حداقل میزان اکسیژن قابل قبول برای محیط کار چند درصد است؟", o: ["۱۹.۵٪", "۲۰٪", "۱۸٪", "۲۱٪"], a: 0, e: "حداقل اکسیژن قابل قبول ۱۹.۵٪ است." },
+                { q: "حداکثر غلظت CO مجاز در محیط کار چند ppm است؟", o: ["۲۵ ppm", "۵۰ ppm", "۱۰ ppm", "۱۰۰ ppm"], a: 0, e: "حداکثر غلظت CO ۲۵ ppm است." },
+                { q: "حداکثر غلظت H2S مجاز در محیط کار چند ppm است؟", o: ["۱۰ ppm", "۵ ppm", "۲۰ ppm", "۱ ppm"], a: 0, e: "حداکثر غلظت H2S ۱۰ ppm است." },
+                { q: "در محیط‌های پرخطر، چه نوع روشنایی اضطراری باید نصب شود؟", o: ["روشنایی اضطراری", "روشنایی معمولی", "چراغ قوه", "شمع"], a: 0, e: "روشنایی اضطراری در محیط‌های پرخطر نصب شود." },
+                { q: "چه کسی مسئول نهایی ایمنی در سازمان است؟", o: ["کارفرما", "مدیر HSE", "کارگر", "ناظر"], a: 0, e: "کارفرما مسئول نهایی ایمنی است." },
+                { q: "در سیستم مدیریت ایمنی، چه چیزی اولین قدم است؟", o: ["شناسایی خطرات", "آموزش", "بازرسی", "گزارش‌دهی"], a: 0, e: "شناسایی خطرات اولین قدم است." },
+                { q: "در سیستم مدیریت ایمنی، آخرین خط دفاعی چیست؟", o: ["تجهیزات حفاظت فردی", "مهندسی", "مدیریتی", "حذف"], a: 0, e: "PPE آخرین خط دفاعی است." },
+                { q: "در مثلث هاینریش، با گزارش و ریشه‌یابی شبه‌حوادث، چه اتفاقی می‌افتد؟", o: ["پیشگیری از حوادث جدی", "هیچ تأثیری ندارد", "افزایش حوادث", "کاهش بهره‌وری"], a: 0, e: "ریشه‌یابی شبه‌حوادث از حوادث جدی پیشگیری می‌کند." },
+                { q: "در محیط کار، استفاده از کدام یک از موارد زیر ممنوع است؟", o: ["مواد قابل اشتعال در نزدیکی شعله", "مواد ایمن", "تجهیزات استاندارد", "PPE"], a: 0, e: "مواد قابل اشتعال در نزدیکی شعله ممنوع است." },
+                { q: "در زمان وقوع حادثه، اولین اقدام چیست؟", o: ["اطمینان از ایمنی صحنه", "تماس با مدیر", "فرار", "گزارش"], a: 0, e: "اولین اقدام، اطمینان از ایمنی صحنه است." }
+            ];
+
+            return { bargh, jarsaghil, darbast, faza, kardarertefa, ranandegi, anbar, oummi };
+        }
+
+        // ============================================================
+        // 2. منطق اصلی با تغییرات
+        // ============================================================
+        const topicBanks = buildQuestionBank();
+        let currentQuestions = [];
+        let selectedAnswers = {};
+        let pageSize = 10;
+        let currentPage = 0;
+        let examStarted = false;
+        let examLocked = false;
+        let timerInterval = null;
+        let timeRemaining = 15 * 60;
+        const TOTAL_TIME = 15 * 60;
+
+        const container = document.getElementById('questionList');
+        const paginationEl = document.getElementById('pagination');
+        const statsAnswered = document.getElementById('answeredCount');
+        const statsTotal = document.getElementById('totalCount');
+        const resultBanner = document.getElementById('resultBanner');
+        const finalScoreSpan = document.getElementById('finalScore');
+        const totalQuestionsDisplay = document.getElementById('totalQuestionsDisplay');
+        const resultMsg = document.getElementById('resultMsg');
+        const topicSelect = document.getElementById('topicSelect');
+        const topicCount = document.getElementById('topicCount');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const timerBox = document.getElementById('timerBox');
+        const submitBtn = document.getElementById('submitBtn');
+        const shuffleBtn = document.getElementById('shuffleBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // جلوگیری از رفرش صفحه در حین آزمون
+        window.addEventListener('beforeunload', function(e) {
+            if (examStarted && !examLocked) {
+                e.preventDefault();
+                e.returnValue = 'آزمون در حال انجام است. آیا مطمئن هستید که می‌خواهید صفحه را ترک کنید؟';
+            }
+        });
+
+        function showToast(msg, duration = 3000) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(t._hide);
+            t._hide = setTimeout(() => t.classList.remove('show'), duration);
+        }
+
+        function getQuestionsForTopic(topic, limit = 15) {
+            const pool = topicBanks[topic];
+            const shuffled = [...pool];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled.slice(0, limit);
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timeRemaining = TOTAL_TIME;
+            updateTimerDisplay();
+            timerBox.classList.remove('warning');
+
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                updateTimerDisplay();
+
+                if (timeRemaining <= 60) {
+                    timerBox.classList.add('warning');
+                }
+
+                if (timeRemaining % 5 === 0) saveQuizState();
+
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    timerBox.classList.remove('warning');
+                    showToast('⏰ زمان آزمون به پایان رسید! تصحیح خودکار...', 3000);
+                    submitExam(true);
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(timeRemaining / 60);
+            const secs = timeRemaining % 60;
+            timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            timerBox.classList.remove('warning');
+        }
+
+        // ============================================================
+        // ذخیره و بازیابی وضعیت آزمون (برای جلوگیری از پاک‌شدن با رفرش)
+        // ============================================================
+        const QUIZ_STATE_KEY = 'hse_quiz_state';
+
+        function saveQuizState() {
+            if (!examStarted) return;
+            try {
+                localStorage.setItem(QUIZ_STATE_KEY, JSON.stringify({
+                    topic: topicSelect.value,
+                    currentQuestions,
+                    selectedAnswers,
+                    currentPage,
+                    examStarted,
+                    examLocked,
+                    timeRemaining,
+                    deadline: examLocked ? null : (Date.now() + timeRemaining * 1000)
+                }));
+            } catch (e) {}
+        }
+
+        function clearQuizState() {
+            try { localStorage.removeItem(QUIZ_STATE_KEY); } catch (e) {}
+        }
+
+        function loadQuizState() {
+            try {
+                const raw = localStorage.getItem(QUIZ_STATE_KEY);
+                if (!raw) return null;
+                return JSON.parse(raw);
+            } catch (e) { return null; }
+        }
+
+        function startExam() {
+            if (examStarted && !examLocked) {
+                showToast('⚠️ آزمون در حال انجام است!', 2500);
+                return;
+            }
+
+            const topic = topicSelect.value;
+            let questions = getQuestionsForTopic(topic, 15);
+            currentQuestions = questions;
+            selectedAnswers = {};
+            currentPage = 0;
+            examStarted = true;
+            examLocked = false;
+            topicSelect.disabled = true; // غیرفعال کردن تغییر موضوع
+            shuffleBtn.disabled = true; // غیرفعال کردن دکمه شروع
+
+            submitBtn.disabled = false;
+
+            render();
+            updateStats();
+            resultBanner.classList.remove('show');
+            document.querySelectorAll('.feedback-area').forEach(el => el.classList.remove('show'));
+            document.getElementById('wheelBtnWrap').style.display = 'none';
+
+            startTimer();
+            saveQuizState();
+
+            const label = topicSelect.options[topicSelect.selectedIndex].text;
+            showToast(`🔀 شروع آزمون ${label} (۱۵ سوال) — زمان: ۱۵ دقیقه`, 2500);
+        }
+
+        function render() {
+            if (!examStarted || currentQuestions.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <span class="icon">📋</span>
+                        <div class="title">آزمونی شروع نشده است</div>
+                        <div class="desc">لطفاً موضوع مورد نظر را انتخاب کرده و دکمه <strong>«شروع آزمون»</strong> را بزنید.</div>
+                    </div>
+                `;
+                paginationEl.innerHTML = '';
+                return;
+            }
+
+            const start = currentPage * pageSize;
+            const end = Math.min(start + pageSize, currentQuestions.length);
+            const pageQuestions = currentQuestions.slice(start, end);
+
+            if (pageQuestions.length === 0) {
+                container.innerHTML = `<div class="empty-state"><span class="icon">📭</span>هیچ سوالی در این صفحه وجود ندارد.</div>`;
+                renderPagination();
+                return;
+            }
+
+            let html = '';
+            const offset = start;
+
+            pageQuestions.forEach((q, idx) => {
+                const globalIdx = offset + idx;
+                const answer = selectedAnswers[globalIdx];
+                const letters = ['الف', 'ب', 'پ', 'ت'];
+                const isLocked = examLocked;
+
+                html += `<div class="question-card" data-qidx="${globalIdx}">
+                    <div class="q-header">
+                        <span class="q-num">سوال ${globalIdx+1}</span>
+                        <span class="q-text">${q.q}</span>
+                    </div>
+                    <div class="options">`;
+
+                q.o.forEach((opt, oi) => {
+                    const checked = (answer !== undefined && answer === oi) ? 'checked' : '';
+                    const disabled = isLocked ? 'disabled' : '';
+                    let labelClass = isLocked ? 'opt-label disabled' : 'opt-label';
+
+                    if (isLocked) {
+                        if (oi === q.a) {
+                            labelClass += ' opt-correct';
+                        } else if (answer === oi) {
+                            labelClass += ' opt-wrong-selected';
+                        }
+                    }
+
+                    html += `
+                        <label class="${labelClass}">
+                            <input type="radio" name="q${globalIdx}" value="${oi}" ${checked} ${disabled} data-qidx="${globalIdx}" data-optidx="${oi}">
+                            <span class="letter">${letters[oi]}.</span> ${opt}
+                        </label>
+                    `;
+                });
+
+                html += `</div>
+                    <div class="feedback-area" id="fb-${globalIdx}">
+                        <span class="badge-answer" id="fb-badge-${globalIdx}"></span>
+                        <span id="fb-text-${globalIdx}"></span>
+                        <div class="explain" id="fb-explain-${globalIdx}" style="display:none;"></div>
+                    </div>
+                </div>`;
+            });
+
+            container.innerHTML = html;
+
+            if (!examLocked) {
+                document.querySelectorAll('input[type="radio"]:not([disabled])').forEach(radio => {
+                    radio.addEventListener('change', function() {
+                        const qIdx = parseInt(this.dataset.qidx);
+                        const optIdx = parseInt(this.dataset.optidx);
+                        selectedAnswers[qIdx] = optIdx;
+                        const fb = document.getElementById(`fb-${qIdx}`);
+                        if (fb) fb.classList.remove('show');
+                        updateStats();
+                        saveQuizState();
+                    });
+                });
+            }
+
+            renderPagination();
+        }
+
+        function renderPagination() {
+            const totalPages = Math.ceil(currentQuestions.length / pageSize);
+            let html = '';
+            for (let i = 0; i < totalPages; i++) {
+                const isActive = i === currentPage;
+                const disabled = examLocked ? 'disabled' : '';
+                html += `<button class="page-btn ${isActive ? 'active' : ''}" data-page="${i}" ${disabled}>${i+1}</button>`;
+            }
+            paginationEl.innerHTML = html;
+            paginationEl.querySelectorAll('.page-btn:not([disabled])').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    currentPage = parseInt(this.dataset.page);
+                    render();
+                    saveQuizState();
+                });
+            });
+        }
+
+        function updateStats() {
+            const total = currentQuestions.length;
+            const answered = Object.keys(selectedAnswers).length;
+            statsAnswered.textContent = answered;
+            statsTotal.textContent = total;
+            topicCount.textContent = total;
+        }
+
+        function submitExam(isTimeout = false) {
+            if (!examStarted || currentQuestions.length === 0) {
+                showToast('⚠️ ابتدا یک آزمون را شروع کنید.', 2500);
+                return;
+            }
+
+            if (examLocked) {
+                showToast('⚠️ این آزمون قبلاً تصحیح شده است.', 3000);
+                return;
+            }
+
+            stopTimer();
+
+            let correct = 0;
+            const total = currentQuestions.length;
+
+            for (let i = 0; i < total; i++) {
+                const ans = selectedAnswers[i];
+                if (ans === undefined) continue;
+                const q = currentQuestions[i];
+                if (ans === q.a) correct++;
+            }
+
+            examLocked = true;
+            topicSelect.disabled = true;
+            shuffleBtn.disabled = true;
+            submitBtn.disabled = true;
+
+            document.querySelectorAll('.page-btn').forEach(btn => btn.disabled = true);
+
+            // نمایش بازخورد همراه با رنگ‌بندی گزینه صحیح/نادرست (در render انجام می‌شود)
+            for (let i = 0; i < total; i++) {
+                const fb = document.getElementById(`fb-${i}`);
+                if (!fb) continue;
+                const badge = document.getElementById(`fb-badge-${i}`);
+                const text = document.getElementById(`fb-text-${i}`);
+                const explain = document.getElementById(`fb-explain-${i}`);
+                const ans = selectedAnswers[i];
+                const q = currentQuestions[i];
+
+                if (ans === undefined) {
+                    badge.textContent = '⚠️';
+                    badge.className = 'badge-answer missing';
+                    text.textContent = ' پاسخ داده نشده — گزینه صحیح با رنگ سبز مشخص شده است';
+                    explain.textContent = q.e || '';
+                    explain.style.display = q.e ? 'block' : 'none';
+                } else if (ans === q.a) {
+                    badge.textContent = '✅';
+                    badge.className = 'badge-answer correct';
+                    text.textContent = ' پاسخ صحیح';
+                    explain.textContent = q.e || '';
+                    explain.style.display = q.e ? 'block' : 'none';
+                } else {
+                    badge.textContent = '❌';
+                    badge.className = 'badge-answer wrong';
+                    text.textContent = ' پاسخ نادرست — گزینه صحیح با رنگ سبز مشخص شده است';
+                    explain.textContent = q.e || '';
+                    explain.style.display = q.e ? 'block' : 'none';
+                }
+                fb.classList.add('show');
+            }
+
+            render();
+
+            finalScoreSpan.textContent = correct;
+            totalQuestionsDisplay.textContent = total;
+            const percent = Math.round((correct / total) * 100);
+            const passed = correct >= 10;
+
+            let timeoutMsg = '';
+            if (isTimeout) {
+                timeoutMsg = ' <span class="timeout-msg">⏰ زمان تمام شد!</span>';
+            }
+
+            if (passed) {
+                resultMsg.innerHTML = `✅ عالی! نمره ${correct}/${total} (${percent}٪) — قبول ${timeoutMsg}`;
+                resultBanner.style.borderRight = '6px solid #27ae60';
+                showToast(`🎉 نمره: ${correct}/${total}`, 3500);
+            } else {
+                resultMsg.innerHTML = `⚠️ نمره ${correct}/${total} (${percent}٪) — نیاز به مطالعه بیشتر ${timeoutMsg}`;
+                resultBanner.style.borderRight = '6px solid #c0392b';
+                showToast(`⚠️ نمره: ${correct}/${total}`, 3500);
+            }
+            resultBanner.classList.add('show');
+
+            // ارسال نمره به Google Sheets
+            try {
+                const raw = localStorage.getItem('hse_user_activated');
+                const u = raw ? JSON.parse(raw) : {};
+                const score = correct;
+                const topicLabel = document.getElementById('topicSelect').options[document.getElementById('topicSelect').selectedIndex].text;
+                const now = new Date().toLocaleString('fa-IR');
+
+                const params = new URLSearchParams({
+                    action: 'submit_grade',
+                    name: u.fullname || '',
+                    personnel: u.personnel || '',
+                    phone: u.phone || '',
+                    nationalId: u.national || '',
+                    topic: topicLabel,
+                    score: score,
+                    total: total,
+                    datetime: now
+                });
+                fetch('https://script.google.com/macros/s/AKfycbzDZiadFyzTOgSpMzSo9b_xQ29N_ZHD2vIOxmswrl0O2YNod2prV1qCN34myNsp653OjQ/exec', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: params.toString()
+                }).catch(()=>{});
+
+                if (score >= 14) {
+                    document.getElementById('wheelBtnWrap').style.display = 'block';
+                    document.getElementById('gradeStatus').textContent = '🎯 نمره عالی! حق چرخوندن گردونه شانس رو داری.';
+                    localStorage.setItem('hse_wheel_eligible', JSON.stringify({name: u.fullname, personnel: u.personnel, phone: u.phone, nationalId: u.national, score: score, topic: topicLabel, ts: Date.now()}));
+                } else {
+                    document.getElementById('gradeStatus').textContent = '📋 نمره ' + score + ' از ' + total + ' ثبت شد.';
+                }
+            } catch(e){}
+
+            saveQuizState();
+        }
+
+        function restartExam() {
+            // فعال‌سازی مجدد برای شروع آزمون جدید
+            stopTimer();
+
+            const topic = topicSelect.value;
+            let questions = getQuestionsForTopic(topic, 15);
+            currentQuestions = questions;
+            selectedAnswers = {};
+            currentPage = 0;
+            examStarted = true;
+            examLocked = false;
+            topicSelect.disabled = true;
+            shuffleBtn.disabled = true;
+            submitBtn.disabled = false;
+
+            render();
+            updateStats();
+            resultBanner.classList.remove('show');
+            document.querySelectorAll('.feedback-area').forEach(el => el.classList.remove('show'));
+            document.getElementById('wheelBtnWrap').style.display = 'none';
+
+            startTimer();
+            saveQuizState();
+
+            const label = topicSelect.options[topicSelect.selectedIndex].text;
+            showToast(`🔄 شروع مجدد آزمون ${label} (۱۵ سوال جدید)`, 2500);
+        }
+
+        function resetExam() {
+            stopTimer();
+
+            selectedAnswers = {};
+            currentPage = 0;
+            examStarted = false;
+            examLocked = false;
+            currentQuestions = [];
+            topicSelect.disabled = false;
+            shuffleBtn.disabled = false;
+            submitBtn.disabled = false;
+
+            timeRemaining = TOTAL_TIME;
+            updateTimerDisplay();
+            timerBox.classList.remove('warning');
+
+            render();
+            updateStats();
+            resultBanner.classList.remove('show');
+            document.querySelectorAll('.feedback-area').forEach(el => el.classList.remove('show'));
+            document.getElementById('wheelBtnWrap').style.display = 'none';
+            clearQuizState();
+            showToast('🗑️ آزمون کاملاً بازنشانی شد.', 2000);
+        }
+
+        // رویدادها
+        document.getElementById('shuffleBtn').addEventListener('click', startExam);
+        document.getElementById('submitBtn').addEventListener('click', function() { submitExam(false); });
+        document.getElementById('restartBtn').addEventListener('click', restartExam);
+        document.getElementById('resetBtn').addEventListener('click', resetExam);
+
+        topicSelect.addEventListener('change', function() {
+            if (!examStarted || examLocked) {
+                const topic = this.value;
+                const count = Math.min(topicBanks[topic].length, 15);
+                topicCount.textContent = count;
+            }
+        });
+
+        // مقداردهی اولیه / بازیابی وضعیت قبلی (در صورت رفرش صفحه)
+        (function initOrRestore() {
+            const saved = loadQuizState();
+
+            if (saved && saved.examStarted && Array.isArray(saved.currentQuestions) && saved.currentQuestions.length > 0) {
+                currentQuestions = saved.currentQuestions;
+                selectedAnswers = saved.selectedAnswers || {};
+                currentPage = saved.currentPage || 0;
+                examStarted = true;
+                examLocked = !!saved.examLocked;
+
+                if (saved.topic) topicSelect.value = saved.topic;
+                topicSelect.disabled = true;
+                shuffleBtn.disabled = true;
+
+                if (examLocked) {
+                    // آزمون قبلاً تصحیح شده بود؛ فقط نتیجه و رنگ‌بندی را دوباره نشان بده (بدون ارسال مجدد به شیت)
+                    submitBtn.disabled = true;
+                    render();
+                    document.querySelectorAll('.page-btn').forEach(btn => btn.disabled = true);
+
+                    let correct = 0;
+                    const total = currentQuestions.length;
+                    for (let i = 0; i < total; i++) {
+                        const ans = selectedAnswers[i];
+                        const q = currentQuestions[i];
+                        if (ans !== undefined && ans === q.a) correct++;
+
+                        const fb = document.getElementById(`fb-${i}`);
+                        if (!fb) continue;
+                        const badge = document.getElementById(`fb-badge-${i}`);
+                        const text = document.getElementById(`fb-text-${i}`);
+                        const explain = document.getElementById(`fb-explain-${i}`);
+
+                        if (ans === undefined) {
+                            badge.textContent = '⚠️';
+                            badge.className = 'badge-answer missing';
+                            text.textContent = ' پاسخ داده نشده — گزینه صحیح با رنگ سبز مشخص شده است';
+                        } else if (ans === q.a) {
+                            badge.textContent = '✅';
+                            badge.className = 'badge-answer correct';
+                            text.textContent = ' پاسخ صحیح';
+                        } else {
+                            badge.textContent = '❌';
+                            badge.className = 'badge-answer wrong';
+                            text.textContent = ' پاسخ نادرست — گزینه صحیح با رنگ سبز مشخص شده است';
+                        }
+                        explain.textContent = q.e || '';
+                        explain.style.display = q.e ? 'block' : 'none';
+                        fb.classList.add('show');
+                    }
+
+                    finalScoreSpan.textContent = correct;
+                    totalQuestionsDisplay.textContent = total;
+                    const percent = Math.round((correct / total) * 100);
+                    const passed = correct >= 10;
+                    if (passed) {
+                        resultMsg.innerHTML = `✅ عالی! نمره ${correct}/${total} (${percent}٪) — قبول`;
+                        resultBanner.style.borderRight = '6px solid #27ae60';
+                    } else {
+                        resultMsg.innerHTML = `⚠️ نمره ${correct}/${total} (${percent}٪) — نیاز به مطالعه بیشتر`;
+                        resultBanner.style.borderRight = '6px solid #c0392b';
+                    }
+                    resultBanner.classList.add('show');
+                    showToast('↩️ نتیجه آزمون قبلی شما بازیابی شد.', 3000);
+
+                } else {
+                    // آزمون هنوز در حال انجام بود؛ زمان باقی‌مانده را بر اساس ساعت واقعی محاسبه کن
+                    submitBtn.disabled = false;
+                    let remaining = saved.timeRemaining || TOTAL_TIME;
+                    if (saved.deadline) {
+                        remaining = Math.max(0, Math.round((saved.deadline - Date.now()) / 1000));
+                    }
+                    timeRemaining = remaining;
+                    updateTimerDisplay();
+
+                    render();
+                    updateStats();
+
+                    if (timeRemaining <= 0) {
+                        showToast('⏰ زمان آزمون قبلاً به پایان رسیده بود! تصحیح خودکار...', 3000);
+                        submitExam(true);
+                    } else {
+                        startTimer();
+                        showToast('↩️ آزمون ناتمام شما بازیابی شد. ادامه دهید...', 3000);
+                    }
+                }
+            } else {
+                topicCount.textContent = '۱۵';
+                timeRemaining = TOTAL_TIME;
+                updateTimerDisplay();
+                render();
+            }
+        })();
+
+        // نمایش کاربر فعال
+        (function showActiveUser(){
+            try {
+                const raw = localStorage.getItem('hse_user_activated');
+                if (!raw) return;
+                const u = JSON.parse(raw);
+                if (!u || !u.fullname) return;
+                const bar = document.getElementById('userBar');
+                const nameEl = document.getElementById('userBarName');
+                if (bar && nameEl) {
+                    nameEl.textContent = u.fullname + ' | پرسنلی: ' + (u.personnel || '—');
+                    bar.style.display = 'flex';
+                }
+            } catch(e){}
+        })();
+
+        console.log('✅ بانک سوالات با ۸ دسته و ۵۰+ سوال تخصصی بارگذاری شد.');
+        console.log('📊 مجموع سوالات: ' + (topicBanks.bargh.length + topicBanks.jarsaghil.length + topicBanks.darbast.length + topicBanks.faza.length + topicBanks.kardarertefa.length + topicBanks.ranandegi.length + topicBanks.anbar.length + topicBanks.oummi.length));
+        console.log('⏱️ مهلت آزمون: ۱۵ دقیقه');
+        console.log('📌 پس از اتمام زمان، آزمون به صورت خودکار تصحیح می‌شود.');
+        console.log('🔒 در حین آزمون، صفحه قابل رفرش نیست و دکمه شروع غیرفعال است.');
+        console.log('💾 وضعیت آزمون با رفرش صفحه پاک نمی‌شود (بازیابی خودکار).');
+        console.log('✅ گزینه صحیح بعد از تصحیح با رنگ سبز و گزینه انتخابی نادرست با رنگ قرمز مشخص می‌شود.');
+    </script>
+
+    <script src="hse-common.js"></script>
+
+<script src="assets/js/sw-register.js"></script>
+</body>
+</html>

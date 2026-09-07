@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+
+<script>
+/* ============================================================
+   ★ امنیت: گیت احراز هویت (سمت کلاینت)
+   هیچ صفحه‌ای بدون ورود به سامانه باز نمی‌شود. محتوای صفحه
+   مخفی می‌ماند و کاربر به صفحه ورود هدایت می‌شود.
+   (لایه نمایشی؛ لایه امنیتی واقعی در بکاند اعمال می‌شود.)
+   ============================================================ */
+(function(){
+  var ok = false;
+  try {
+    var _u = JSON.parse(localStorage.getItem('hse_user_activated') || 'null');
+    ok = !!(_u && _u.personnel && _u.fullname);
+  } catch(e) { ok = false; }
+  if (ok) return; // مجاز - ادامه می‌دهد
+
+  // پنهان‌کردن کل محتوا و نمایش قفل
+  var hide = function(){
+    try {
+      var d = document;
+      // مخفی کردن همه عناصر
+      var all = d.body ? d.body.children : [];
+      for (var i=0;i<all.length;i++){ all[i].style.display='none'; }
+      var lock = d.createElement('div');
+      lock.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#0f172a;color:#f8fafc;'
+        +'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+        +'font-family:Tahoma,sans-serif;text-align:center;padding:20px;direction:rtl;';
+      lock.innerHTML = '<div style="font-size:60px;margin-bottom:10px;">🔒</div>'
+        +'<h2 style="margin:0 0 8px;">دسترسی محدود است</h2>'
+        +'<p style="margin:0 0 20px;color:#94a3b8;">لطفاً ابتدا از صفحه اصلی وارد سامانه شوید.</p>'
+        +'<a href="index.html" style="background:#ff6208;color:#fff;padding:10px 26px;'
+        +'border-radius:10px;text-decoration:none;font-weight:bold;">بازگشت به صفحه ورود</a>';
+      d.body.appendChild(lock);
+    } catch(e){}
+  };
+  if (document.body) hide(); else document.addEventListener('DOMContentLoaded', hide);
+  setTimeout(function(){ try{ location.replace('index.html'); }catch(e){} }, 2500);
+})();
+</script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#1e3c5c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HSE درکاو" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+    <title>معرفی شرکت | درکاو</title>
+
+    <style>
+        :root {
+            --primary: #ff6208;
+            --primary-hover: #e05300;
+            --secondary: #f39c12;
+            --success: #27ae60;
+            --safety: #2c6e4e;
+            --danger: #c0392b;
+            --dark-blue: #1e3c5c;
+            --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #dfe7f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --text-main: #1e2a2e;
+            --text-muted: #64748b;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --gold: #c9a84c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body { padding-bottom: 75px !important;
+            background: var(--bg-gradient);
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text-main);
+            line-height: 1.9;
+        }
+
+        .main-container {
+            max-width: 700px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            background: var(--dark-blue);
+            padding: 35px 20px;
+            color: white;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+            position: relative;
+        }
+        .header h1 { font-size: 1.8rem; margin-bottom: 5px; }
+        .header h1 .icon { margin-left: 10px; }
+        .header p { opacity: 0.8; font-size: 0.9rem; }
+        .header .back-home {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .header .back-home:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .content { padding: 25px; }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-md);
+            padding: 22px;
+            margin-bottom: 18px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+        .card:hover { box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08); }
+
+        .card-title {
+            color: var(--dark-blue);
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-right: 4px solid var(--primary);
+            padding-right: 12px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title .icon { font-size: 1.5rem; }
+
+        .card p { color: var(--text-main); font-size: 0.95rem; }
+
+        .feature-list {
+            list-style: none;
+            margin-top: 6px;
+        }
+        .feature-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 12px;
+            background: #f8fafc;
+            border-radius: var(--border-radius-sm);
+            margin-bottom: 8px;
+            font-size: 0.92rem;
+            border: 1px solid #e2e8f0;
+        }
+        .feature-list li .bullet {
+            color: var(--primary);
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        /* پیام مدیریت با استایل خاص */
+        .message-card {
+            background: linear-gradient(145deg, #fefaf5, #fdf6ed);
+            border-right: 5px solid var(--gold);
+            border-radius: var(--border-radius-md);
+            padding: 22px;
+            margin-bottom: 18px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(201, 168, 76, 0.2);
+        }
+        .message-card .card-title {
+            border-right-color: var(--gold);
+            color: #8a6d2b;
+        }
+        .message-card .signature {
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px dashed rgba(201, 168, 76, 0.4);
+            font-weight: bold;
+            color: var(--dark-blue);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .message-card .signature .name {
+            color: #8a6d2b;
+            font-size: 1rem;
+        }
+        .message-card .signature .title {
+            color: var(--text-muted);
+            font-weight: normal;
+            font-size: 0.85rem;
+        }
+        .message-card p {
+            font-size: 0.95rem;
+            line-height: 2;
+        }
+
+        .btn-back {
+            background: #cbd5e1;
+            border: none;
+            padding: 10px 24px;
+            border-radius: var(--border-radius-sm);
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            color: #334155;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .btn-back:hover { background: #b0bec5; transform: translateY(-2px); }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .footer .highlight { color: var(--primary); font-weight: bold; }
+
+        @media (max-width: 700px) {
+            .content { padding: 15px; }
+            .header h1 { font-size: 1.3rem; }
+            .header .back-home { width: 36px; height: 36px; font-size: 1rem; left: 10px; }
+            .card { padding: 16px; }
+            .message-card { padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <a href="index.html" class="back-home" title="بازگشت به صفحه اصلی">🏠</a>
+            <h1><span class="icon">🏢</span> شرکت معدنی و صنایع معدنی درکاو</h1>
+            <p>فرآوری سرب و روی مجتمع مهدی‌آباد، مهریز</p>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <!-- معرفی شرکت -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📖</span> معرفی شرکت</div>
+                <p>
+                    شرکت معدنی و صنایع معدنی درکاو به عنوان یکی از بازیگران کلیدی در صنعت فرآوری مواد معدنی ایران، 
+                    مسئولیت بهره‌برداری و فرآوری از <strong>مجتمع عظیم سرب و روی مهدی‌آباد</strong> در شهرستان مهریز (یزد) را بر عهده دارد. 
+                    این مجتمع با دارا بودن یکی از بزرگترین ذخایر سرب و روی جهان، نقش محوری در تأمین نیازهای صنعتی کشور ایفا می‌کند.
+                </p>
+            </div>
+
+            <!-- شرح فعالیت (ویژه فرآوری) -->
+            <div class="card">
+                <div class="card-title"><span class="icon">⚙️</span> شرح فعالیت</div>
+                <ul class="feature-list">
+                    <li><span class="bullet">🧪</span> فرآوری سنگ‌های سولفیدی و اکسیدی سرب و روی با روش‌های پیشرفته فلوتاسیون</li>
+                    <li><span class="bullet">📊</span> تولید کنسانتره روی با عیار بالا و کنسانتره سرب-نقره</li>
+                    <li><span class="bullet">🔬</span> کنترل کیفی پیوسته و بهینه‌سازی فرآیندهای فرآوری</li>
+                    <li><span class="bullet">🌿</span> رعایت اصول زیست‌محیطی و مدیریت پسماندهای معدنی</li>
+                </ul>
+            </div>
+
+            <!-- شرح کار (تیم و رویکرد) -->
+            <div class="card">
+                <div class="card-title"><span class="icon">👷</span> شرح کار</div>
+                <p>
+                    تیم متخصص و کارآزموده شرکت درکاو متشکل از مهندسان معدن، متالورژی و فرآوری، با تکیه بر دانش فنی و تجربه عملی، 
+                    فرآیند تبدیل سنگ‌معدن خام به کنسانتره باارزش را مدیریت می‌کنند. 
+                    تمرکز اصلی بر افزایش راندمان، کاهش ناخالصی‌ها و دستیابی به استانداردهای جهانی در محصول نهایی است.
+                </p>
+            </div>
+
+            <!-- پیام مدیریت -->
+            <div class="message-card">
+                <div class="card-title"><span class="icon">📜</span> پیام مدیریت</div>
+                <p>
+                    <strong>همکاران گرامی در شرکت درکاو</strong>
+                    <br><br>
+                    با سلام و احترام،<br>
+                    ابتدا از تلاش‌ها و همت والای همه شما در پیشبرد اهداف و مأموریت‌های شرکت تشکر و قدردانی می‌کنم. 
+                    هر روز که می‌گذرد، شرکت ما با اتکا به تعهد و مسئولیت‌پذیری شما عزیزان، یک قدم به سوی اهداف بزرگ‌تر خود 
+                    در زمینه بهره‌برداری پایدار از منابع معدنی و ارتقای جایگاه در صنعت نزدیک‌تر می‌شود.
+                    <br><br>
+                    ما در شرکت درکاو، با باور به پتانسیل‌های بی‌نظیر موجود در تیم خود، متعهد هستیم تا از فناوری‌های نوین و راهکارهای علمی 
+                    بهره ببریم و با رعایت استانداردهای بین‌المللی، به تولیدات و محصولات باکیفیت و رقابتی دست یابیم.
+                    <br><br>
+                    دوران کنونی فرصت‌های بسیاری برای رشد و پیشرفت فراهم کرده و ما باید با نوآوری و خلاقیت، آینده‌ای روشن‌تر برای شرکت 
+                    و صنعت معدن رقم بزنیم. از تمامی شما می‌خواهم با همدلی، همفکری و مسئولیت‌پذیری، همانند گذشته در مسیر توسعه پایدار 
+                    و موفقیت‌های بیشتر همراه ما باشید.
+                    <br><br>
+                    امیدوارم با استمرار تلاش‌ها و همکاری‌ها، شرکت معدنی درکاو بتواند جایگاه خود را در صنعت و معدن بیش از پیش ارتقا دهد 
+                    و افتخارات بیشتری کسب نماید.
+                </p>
+                <div class="signature">
+                    <span class="name">سیدحمید رضوی</span>
+                    <span class="title">مدیرعامل شرکت معدنی و صنایع معدنی درکاو</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            تهیه شده توسط <span class="highlight">شرکت معدنی و صنایع معدنی درکاو</span><br>
+            <span style="direction:ltr; display:inline-block;">📞 09178680173</span>
+        </div>
+
+    </div>
+
+    <script src="hse-common.js"></script>
+
+<script src="assets/js/sw-register.js"></script>
+</body>
+</html>

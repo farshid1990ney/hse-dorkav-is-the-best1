@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+
+<script>
+/* ============================================================
+   ★ امنیت: گیت احراز هویت (سمت کلاینت)
+   هیچ صفحه‌ای بدون ورود به سامانه باز نمی‌شود. محتوای صفحه
+   مخفی می‌ماند و کاربر به صفحه ورود هدایت می‌شود.
+   (لایه نمایشی؛ لایه امنیتی واقعی در بکاند اعمال می‌شود.)
+   ============================================================ */
+(function(){
+  var ok = false;
+  try {
+    var _u = JSON.parse(localStorage.getItem('hse_user_activated') || 'null');
+    ok = !!(_u && _u.personnel && _u.fullname);
+  } catch(e) { ok = false; }
+  if (ok) return; // مجاز - ادامه می‌دهد
+
+  // پنهان‌کردن کل محتوا و نمایش قفل
+  var hide = function(){
+    try {
+      var d = document;
+      // مخفی کردن همه عناصر
+      var all = d.body ? d.body.children : [];
+      for (var i=0;i<all.length;i++){ all[i].style.display='none'; }
+      var lock = d.createElement('div');
+      lock.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#0f172a;color:#f8fafc;'
+        +'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+        +'font-family:Tahoma,sans-serif;text-align:center;padding:20px;direction:rtl;';
+      lock.innerHTML = '<div style="font-size:60px;margin-bottom:10px;">🔒</div>'
+        +'<h2 style="margin:0 0 8px;">دسترسی محدود است</h2>'
+        +'<p style="margin:0 0 20px;color:#94a3b8;">لطفاً ابتدا از صفحه اصلی وارد سامانه شوید.</p>'
+        +'<a href="index.html" style="background:#ff6208;color:#fff;padding:10px 26px;'
+        +'border-radius:10px;text-decoration:none;font-weight:bold;">بازگشت به صفحه ورود</a>';
+      d.body.appendChild(lock);
+    } catch(e){}
+  };
+  if (document.body) hide(); else document.addEventListener('DOMContentLoaded', hide);
+  setTimeout(function(){ try{ location.replace('index.html'); }catch(e){} }, 2500);
+})();
+</script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#1e3c5c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HSE درکاو" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+    <title>آموزش جامع ایمنی داربست - آژند همت توس</title>
+
+    <style>
+        :root {
+            --primary: #ff6208;
+            --primary-hover: #e05300;
+            --secondary: #f39c12;
+            --success: #27ae60;
+            --safety: #2c6e4e;
+            --danger: #c0392b;
+            --dark-blue: #1e3c5c;
+            --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #dfe7f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --text-main: #1e2a2e;
+            --text-muted: #64748b;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body { padding-bottom: 75px !important;
+            background: var(--bg-gradient);
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text-main);
+            line-height: 1.8;
+        }
+
+        .main-container {
+            max-width: 1000px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            background: var(--dark-blue);
+            padding: 35px 20px;
+            color: white;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+            position: relative;
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        .header h1 .icon {
+            margin-left: 10px;
+        }
+        .header p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        .header .back-home {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .header .back-home:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+        .card:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        }
+        .card-title {
+            color: var(--dark-blue);
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-right: 4px solid var(--primary);
+            padding-right: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title .icon {
+            font-size: 1.5rem;
+        }
+        .card-subtitle {
+            color: var(--primary);
+            font-size: 1.05rem;
+            font-weight: bold;
+            margin: 18px 0 10px 0;
+            border-bottom: 2px solid rgba(255, 98, 8, 0.15);
+            padding-bottom: 6px;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .tips-grid .tip-item {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 10px 14px;
+            border-radius: var(--border-radius-sm);
+            border-right: 3px solid var(--safety);
+            font-size: 0.9rem;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .tips-grid .tip-item:hover {
+            background: rgba(44, 110, 78, 0.04);
+            transform: translateX(-3px);
+        }
+        .tips-grid .tip-item.danger-tip {
+            border-right-color: var(--danger);
+        }
+        .tips-grid .tip-item.warning-tip {
+            border-right-color: var(--secondary);
+        }
+        .tips-grid .tip-item.primary-tip {
+            border-right-color: var(--primary);
+        }
+        .tips-grid .tip-item.info-tip {
+            border-right-color: #3498db;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+        .spec-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .spec-table th,
+        .spec-table td {
+            padding: 10px 12px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        .spec-table th {
+            background: var(--dark-blue);
+            color: white;
+            font-weight: bold;
+        }
+        .spec-table tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .spec-table tr:hover {
+            background: rgba(255, 98, 8, 0.04);
+        }
+        .spec-table .highlight-row {
+            background: rgba(255, 98, 8, 0.06);
+            font-weight: bold;
+        }
+
+        .btn-back {
+            background: #cbd5e1;
+            border: none;
+            padding: 10px 24px;
+            border-radius: var(--border-radius-sm);
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 12px;
+            color: #334155;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .btn-back:hover {
+            background: #b0bec5;
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .footer .highlight {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .badge-standard {
+            display: inline-block;
+            background: var(--safety);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-danger {
+            display: inline-block;
+            background: var(--danger);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-warning {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-info {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+
+        .safety-alert {
+            background: rgba(192, 57, 43, 0.04);
+            border-right: 4px solid var(--danger);
+            padding: 15px;
+            border-radius: var(--border-radius-sm);
+            margin: 10px 0;
+        }
+        .safety-alert strong {
+            color: var(--danger);
+        }
+        .safety-alert ul {
+            padding-right: 20px;
+            margin-top: 5px;
+        }
+        .safety-alert ul li {
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .definition-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .definition-item {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 10px 14px;
+            border-radius: var(--border-radius-sm);
+            border-right: 3px solid var(--secondary);
+            transition: var(--transition);
+        }
+        .definition-item:hover {
+            background: rgba(255, 98, 8, 0.04);
+        }
+        .definition-item strong {
+            color: var(--dark-blue);
+            display: block;
+            font-size: 0.92rem;
+        }
+        .definition-item span {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: block;
+            margin-top: 2px;
+        }
+
+
+        .visual-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+            margin-top: 18px;
+        }
+        .visual-card {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid rgba(30, 60, 92, 0.10);
+            border-radius: 20px;
+            padding: 14px;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        .visual-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 18px 42px rgba(15, 23, 42, 0.12);
+        }
+        .visual-card.feature {
+            grid-column: 1 / -1;
+        }
+        .visual-frame {
+            width: 100%;
+            background: #eef2f7;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(30, 60, 92, 0.08);
+        }
+        .visual-frame svg {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .visual-title {
+            margin-top: 12px;
+            font-weight: 900;
+            color: var(--dark-blue);
+            font-size: 1rem;
+        }
+        .visual-desc {
+            color: var(--text-muted);
+            font-size: 0.86rem;
+            margin-top: 4px;
+            line-height: 1.8;
+        }
+        .visual-points {
+            list-style: none;
+            margin-top: 10px;
+            display: grid;
+            gap: 6px;
+        }
+        .visual-points li {
+            background: rgba(30, 60, 92, 0.04);
+            border-right: 3px solid var(--primary);
+            border-radius: 12px;
+            padding: 7px 10px;
+            font-size: 0.84rem;
+            color: #334155;
+        }
+        .point-no {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            font-weight: 900;
+            font-size: 0.75rem;
+            margin-left: 6px;
+        }
+        .svg-bg { fill: #f8fafc; }
+        .svg-ground { fill: #cbd5e1; }
+        .svg-steel { stroke: #1e3c5c; stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+        .svg-steel-thin { stroke: #1e3c5c; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+        .svg-board { fill: #d6a45d; stroke: #8b5a2b; stroke-width: 2; }
+        .svg-green { stroke: #27ae60; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+        .svg-orange { stroke: #ff6208; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+        .svg-red { stroke: #c0392b; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+        .svg-fill-green { fill: #27ae60; }
+        .svg-fill-orange { fill: #ff6208; }
+        .svg-fill-red { fill: #c0392b; }
+        .svg-fill-blue { fill: #1e3c5c; }
+        .svg-fill-gray { fill: #64748b; }
+        .svg-badge text { font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 17px; font-weight: 900; fill: #fff; dominant-baseline: central; text-anchor: middle; }
+        .svg-mini-text { font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 13px; font-weight: 800; fill: #1e3c5c; }
+
+        @media(max-width:700px) {
+            .content {
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            .header .back-home {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+                left: 10px;
+            }
+            .definition-grid {
+                grid-template-columns: 1fr;
+            }
+            .tips-grid {
+                grid-template-columns: 1fr;
+            }
+            .visual-grid {
+                grid-template-columns: 1fr;
+            }
+            .visual-card.feature {
+                grid-column: auto;
+            }
+            .spec-table {
+                font-size: 0.75rem;
+            }
+            .spec-table th,
+            .spec-table td {
+                padding: 6px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <a href="index.html" class="back-home" title="بازگشت به صفحه اصلی">🏠</a>
+            <h1><span class="icon">🪜</span> آموزش جامع ایمنی داربست</h1>
+            <p>راهنمای کامل برپایی، بازرسی و استفاده ایمن از داربست‌ها بر اساس استاندارد BS 5973</p>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <!-- ===== 1- هدف و دامنه ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📖</span> 1- هدف و دامنه فعالیت</div>
+                <p style="margin-bottom:8px;">
+                    <strong>هدف:</strong> تعیین استانداردهایی برای برپایی داربست‌های ایمن، استفاده صحیح از آنها، 
+                    ایجاد پارامترهای بازرسی و شناسایی الزامات هماهنگ‌سازی برای به حداقل رساندن خطرات.
+                </p>
+                <p>
+                    <strong>دامنه فعالیت:</strong> این دستورالعمل برای <strong>همه داربست‌هایی</strong> که در پروژه‌های شرکت آژند همت توس برپا می‌شوند، کاربرد دارد.
+                </p>
+                <div style="margin-top:10px; padding:10px; background:rgba(44,110,78,0.04); border-radius:var(--border-radius-sm); border-right:3px solid var(--safety);">
+                    <strong>📌 منابع معتبر:</strong>
+                    <span class="badge-standard">BS 5973</span>
+                    <span class="badge-standard">BS 1139</span>
+                    <span class="badge-standard">BS 2482</span>
+                    <span class="badge-standard">BS 1129</span>
+                    <span class="badge-standard">BS 5973 1981</span>
+                </div>
+            </div>
+
+            <!-- ===== تصاویر آموزشی کلیدی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🖼️</span> تصاویر آموزشی کاربردی داربست</div>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:12px;">
+                    نسخه تصویری بازطراحی شد: متن‌ها از داخل تصویر خارج شده‌اند تا هیچ تداخلی با شکل‌ها نداشته باشند. هر شماره داخل تصویر، در توضیحات زیر همان کارت تشریح شده است.
+                </p>
+
+                <div class="visual-grid">
+                    <figure class="visual-card feature">
+                        <div class="visual-frame">
+                            <svg viewBox="0 0 900 380" role="img" aria-label="نمای کلی داربست ایمن">
+                                <rect class="svg-bg" width="900" height="380"/>
+                                <rect x="40" y="320" width="820" height="28" rx="10" class="svg-ground"/>
+                                <rect x="100" y="298" width="95" height="16" rx="4" class="svg-board"/>
+                                <rect x="360" y="298" width="95" height="16" rx="4" class="svg-board"/>
+                                <rect x="620" y="298" width="95" height="16" rx="4" class="svg-board"/>
+                                <g class="svg-steel">
+                                    <line x1="145" y1="300" x2="145" y2="72"/><line x1="405" y1="300" x2="405" y2="72"/><line x1="665" y1="300" x2="665" y2="72"/>
+                                    <line x1="145" y1="115" x2="665" y2="115"/><line x1="145" y1="205" x2="665" y2="205"/><line x1="145" y1="290" x2="665" y2="290"/>
+                                    <line x1="145" y1="290" x2="405" y2="115"/><line x1="405" y1="290" x2="665" y2="115"/>
+                                </g>
+                                <g class="svg-green" stroke-width="6"><line x1="165" y1="145" x2="645" y2="145"/><line x1="165" y1="176" x2="645" y2="176"/></g>
+                                <g>
+                                    <rect x="170" y="194" width="470" height="14" rx="4" class="svg-board"/><rect x="170" y="211" width="470" height="14" rx="4" class="svg-board"/><rect x="170" y="228" width="470" height="14" rx="4" class="svg-board"/>
+                                    <rect x="165" y="250" width="480" height="20" rx="4" fill="#c0392b"/>
+                                </g>
+                                <g class="svg-steel-thin"><line x1="730" y1="285" x2="785" y2="142"/><line x1="754" y1="285" x2="809" y2="142"/><line x1="744" y1="248" x2="775" y2="248"/><line x1="756" y1="216" x2="787" y2="216"/><line x1="768" y1="184" x2="799" y2="184"/></g>
+                                <g class="svg-badge"><circle cx="145" cy="84" r="17" class="svg-fill-orange"/><text x="145" y="84">1</text><circle cx="405" cy="205" r="17" class="svg-fill-orange"/><text x="405" y="205">2</text><circle cx="500" cy="145" r="17" class="svg-fill-green"/><text x="500" y="145">3</text><circle cx="520" cy="232" r="17" class="svg-fill-orange"/><text x="520" y="232">4</text><circle cx="310" cy="178" r="17" class="svg-fill-red"/><text x="310" y="178">5</text><circle cx="774" cy="160" r="17" class="svg-fill-orange"/><text x="774" y="160">6</text></g>
+                            </svg>
+                        </div>
+                        <figcaption class="visual-title">نمای کلی داربست ایمن و اجزای ضروری</figcaption>
+                        <div class="visual-desc">این تصویر برای مرور سریع قبل از شروع کار مناسب است و نشان می‌دهد کنترل داربست فقط یک مورد نیست؛ مجموعه‌ای از اجزای همزمان باید ایمن باشند.</div>
+                        <ul class="visual-points">
+                            <li><span class="point-no">1</span>استاندارد یا پایه عمودی؛ باید شاقول، سالم و روی زیرسازی مناسب باشد.</li>
+                            <li><span class="point-no">2</span>لجر و ترانزوم؛ تحمل‌کننده سکوی کار و انتقال‌دهنده بار به پایه‌ها.</li>
+                            <li><span class="point-no">3</span>نرده بالا و نرده میانی؛ کنترل اصلی خطر سقوط نفر.</li>
+                            <li><span class="point-no">4</span>تخته‌های سکوی کار و قرنیز؛ جلوگیری از سقوط ابزار و مصالح.</li>
+                            <li><span class="point-no">5</span>مهاربندی ضربدری؛ جلوگیری از لق‌زدن و تغییرشکل داربست.</li>
+                            <li><span class="point-no">6</span>دسترسی ایمن؛ نردبان باید مهار شده و زاویه مناسب داشته باشد.</li>
+                        </ul>
+                    </figure>
+
+                    <figure class="visual-card">
+                        <div class="visual-frame">
+                            <svg viewBox="0 0 430 310" role="img" aria-label="زیرسازی صحیح داربست">
+                                <rect class="svg-bg" width="430" height="310"/><rect x="30" y="258" width="370" height="24" rx="8" class="svg-ground"/>
+                                <rect x="75" y="235" width="135" height="18" rx="4" class="svg-board"/><rect x="112" y="215" width="62" height="16" rx="3" class="svg-fill-gray"/><line x1="143" y1="215" x2="143" y2="75" class="svg-steel"/>
+                                <g class="svg-green" stroke-width="5"><path d="M95 185 L122 210 L190 128"/></g>
+                                <rect x="265" y="240" width="58" height="35" rx="4" fill="#c0392b" opacity="0.85"/><rect x="333" y="232" width="42" height="42" rx="4" fill="#ef4444" opacity="0.9"/><line x1="304" y1="228" x2="282" y2="80" class="svg-steel"/>
+                                <g class="svg-red" stroke-width="6"><line x1="250" y1="115" x2="340" y2="205"/><line x1="340" y1="115" x2="250" y2="205"/></g>
+                                <g class="svg-badge"><circle cx="145" cy="55" r="16" class="svg-fill-green"/><text x="145" y="55">1</text><circle cx="143" cy="228" r="16" class="svg-fill-orange"/><text x="143" y="228">2</text><circle cx="305" cy="58" r="16" class="svg-fill-red"/><text x="305" y="58">3</text></g>
+                            </svg>
+                        </div>
+                        <figcaption class="visual-title">زیرسازی و پایه‌گذاری صحیح</figcaption>
+                        <ul class="visual-points">
+                            <li><span class="point-no">1</span>پایه باید عمودی و بدون کجی نصب شود.</li>
+                            <li><span class="point-no">2</span>Base Plate و Sole Plate مناسب برای توزیع بار الزامی است.</li>
+                            <li><span class="point-no">3</span>استفاده از آجر، بلوک، سنگ یا چوب ضایعاتی زیر پایه ممنوع است.</li>
+                        </ul>
+                    </figure>
+
+                    <figure class="visual-card">
+                        <div class="visual-frame">
+                            <svg viewBox="0 0 430 310" role="img" aria-label="حفاظت لبه سکوی کار">
+                                <rect class="svg-bg" width="430" height="310"/><rect x="60" y="225" width="310" height="24" rx="5" class="svg-board"/>
+                                <g class="svg-steel"><line x1="85" y1="245" x2="85" y2="75"/><line x1="345" y1="245" x2="345" y2="75"/><line x1="85" y1="92" x2="345" y2="92"/><line x1="85" y1="155" x2="345" y2="155"/></g>
+                                <rect x="82" y="193" width="266" height="26" rx="4" fill="#c0392b"/>
+                                <g class="svg-badge"><circle cx="362" cy="92" r="16" class="svg-fill-green"/><text x="362" y="92">1</text><circle cx="362" cy="155" r="16" class="svg-fill-green"/><text x="362" y="155">2</text><circle cx="362" cy="205" r="16" class="svg-fill-red"/><text x="362" y="205">3</text><circle cx="185" cy="238" r="16" class="svg-fill-orange"/><text x="185" y="238">4</text></g>
+                            </svg>
+                        </div>
+                        <figcaption class="visual-title">حفاظت لبه و سکوی کار</figcaption>
+                        <ul class="visual-points">
+                            <li><span class="point-no">1</span>نرده بالا در حدود ۱ متر از سطح سکو.</li>
+                            <li><span class="point-no">2</span>نرده میانی حدود ۵۰۰ میلی‌متر از سطح سکو.</li>
+                            <li><span class="point-no">3</span>قرنیز حداقل ۱۵۰ میلی‌متر برای جلوگیری از سقوط اشیا.</li>
+                            <li><span class="point-no">4</span>تخته‌ها باید پیوسته، سالم و بدون فاصله خطرناک باشند.</li>
+                        </ul>
+                    </figure>
+
+                    <figure class="visual-card">
+                        <div class="visual-frame">
+                            <svg viewBox="0 0 430 310" role="img" aria-label="مهاربندی داربست">
+                                <rect class="svg-bg" width="430" height="310"/><rect x="45" y="260" width="340" height="22" rx="8" class="svg-ground"/>
+                                <g class="svg-steel"><line x1="90" y1="260" x2="90" y2="60"/><line x1="215" y1="260" x2="215" y2="60"/><line x1="340" y1="260" x2="340" y2="60"/><line x1="90" y1="95" x2="340" y2="95"/><line x1="90" y1="175" x2="340" y2="175"/><line x1="90" y1="250" x2="340" y2="250"/></g>
+                                <g class="svg-red" stroke-width="7"><line x1="90" y1="250" x2="215" y2="95"/><line x1="215" y1="250" x2="340" y2="95"/></g>
+                                <g class="svg-badge"><circle cx="153" cy="172" r="16" class="svg-fill-red"/><text x="153" y="172">1</text><circle cx="278" cy="172" r="16" class="svg-fill-red"/><text x="278" y="172">2</text><circle cx="215" cy="95" r="16" class="svg-fill-orange"/><text x="215" y="95">3</text></g>
+                            </svg>
+                        </div>
+                        <figcaption class="visual-title">مهاربندی و کنترل پایداری</figcaption>
+                        <ul class="visual-points">
+                            <li><span class="point-no">1</span>مهار اریب نمای داربست مانع حرکت جانبی می‌شود.</li>
+                            <li><span class="point-no">2</span>در دهانه‌های متوالی، مهاربندی باید طبق طرح تکرار شود.</li>
+                            <li><span class="point-no">3</span>محل اتصال مهار باید با بست مناسب و سالم بسته شود.</li>
+                        </ul>
+                    </figure>
+
+                    <figure class="visual-card">
+                        <div class="visual-frame">
+                            <svg viewBox="0 0 430 310" role="img" aria-label="تیر اتصال داربست به سازه">
+                                <rect class="svg-bg" width="430" height="310"/><rect x="295" y="45" width="75" height="220" rx="8" fill="#cbd5e1"/><g stroke="#94a3b8" stroke-width="2"><line x1="295" y1="85" x2="370" y2="85"/><line x1="295" y1="125" x2="370" y2="125"/><line x1="295" y1="165" x2="370" y2="165"/><line x1="295" y1="205" x2="370" y2="205"/></g>
+                                <g class="svg-steel"><line x1="85" y1="260" x2="85" y2="70"/><line x1="190" y1="260" x2="190" y2="70"/><line x1="85" y1="105" x2="190" y2="105"/><line x1="85" y1="175" x2="190" y2="175"/><line x1="85" y1="245" x2="190" y2="245"/></g>
+                                <g class="svg-green" stroke-width="9"><line x1="190" y1="110" x2="295" y2="110"/><line x1="190" y1="180" x2="295" y2="180"/></g>
+                                <g class="svg-badge"><circle cx="245" cy="110" r="16" class="svg-fill-green"/><text x="245" y="110">1</text><circle cx="245" cy="180" r="16" class="svg-fill-green"/><text x="245" y="180">2</text><circle cx="322" cy="110" r="16" class="svg-fill-orange"/><text x="322" y="110">3</text></g>
+                            </svg>
+                        </div>
+                        <figcaption class="visual-title">اتصال داربست به سازه مجاور</figcaption>
+                        <ul class="visual-points">
+                            <li><span class="point-no">1</span>تای یا تیر اتصال باید در نقاط برنامه‌ریزی‌شده نصب شود.</li>
+                            <li><span class="point-no">2</span>حذف خودسرانه Tie خطر واژگونی داربست را افزایش می‌دهد.</li>
+                            <li><span class="point-no">3</span>نقطه مهار باید مقاومت کافی داشته باشد؛ نرده محافظ نقطه مهار نیست.</li>
+                        </ul>
+                    </figure>
+
+                    <figure class="visual-card">
+                        <div class="visual-frame">
+                            <svg viewBox="0 0 430 310" role="img" aria-label="زاویه نردبان داربست">
+                                <rect class="svg-bg" width="430" height="310"/><rect x="55" y="245" width="320" height="24" rx="8" class="svg-ground"/><rect x="285" y="65" width="22" height="185" rx="3" fill="#94a3b8"/>
+                                <g class="svg-steel-thin" transform="rotate(14 170 242)"><line x1="170" y1="242" x2="170" y2="65"/><line x1="205" y1="242" x2="205" y2="65"/><line x1="164" y1="100" x2="211" y2="100"/><line x1="164" y1="135" x2="211" y2="135"/><line x1="164" y1="170" x2="211" y2="170"/><line x1="164" y1="205" x2="211" y2="205"/></g>
+                                <path d="M176 245 A70 70 0 0 1 239 184" class="svg-orange" stroke-width="6"/>
+                                <circle cx="228" cy="215" r="24" fill="#fff" stroke="#ff6208" stroke-width="3"/><text x="213" y="221" class="svg-mini-text" fill="#ff6208">75°</text>
+                                <g class="svg-badge"><circle cx="288" cy="77" r="16" class="svg-fill-green"/><text x="288" y="77">1</text><circle cx="176" cy="244" r="16" class="svg-fill-orange"/><text x="176" y="244">2</text><circle cx="250" cy="245" r="16" class="svg-fill-green"/><text x="250" y="245">3</text></g>
+                            </svg>
+                        </div>
+                        <figcaption class="visual-title">نردبان دسترسی با زاویه صحیح</figcaption>
+                        <ul class="visual-points">
+                            <li><span class="point-no">1</span>قسمت بالایی نردبان باید به سازه یا داربست مهار شود.</li>
+                            <li><span class="point-no">2</span>پای نردبان باید روی سطح پایدار باشد و لیز نخورد.</li>
+                            <li><span class="point-no">3</span>زاویه حدود ۷۵ درجه یا نسبت ۱ به ۴ رعایت شود.</li>
+                        </ul>
+                    </figure>
+
+                    <figure class="visual-card">
+                        <div class="visual-frame">
+                            <svg viewBox="0 0 430 310" role="img" aria-label="بازرسی بست داربست">
+                                <rect class="svg-bg" width="430" height="310"/>
+                                <g class="svg-steel"><line x1="90" y1="160" x2="320" y2="160"/><line x1="205" y1="70" x2="205" y2="250"/></g>
+                                <circle cx="205" cy="160" r="45" fill="#e2e8f0" stroke="#1e3c5c" stroke-width="5"/><circle cx="205" cy="160" r="15" fill="#64748b"/>
+                                <path d="M270 105 C335 120 350 190 300 235" class="svg-orange" stroke-width="10"/>
+                                <rect x="300" y="220" width="70" height="22" rx="8" fill="#ff6208" transform="rotate(28 300 220)"/>
+                                <g class="svg-badge"><circle cx="205" cy="160" r="16" class="svg-fill-orange"/><text x="205" y="160">1</text><circle cx="338" cy="230" r="16" class="svg-fill-green"/><text x="338" y="230">2</text><circle cx="115" cy="105" r="16" class="svg-fill-red"/><text x="115" y="105">3</text></g>
+                                <path d="M95 95 l40 40 M135 95 l-40 40" class="svg-red" stroke-width="7"/>
+                            </svg>
+                        </div>
+                        <figcaption class="visual-title">کنترل بست‌ها و اتصالات</figcaption>
+                        <ul class="visual-points">
+                            <li><span class="point-no">1</span>بست باید متناسب با نوع اتصال انتخاب شود؛ باربر و غیرباربر جابه‌جا نشوند.</li>
+                            <li><span class="point-no">2</span>بست‌های باربر با گشتاور مناسب بسته شوند.</li>
+                            <li><span class="point-no">3</span>بست ترک‌خورده، زنگ‌زده، رزوه خراب یا تغییرشکل‌یافته استفاده نشود.</li>
+                        </ul>
+                    </figure>
+
+                    <figure class="visual-card">
+                        <div class="visual-frame">
+                            <svg viewBox="0 0 430 310" role="img" aria-label="سیستم تگ داربست">
+                                <rect class="svg-bg" width="430" height="310"/>
+                                <g transform="translate(45 55)"><rect width="85" height="150" rx="12" fill="#27ae60"/><rect x="14" y="20" width="57" height="45" rx="7" fill="#fff" opacity="0.95"/><circle cx="42" cy="98" r="22" fill="#fff"/><path d="M30 98 l9 10 l19 -25" fill="none" stroke="#27ae60" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></g>
+                                <g transform="translate(172 55)"><rect width="85" height="150" rx="12" fill="#f39c12"/><rect x="14" y="20" width="57" height="45" rx="7" fill="#fff" opacity="0.95"/><circle cx="42" cy="98" r="22" fill="#fff"/><text x="36" y="110" font-size="36" font-weight="900" fill="#f39c12">!</text></g>
+                                <g transform="translate(299 55)"><rect width="85" height="150" rx="12" fill="#c0392b"/><rect x="14" y="20" width="57" height="45" rx="7" fill="#fff" opacity="0.95"/><circle cx="42" cy="98" r="22" fill="#fff"/><path d="M30 86 l24 24 M54 86 l-24 24" stroke="#c0392b" stroke-width="7" stroke-linecap="round"/></g>
+                                <g class="svg-badge"><circle cx="87" cy="230" r="16" class="svg-fill-green"/><text x="87" y="230">1</text><circle cx="214" cy="230" r="16" class="svg-fill-orange"/><text x="214" y="230">2</text><circle cx="341" cy="230" r="16" class="svg-fill-red"/><text x="341" y="230">3</text></g>
+                            </svg>
+                        </div>
+                        <figcaption class="visual-title">سیستم Scafftag</figcaption>
+                        <ul class="visual-points">
+                            <li><span class="point-no">1</span>سبز: داربست بازرسی شده و قابل استفاده است.</li>
+                            <li><span class="point-no">2</span>زرد: استفاده فقط با محدودیت‌های درج‌شده روی تگ.</li>
+                            <li><span class="point-no">3</span>قرمز: داربست ناایمن است؛ ورود و استفاده ممنوع.</li>
+                        </ul>
+                    </figure>
+
+                    <figure class="visual-card">
+                        <div class="visual-frame">
+                            <svg viewBox="0 0 430 310" role="img" aria-label="داربست متحرک ایمن">
+                                <rect class="svg-bg" width="430" height="310"/><rect x="45" y="260" width="340" height="22" rx="8" class="svg-ground"/>
+                                <g class="svg-steel"><line x1="120" y1="250" x2="120" y2="70"/><line x1="305" y1="250" x2="305" y2="70"/><line x1="120" y1="105" x2="305" y2="105"/><line x1="120" y1="175" x2="305" y2="175"/><line x1="120" y1="238" x2="305" y2="238"/><line x1="120" y1="238" x2="305" y2="105"/><line x1="305" y1="238" x2="120" y2="105"/></g>
+                                <rect x="135" y="130" width="155" height="18" rx="4" class="svg-board"/>
+                                <circle cx="120" cy="265" r="18" fill="#64748b"/><circle cx="305" cy="265" r="18" fill="#64748b"/><path d="M102 250 h35" class="svg-red" stroke-width="6"/><path d="M287 250 h35" class="svg-red" stroke-width="6"/>
+                                <g class="svg-green" stroke-width="7"><line x1="120" y1="248" x2="70" y2="270"/><line x1="305" y1="248" x2="360" y2="270"/></g>
+                                <g class="svg-badge"><circle cx="120" cy="265" r="16" class="svg-fill-red"/><text x="120" y="265">1</text><circle cx="70" cy="270" r="16" class="svg-fill-green"/><text x="70" y="270">2</text><circle cx="215" cy="104" r="16" class="svg-fill-orange"/><text x="215" y="104">3</text></g>
+                            </svg>
+                        </div>
+                        <figcaption class="visual-title">برج متحرک و کنترل چرخ‌ها</figcaption>
+                        <ul class="visual-points">
+                            <li><span class="point-no">1</span>چرخ‌ها قبل از استفاده باید قفل شوند.</li>
+                            <li><span class="point-no">2</span>در صورت نیاز، پایه کمکی یا مهار جانبی برای پایداری نصب شود.</li>
+                            <li><span class="point-no">3</span>جابجایی برج با نفر یا بار روی سکوی کار ممنوع است.</li>
+                        </ul>
+                    </figure>
+
+                    <figure class="visual-card">
+                        <div class="visual-frame">
+                            <svg viewBox="0 0 430 310" role="img" aria-label="نشانه‌های داربست ناایمن">
+                                <rect class="svg-bg" width="430" height="310"/><rect x="45" y="260" width="340" height="22" rx="8" class="svg-ground"/>
+                                <g class="svg-steel"><line x1="100" y1="250" x2="88" y2="80"/><line x1="220" y1="250" x2="220" y2="80"/><line x1="340" y1="250" x2="355" y2="80"/><line x1="94" y1="110" x2="350" y2="100"/><line x1="100" y1="185" x2="345" y2="175"/></g>
+                                <rect x="125" y="205" width="70" height="14" rx="4" class="svg-board"/><rect x="235" y="205" width="40" height="14" rx="4" class="svg-board"/>
+                                <g class="svg-red" stroke-width="7"><path d="M285 204 l38 0" stroke-dasharray="7 7"/><line x1="74" y1="230" x2="135" y2="178"/><line x1="300" y1="120" x2="365" y2="185"/></g>
+                                <g class="svg-badge"><circle cx="304" cy="207" r="16" class="svg-fill-red"/><text x="304" y="207">1</text><circle cx="83" cy="228" r="16" class="svg-fill-red"/><text x="83" y="228">2</text><circle cx="354" cy="181" r="16" class="svg-fill-red"/><text x="354" y="181">3</text></g>
+                            </svg>
+                        </div>
+                        <figcaption class="visual-title">علائم هشداردهنده داربست ناایمن</figcaption>
+                        <ul class="visual-points">
+                            <li><span class="point-no">1</span>سکوی ناقص یا تخته‌های کم، خطر سقوط مستقیم ایجاد می‌کند.</li>
+                            <li><span class="point-no">2</span>پایه کج یا نشست‌کرده باید فوراً اصلاح شود.</li>
+                            <li><span class="point-no">3</span>نبود مهاربندی، Tie یا نرده محافظ یعنی داربست قابل استفاده نیست.</li>
+                        </ul>
+                    </figure>
+                </div>
+            </div>
+
+
+            <!-- ===== 2- تعاریف کامل ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📚</span> 2- تعاریف و اصطلاحات کامل</div>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:12px;">تمام اجزاء و اصطلاحات مورد استفاده در داربست‌بندی بر اساس استانداردهای بین‌المللی</p>
+
+                <div class="definition-grid">
+                    <div class="definition-item">
+                        <strong>🪜 داربست (Scaffold)</strong>
+                        <span>ساختار موقتی که دسترسی ایمن به محیط‌های کاری فراهم می‌کند و برای نگهداری مواد، دستگاه‌ها یا تجهیزات استفاده می‌شود.</span>
+                    </div>
+                    <div class="definition-item">
+                        <strong>🔗 بست (Coupler)</strong>
+                        <span>وسیله‌ای برای اتصال دو لوله به یکدیگر. دو نوع است: <strong>حامل بار (Load Bearing)</strong> و <strong>غیر حامل بار (Non-Load Bearing)</strong></span>
+                    </div>
+                    <div class="definition-item">
+                        <strong>🛡️ شخص کارآمد (Competent Person)</strong>
+                        <span>فردی با دانش تئوری و عملی کافی که توانایی شناسایی خطاها، عیوب و نقص‌های داربست را داشته باشد.</span>
+                    </div>
+                    <div class="definition-item">
+                        <strong>📏 فاصله بین دو پایه (Bay Length)</strong>
+                        <span>فاصله بین دو استاندارد مجاور در طول داربست.</span>
+                    </div>
+                    <div class="definition-item">
+                        <strong>🪵 تخته داربست (Scaffold Board)</strong>
+                        <span>چوب نرم تأییدشده طبق BS 2482 برای ایجاد سکوهای دسترسی و کاری. باید کندسوز باشد.</span>
+                    </div>
+                    <div class="definition-item">
+                        <strong>🛡️ نرده محافظ (Guard Rail)</strong>
+                        <span>لوله‌ای که در داخل داربست در ارتفاع ۱ متری برای جلوگیری از سقوط افراد نصب می‌شود.</span>
+                    </div>
+                    <div class="definition-item">
+                        <strong>⬆️ لجر (Ledger)</strong>
+                        <span>لوله افقی که به استانداردها متصل شده و از خم شدن آنها جلوگیری می‌کند. به عنوان تکیه‌گاه ترانزوم‌ها عمل می‌کند.</span>
+                    </div>
+                    <div class="definition-item">
+                        <strong>⬆️ ترانزوم (Transom)</strong>
+                        <span>دستک افقی که سکوهای کاری را نگهداری می‌کند. بین لجرها قرار می‌گیرد.</span>
+                    </div>
+                    <div class="definition-item">
+                        <strong>⬆️ استاندارد (Standard)</strong>
+                        <span>لوله عمودی اصلی که بار را به پایه‌ها و زمین منتقل می‌کند.</span>
+                    </div>
+                    <div class="definition-item">
+                        <strong>🏗️ بیس پلیت (Base Plate)</strong>
+                        <span>صفحه فلزی زیر استاندارد که بار را توزیع می‌کند.</span>
+                    </div>
+                    <div class="definition-item">
+                        <strong>🪵 سول پلیت (Sole Plate)</strong>
+                        <span>تخته چوبی زیر بیس پلیت در زمین‌های نرم برای توزیع بار.</span>
+                    </div>
+                    <div class="definition-item">
+                        <strong>📐 مهاربندی (Bracing)</strong>
+                        <span>لوله‌های اریب که به صورت ضربدری برای محکم‌کردن داربست نصب می‌شوند.</span>
+                    </div>
+                    <div class="definition-item">
+                        <strong>⬆️ پانچون (Puncheon)</strong>
+                        <span>لوله عمودی که در پایین‌ترین انتها به لوله افقی متصل شده و بار را مستقیماً به زمین منتقل نمی‌کند.</span>
+                    </div>
+                    <div class="definition-item">
+                        <strong>🔀 ریکر (Raker)</strong>
+                        <span>لوله اریب که برای تقویت داربست استفاده می‌شود.</span>
+                    </div>
+                    <div class="definition-item">
+                        <strong>🧱 باترس (Buttress)</strong>
+                        <span>ساختار لوله‌ای که در مقابل داربست برای تقویت آن قرار می‌گیرد.</span>
+                    </div>
+                    <div class="definition-item">
+                        <strong>🔄 کاستور (Castor)</strong>
+                        <span>چرخ با قفل که به پایه استاندارد متصل شده و برای حرکت داربست استفاده می‌شود.</span>
+                    </div>
+                    <div class="definition-item">
+                        <strong>📏 لفت (Lift)</strong>
+                        <span>طبقه یا سطح کاری داربست که شامل لجرها، ترانزوم‌ها و تخته‌ها می‌باشد.</span>
+                    </div>
+                    <div class="definition-item">
+                        <strong>📍 نود پوینت (Node Point)</strong>
+                        <span>محل اتصال ترانزوم، لجر و استانداردها به یکدیگر.</span>
+                    </div>
+                    <div class="definition-item">
+                        <strong>🪵 تویی برد (Toe Board)</strong>
+                        <span>قرنیز یا صفحه محافظ در لبه سکو برای جلوگیری از سقوط اشیا.</span>
+                    </div>
+                    <div class="definition-item">
+                        <strong>🔗 گیره نگهدارنده قرنیز (Toe Board Clip)</strong>
+                        <span>گیره‌ای که قرنیز را به لوله داربست متصل می‌کند.</span>
+                    </div>
+                    <div class="definition-item">
+                        <strong>⛓️ هوپ آیرن (Hoop Iron)</strong>
+                        <span>تسمه فلزی در دو انتهای تخته برای جلوگیری از شکاف‌برداشتن.</span>
+                    </div>
+                    <div class="definition-item">
+                        <strong>🪜 نیدل ترانزوم (Needle Transom)</strong>
+                        <span>ترانزومی که از داربست بیرون زده است.</span>
+                    </div>
+                    <div class="definition-item">
+                        <strong>📐 تیر اتصال (Tie)</strong>
+                        <span>لوله‌ای که داربست را به ساختمان یا سازه مجاور متصل می‌کند.</span>
+                    </div>
+                    <div class="definition-item">
+                        <strong>🪜 نردبان (Ladder)</strong>
+                        <span>وسیله دسترسی عمودی با پله‌های ثابت که باید طبق BS 1129 ساخته شود.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== 3- بست‌ها ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🔗</span> 3- بست‌ها (Couplers)</div>
+
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr>
+                                <th>نوع بست</th>
+                                <th>کاربرد</th>
+                                <th>نکات ایمنی</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>بست راست‌گوشه (Right-angle Coupler)</strong></td>
+                                <td>اتصال دو لوله عمود بر هم (استاندارد به لجر)</td>
+                                <td>بست حامل بار — باید محکم بسته شود</td>
+                            </tr>
+                            <tr>
+                                <td><strong>بست خوابیده (Swivel Coupler)</strong></td>
+                                <td>اتصال دو لوله در هر زاویه (مهاربندی)</td>
+                                <td>برای مهاربندی اریب استفاده می‌شود</td>
+                            </tr>
+                            <tr>
+                                <td><strong>بست خطی (Sleeve Coupler)</strong></td>
+                                <td>اتصال دو لوله هم‌جهت (افزایش طول)</td>
+                                <td>غیرحامل بار — فقط برای افزایش طول</td>
+                            </tr>
+                            <tr>
+                                <td><strong>بست گیره‌ای (Putlog Coupler)</strong></td>
+                                <td>اتصال ترانزوم به لجر</td>
+                                <td>بست حامل بار</td>
+                            </tr>
+                            <tr>
+                                <td><strong>بست تیر اتصال (Tie Coupler)</strong></td>
+                                <td>اتصال داربست به ساختمان</td>
+                                <td>برای نقاط مهار استفاده می‌شود</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="safety-alert" style="margin-top:10px;">
+                    <strong>⚠️ نکات مهم در مورد بست‌ها:</strong>
+                    <ul>
+                        <li>بست‌های حامل بار باید با آچار کالیبره شده به <strong>گشتاور ۵۰ تا ۶۰ نیوتن‌متر</strong> بسته شوند.</li>
+                        <li>بست‌های شکسته، زنگ‌زده یا تغییرشکل‌یافته <strong>نباید</strong> استفاده شوند.</li>
+                        <li>بست‌ها باید بر اساس نوع دسته‌بندی و انبار شوند.</li>
+                        <li>از بست‌های غیرحامل بار برای اتصالات باربر استفاده نشود.</li>
+                        <li>بست‌های راست‌گوشه نباید بیش از حد سفت شوند (تغییرشکل شیارهای داخلی).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ===== 4- انبار لوازم ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📦</span> 4- انبار لوازم و تجهیزات</div>
+                <div class="tips-grid">
+                    <div class="tip-item primary-tip">📦 تمام تجهیزات داربست در <strong>قفسه‌های مناسب</strong> و تمیز انبار شوند.</div>
+                    <div class="tip-item primary-tip">📏 لوله‌ها بر اساس <strong>طول</strong> دسته‌بندی شوند.</div>
+                    <div class="tip-item primary-tip">🔗 بست‌ها و اتصالات بر اساس <strong>نوع</strong> دسته‌بندی شوند.</div>
+                    <div class="tip-item warning-tip">📦 تخته‌ها بیش از <strong>۲۰ عدد</strong> روی هم انبار نشوند.</div>
+                    <div class="tip-item warning-tip">📍 لوازم در مکان‌های مشخص‌شده توسط مدیریت سایت انبار شوند.</div>
+                    <div class="tip-item danger-tip">🚫 انبار کردن در مسیرهای دسترسی یا خطر لغزش ممنوع است.</div>
+                    <div class="tip-item info-tip">🔧 بست‌ها با مقدار کمی روغن نگهداری شوند تا از زنگ‌زدگی جلوگیری شود.</div>
+                    <div class="tip-item danger-tip">🚫 لوازم آسیب‌دیده یا فاقد مشخصات باید <strong>دور انداخته شوند</strong>.</div>
+                </div>
+            </div>
+
+            <!-- ===== 5- مقررات عمومی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📋</span> 5- مقررات عمومی داربست</div>
+
+                <div class="tips-grid">
+                    <div class="tip-item primary-tip">✅ کلیه داربست‌ها توسط <strong>پرسنل کارآمد</strong> نصب، اصلاح و پیاده شوند.</div>
+                    <div class="tip-item primary-tip">✅ داربست‌بندان به ۳ گروه تقسیم می‌شوند: <strong>کارآموز، ماهر، سرکارگر</strong></div>
+                    <div class="tip-item warning-tip">📋 سیستم <strong>دفتر ثبت روزانه</strong> برای ثبت اطلاعات داربست برقرار شود.</div>
+                    <div class="tip-item warning-tip">📋 <strong>نقشه داربست</strong> شامل موقعیت، کد شناسایی و نوع داربست نگهداری شود.</div>
+                    <div class="tip-item">✅ داربست باید هفته‌ای یکبار توسط سوپروایزر بازرسی شود.</div>
+                    <div class="tip-item">✅ نتیجه بازرسی در <strong>فرم بازرسی</strong> ثبت گردد.</div>
+                    <div class="tip-item danger-tip">🚫 هیچ داربستی نباید نیمه‌کاره رها شود مگر با علائم کافی.</div>
+                    <div class="tip-item danger-tip">🚫 تغییرات فقط توسط داربست‌بندهای مجاز انجام شود.</div>
+                    <div class="tip-item danger-tip">🚫 داربست فقط برای هدفی که ساخته شده استفاده شود.</div>
+                    <div class="tip-item danger-tip">🚫 استفاده از اجزاء آسیب‌دیده یا زنگ‌زده ممنوع است.</div>
+                    <div class="tip-item info-tip">📌 در هنگام انتقال مسئولیت، <strong>تگ جدید Scafftag</strong> صادر شود.</div>
+                    <div class="tip-item info-tip">📌 قبل از هر بار استفاده، داربست توسط <strong>شخص کارآمد</strong> بازرسی شود.</div>
+                </div>
+
+                <div class="safety-alert" style="margin-top:10px;">
+                    <strong>🚫 ممنوعیت‌های مهم:</strong>
+                    <ul>
+                        <li>هیچ داربستی نباید نیمه‌کاره رها شود مگر اینکه علائم کافی نصب شده باشد.</li>
+                        <li>تغییرات در داربست فقط توسط داربست‌بندهای مجاز انجام شود.</li>
+                        <li>داربست فقط برای هدفی که ساخته شده است مورد استفاده قرار گیرد.</li>
+                        <li>استفاده از اجزاء آسیب‌دیده، زنگ‌زده یا بدون ویژگی‌های مطلوب ممنوع است.</li>
+                        <li>کارگران زیر ساختار داربست باید با نرده‌های محافظ، جان‌پناه و قرنیز محافظت شوند.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ===== 6- فونداسیون ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🏗️</span> 6- فونداسیون و پایه‌ها</div>
+
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr>
+                                <th>نوع زمین</th>
+                                <th>ابعاد سول پلیت (Sole Plate)</th>
+                                <th>حداقل مساحت</th>
+                                <th>توضیحات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>زمین سخت (بتن، فولاد)</td>
+                                <td>۵۰۰ × ۲۲۵ × ۳۵ میلی‌متر</td>
+                                <td>—</td>
+                                <td>مستقیماً روی سطح با Base Plate</td>
+                            </tr>
+                            <tr>
+                                <td>زمین نرم یا دست‌خورده</td>
+                                <td>۷۶۵ × ۲۲۵ × ۳۵ میلی‌متر</td>
+                                <td>۱۷۰۰ cm²</td>
+                                <td>نیاز به توزیع بار بیشتر</td>
+                            </tr>
+                            <tr class="highlight-row">
+                                <td>دو پایه مجاور (زمین نرم)</td>
+                                <td>۱۰۵۵ × ۲۲۵ × ۳۵ میلی‌متر</td>
+                                <td>۳۴۰۰ cm²</td>
+                                <td>برای دو پایه هم‌سطح</td>
+                            </tr>
+                            <tr>
+                                <td>زمین شیب‌دار (&gt;10:1)</td>
+                                <td>بررسی توسط ناظر</td>
+                                <td>—</td>
+                                <td>نیاز به پله‌های شیب‌شکن</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="tips-grid" style="margin-top:10px;">
+                    <div class="tip-item">🔹 از <strong>Base Plate</strong> برای هر پایه داربست استفاده شود.</div>
+                    <div class="tip-item">🔹 <strong>Sole Plate</strong> در زمین‌های غیر از بتن یا فلز استفاده شود.</div>
+                    <div class="tip-item danger-tip">🚫 استفاده از آجر، بلوک حرارتی یا قراضه چوب ممنوع است.</div>
+                    <div class="tip-item">🔹 پایه‌های داربست باید به طور <strong>عمودی</strong> کار گذاشته شوند.</div>
+                    <div class="tip-item warning-tip">⚠️ در زمین شیبدار، پله‌های شیب‌شکن ایجاد شوند.</div>
+                    <div class="tip-item">🔹 اتصالات پایه‌ها باید <strong>یک در میان</strong> باشند.</div>
+                    <div class="tip-item danger-tip">🚫 حفاری در مجاورت داربست (۱ متری بتن، ۲ متری خاک) ممنوع.</div>
+                    <div class="tip-item">🔹 Base Plate در دو طرف پایه مجاور به اندازه <strong>۶۰۰ میلی‌متر</strong> گسترش یابد.</div>
+                    <div class="tip-item info-tip">📏 فاصله بین پایه‌ها طبق جدول بخش ۱۳ تعیین می‌شود.</div>
+                </div>
+            </div>
+
+            <!-- ===== 7- لجر و ترانزوم ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">⬆️</span> 7- لجر (Ledger) و ترانزوم (Transom)</div>
+
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr>
+                                <th>جزء</th>
+                                <th>حداکثر فاصله (مرکز به مرکز)</th>
+                                <th>نکات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>لجر (Ledger)</strong></td>
+                                <td>۲ متر</td>
+                                <td>با بست‌های حامل بار به استانداردها متصل شوند</td>
+                            </tr>
+                            <tr>
+                                <td><strong>ترانزوم (Transom)</strong></td>
+                                <td>۱.۲ متر</td>
+                                <td>برای سکوهای کاری ۵ تخته‌ای</td>
+                            </tr>
+                            <tr>
+                                <td><strong>ترانزوم میانی (Intermediate)</strong></td>
+                                <td>۱.۵ متر</td>
+                                <td>برای تقویت سکوهای کاری</td>
+                            </tr>
+                            <tr>
+                                <td><strong>فاصله لجر از استاندارد</strong></td>
+                                <td>حداکثر ۲ متر</td>
+                                <td>برای جلوگیری از خمیدگی</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="tips-grid" style="margin-top:10px;">
+                    <div class="tip-item primary-tip">🔹 لجرها با <strong>بست‌های حامل بار</strong> به استانداردها متصل شوند.</div>
+                    <div class="tip-item primary-tip">🔹 ترانزوم‌ها با بست‌های ثابت به پایه‌ها محکم شوند.</div>
+                    <div class="tip-item warning-tip">📏 فاصله لجرها حداکثر <strong>۲ متر</strong>.</div>
+                    <div class="tip-item warning-tip">📏 فاصله ترانزوم‌ها حداکثر <strong>۱.۲ متر</strong>.</div>
+                    <div class="tip-item danger-tip">🚫 اتصالات نباید در یک سطح یکسان در پایه‌های مجاور ایجاد شوند.</div>
+                    <div class="tip-item">✅ ترانزوم‌ها می‌توانند بر روی لجرها قرار گرفته و با گیره‌های مهار ایمن شوند.</div>
+                    <div class="tip-item info-tip">📌 در هر نود پوینت (محل اتصال) حداقل یک بست حامل بار استفاده شود.</div>
+                </div>
+            </div>
+
+            <!-- ===== 8- تیرهای متصل (Ties) ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🔗</span> 8- تیرهای متصل (Ties)</div>
+
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr>
+                                <th>نوع تیر اتصال</th>
+                                <th>حداکثر فاصله</th>
+                                <th>توضیحات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>تیر اتصال مستقیم (Direct Tie)</strong></td>
+                                <td>۴ متر</td>
+                                <td>اتصال مستقیم به ساختمان</td>
+                            </tr>
+                            <tr>
+                                <td><strong>تیر اتصال غیرمستقیم (Indirect Tie)</strong></td>
+                                <td>۶ متر</td>
+                                <td>از طریق لوله‌های واسطه</td>
+                            </tr>
+                            <tr>
+                                <td><strong>تیر اتصال مهاربندی (Brace Tie)</strong></td>
+                                <td>۸ متر</td>
+                                <td>با استفاده از مهاربندی</td>
+                            </tr>
+                            <tr>
+                                <td><strong>نقطه مهار (Tie Point)</strong></td>
+                                <td>هر ۴ متر در ارتفاع</td>
+                                <td>در هر طبقه</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="safety-alert" style="margin-top:10px;">
+                    <strong>⚠️ نکات مهم تیرهای متصل:</strong>
+                    <ul>
+                        <li>نقطه مهار باید استحکام کافی برای مقاومت در برابر بار داشته باشد.</li>
+                        <li>تحت هیچ شرایطی از <strong>نرده‌های محافظ</strong> به عنوان نقطه مهار استفاده نشود.</li>
+                        <li>در داربست‌های کوچک (کمتر از ۳ طبقه)، پایداری با <strong>تیرهای اریب</strong> حفظ شود.</li>
+                        <li>تیرهای اریب توسط بست‌های ثابت به لجر طبقه دوم محکم شوند.</li>
+                        <li>تیرهای اریب نباید بدون اتصالات مهاری بیش از ۳ متر باشند.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ===== 9- مهاربندی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📐</span> 9- مهاربندی (Bracing)</div>
+
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr>
+                                <th>نوع مهاربندی</th>
+                                <th>حداکثر فاصله</th>
+                                <th>توضیحات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>مهار نمای (Face Brace)</strong></td>
+                                <td>۱۰ متر</td>
+                                <td>در هر دو جهت نما</td>
+                            </tr>
+                            <tr>
+                                <td><strong>مهار لجر به لجر (Ledger Brace)</strong></td>
+                                <td>یک در میان</td>
+                                <td>بین پایه‌ها تکرار شود</td>
+                            </tr>
+                            <tr>
+                                <td><strong>مهار Plan</strong></td>
+                                <td>یک در میان در طبقات</td>
+                                <td>طبقه پایین و بالا همیشه مهار شوند</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="tips-grid" style="margin-top:10px;">
+                    <div class="tip-item primary-tip">✅ تمام داربست‌ها در <strong>هر دو جهت</strong> مهاربندی شوند.</div>
+                    <div class="tip-item primary-tip">✅ مهارهای نمای داربست در حداکثر فاصله <strong>۱۰ متری</strong> تکرار شوند.</div>
+                    <div class="tip-item primary-tip">✅ مهاربندی لجر به لجر به صورت <strong>یک در میان</strong> بین پایه‌ها تکرار گردد.</div>
+                    <div class="tip-item danger-tip">🚫 اتصالات در مهاربندی نمایی با <strong>رابط (مغزی)</strong> ایجاد شوند (پین‌ها مجاز نیستند).</div>
+                    <div class="tip-item danger-tip">🚫 اتصالات پیوندی برای مهاربندی استفاده نشوند.</div>
+                    <div class="tip-item info-tip">📌 جایی که مهارها به ترانزوم‌ها اتصال یافته‌اند، ترانزوم با بست ثابت محکم شود.</div>
+                </div>
+            </div>
+
+            <!-- ===== 10- سکوی کار ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🪵</span> 10- سکوهای کاری (Working Platforms)</div>
+
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr>
+                                <th>نوع سکو</th>
+                                <th>تعداد تخته</th>
+                                <th>عرض (mm)</th>
+                                <th>کاربرد</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>سکوی استاندارد</strong></td>
+                                <td>۵ تخته</td>
+                                <td>۴۳۲</td>
+                                <td>سکوی کاری عمومی</td>
+                            </tr>
+                            <tr>
+                                <td><strong>سکوی بازرسی</strong></td>
+                                <td>۲ تخته</td>
+                                <td>۱۷۳</td>
+                                <td>فقط برای بازرسی و دسترسی</td>
+                            </tr>
+                            <tr>
+                                <td><strong>سکوی دسترسی نردبان</strong></td>
+                                <td>۲ تخته</td>
+                                <td>۱۷۳</td>
+                                <td>محل ورودی نردبان</td>
+                            </tr>
+                            <tr>
+                                <td><strong>سکوی ۶ تخته</strong></td>
+                                <td>۶ تخته</td>
+                                <td>۶۳۵</td>
+                                <td>برای عبور و مرور بیشتر</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="tips-grid" style="margin-top:10px;">
+                    <div class="tip-item primary-tip">✅ سکوهای کاری باید به صورت <strong>تخته‌فرش پیوسته</strong> باشند.</div>
+                    <div class="tip-item primary-tip">✅ نرده محافظ در ارتفاع <strong>۱ متری</strong> از سکو نصب شود.</div>
+                    <div class="tip-item primary-tip">✅ نرده محافظ میانی در <strong>ارتفاع ۵۰۰ میلی‌متر</strong> از سکو.</div>
+                    <div class="tip-item primary-tip">✅ قرنیزها حداقل ارتفاع <strong>۱۵۰ میلی‌متر</strong> در تمام سکوها.</div>
+                    <div class="tip-item warning-tip">📏 حداکثر فاصله بین بالای قرنیز تا نرده: <strong>۶۹۰ میلی‌متر</strong>.</div>
+                    <div class="tip-item warning-tip">📏 حداکثر دهانه هر تخته: <strong>۱.۲ متر</strong>.</div>
+                    <div class="tip-item info-tip">📌 تخته‌ها برای عبور از کنار لوله‌ها بریده می‌شوند.</div>
+                    <div class="tip-item info-tip">📌 هر تخته باید با <strong>تسمه یا سیم</strong> بسته شود.</div>
+                    <div class="tip-item danger-tip">🚫 اگر مواد باالی قرنیز انباشته می‌شوند، <strong>حفاظ آجری</strong> نصب شود.</div>
+                    <div class="tip-item danger-tip">🚫 فضای دسترسی نردبان نباید بیش از <strong>۵۰۰ میلی‌متر</strong> (۲ تخته) باشد.</div>
+                </div>
+
+                <div class="safety-alert" style="margin-top:10px;">
+                    <strong>📏 ابعاد دقیق نرده و قرنیز:</strong>
+                    <ul>
+                        <li>ارتفاع نرده محافظ از سطح سکو: <strong>۱ متر</strong></li>
+                        <li>ارتفاع نرده میانی از سطح سکو: <strong>۵۰۰ میلی‌متر</strong></li>
+                        <li>ارتفاع قرنیز: <strong>۱۵۰ میلی‌متر</strong></li>
+                        <li>فاصله بین بالای قرنیز تا زیر نرده: حداکثر <strong>۶۹۰ میلی‌متر</strong></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ===== 11- نردبان‌ها ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🪜</span> 11- نردبان‌ها (Ladders)</div>
+
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr>
+                                <th>مشخصه</th>
+                                <th>مقدار</th>
+                                <th>توضیحات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>فاصله از سکو</strong></td>
+                                <td>حداقل ۱.۰۵ متر</td>
+                                <td>فاصله انتهای نردبان تا سکو</td>
+                            </tr>
+                            <tr>
+                                <td><strong>زاویه نصب</strong></td>
+                                <td>۷۵ درجه</td>
+                                <td>به ازای هر ۱.۲ متر ارتفاع، ۳۰۰ میلی‌متر عقب‌روی</td>
+                            </tr>
+                            <tr>
+                                <td><strong>ارتفاع نردبان</strong></td>
+                                <td>حداکثر ۹ متر</td>
+                                <td>برای سکوهای دسترسی</td>
+                            </tr>
+                            <tr>
+                                <td><strong>جنس</strong></td>
+                                <td>آلومینیوم یا چوب</td>
+                                <td>نردبان دست‌ساز ممنوع</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="tips-grid" style="margin-top:10px;">
+                    <div class="tip-item primary-tip">✅ نردبان‌ها در <strong>زمین مناسب</strong> قرار گیرند.</div>
+                    <div class="tip-item primary-tip">✅ نردبان در <strong>انتها و قسمت فوقانی</strong> با گیره یا تسمه محکم شود.</div>
+                    <div class="tip-item primary-tip">✅ نردبان‌های بلند در <strong>نقطه میانی</strong> ساپورت و با تسمه بسته شوند.</div>
+                    <div class="tip-item warning-tip">📏 زاویه نصب: <strong>۷۵ درجه</strong> (۱ به ۴)</div>
+                    <div class="tip-item warning-tip">📏 ارتفاع عمودی سکوهای دسترسی نردبان: حداکثر <strong>۹ متر</strong></div>
+                    <div class="tip-item danger-tip">🚫 نردبان‌های آسیب‌دیده یا فرسوده استفاده نشوند.</div>
+                    <div class="tip-item danger-tip">🚫 نردبان‌های دست‌ساز <strong>ممنوع</strong> است.</div>
+                    <div class="tip-item info-tip">✅ میله‌های مهار فلزی در جایگاه مناسب کار گذاشته شوند.</div>
+                    <div class="tip-item info-tip">✅ نردبان‌ها باید از نظر آسیب‌دیدگی توسط ناظر تأیید شوند.</div>
+                </div>
+            </div>
+
+            <!-- ===== 12- انواع داربست ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🏗️</span> 12- انواع داربست</div>
+
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr>
+                                <th>نوع داربست</th>
+                                <th>کاربرد</th>
+                                <th>شرایط و محدودیت‌ها</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>داربست مستقل (Independent Tied)</strong></td>
+                                <td>کارهای عمومی ساختمانی</td>
+                                <td>ارتفاع حداکثر <strong>۴۵ متر</strong> بدون محاسبات مهندسی</td>
+                            </tr>
+                            <tr>
+                                <td><strong>داربست قفسی (Birdcage)</strong></td>
+                                <td>کار در فضاهای بزرگ (سقف‌ها)</td>
+                                <td>استانداردها در فواصل <strong>۲.۵ متر</strong>. ارتفاع طبقات <strong>۲.۵ متر</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>برج متحرک (Mobile Tower)</strong></td>
+                                <td>کار در ارتفاعات با جابجایی</td>
+                                <td>ارتفاع ≤ ۳ برابر حداقل پایه. چرخ‌ها با <strong>ترمز</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>برج ثابت (Fixed Tower)</strong></td>
+                                <td>کار در ارتفاعات بدون جابجایی</td>
+                                <td>ارتفاع ≤ ۳ برابر حداقل پایه</td>
+                            </tr>
+                            <tr>
+                                <td><strong>داربست بازویی (Cantilever)</strong></td>
+                                <td>دسترسی به نقاط دور از دسترس</td>
+                                <td>نیاز به <strong>محاسبات مهندسی</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>داربست آویزان (Suspended)</strong></td>
+                                <td>کار در نمای ساختمان</td>
+                                <td>آویزها حداکثر فاصله <strong>۲.۵ متر</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>داربست سیستمی (System Scaffold)</strong></td>
+                                <td>ساختارهای پیش‌ساخته</td>
+                                <td>طبق <strong>دستورالعمل سازنده</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>داربست معلق (Hanging)</strong></td>
+                                <td>یک طبقه آویزان</td>
+                                <td>فقط یک سکو — نیاز به <strong>مهندسی</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>داربست مستحکم با خربا (Truss-out)</strong></td>
+                                <td>کار در نقاط صعب‌العبور</td>
+                                <td>نیاز به <strong>طراحی خاص</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="tips-grid" style="margin-top:10px;">
+                    <div class="tip-item info-tip"><strong>داربست مستقل:</strong> دو ردیف استاندارد موازی با مهاربندی در دو جهت.</div>
+                    <div class="tip-item info-tip"><strong>داربست قفسی:</strong> شبکه‌ای از استانداردها در فواصل منظم ۲.۵ متر.</div>
+                    <div class="tip-item warning-tip"><strong>برج متحرک:</strong> فقط در سطوح <strong>محکم و مسطح</strong> حرکت کنند.</div>
+                    <div class="tip-item danger-tip"><strong>برج متحرک:</strong> جابجایی با <strong>افراد یا بار</strong> روی آن ممنوع.</div>
+                    <div class="tip-item info-tip"><strong>داربست سیستمی:</strong> افراد باید <strong>آموزش دیده</strong> باشند.</div>
+                    <div class="tip-item danger-tip"><strong>داربست آویزان:</strong> نقاط معلق باید توسط <strong>مهندسی</strong> تأیید شود.</div>
+                    <div class="tip-item info-tip"><strong>داربست در مخازن:</strong> تست گاز، تهویه، نگهبان و روشنایی الزامی.</div>
+                    <div class="tip-item danger-tip"><strong>داربست در فضاهای محدود:</strong> رعایت <strong>همه الزامات</strong> فضاهای محدود.</div>
+                </div>
+            </div>
+
+            <!-- ===== 13- سیستم Scafftag ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🏷️</span> 13- سیستم Scafftag</div>
+                <p style="margin-bottom:10px;">
+                    <strong>Scafftag</strong> یک سیستم برچسب‌گذاری برای شناسایی وضعیت ایمنی داربست است.
+                </p>
+                <div class="tips-grid">
+                    <div class="tip-item" style="border-right-color:#27ae60;">🟢 <strong>تگ سبز:</strong> داربست <strong>ایمن</strong> و قابل استفاده</div>
+                    <div class="tip-item warning-tip">🟡 <strong>تگ زرد:</strong> داربست با <strong>محدودیت</strong> (فقط برای پرسنل خاص)</div>
+                    <div class="tip-item danger-tip">🔴 <strong>تگ قرمز:</strong> داربست <strong>غیرایمن</strong> — ورود ممنوع</div>
+                    <div class="tip-item primary-tip">📋 پس از بازرسی، <strong>تگ جدید</strong> صادر شود.</div>
+                    <div class="tip-item primary-tip">🔄 در هنگام انتقال مسئولیت، <strong>تگ جدید</strong> صادر شود.</div>
+                    <div class="tip-item warning-tip">📅 داربست باید <strong>هفته‌ای یکبار</strong> بازرسی و تگ شود.</div>
+                </div>
+            </div>
+
+
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            تهیه شده توسط <span class="highlight">شرکت معدنی و صنایع معدنی درکاو</span><br>
+            <span style="direction:ltr; display:inline-block;">📞 09178680173</span>
+        </div>
+
+    </div>
+
+    <script>
+        // اضافه کردن قابلیت کپی متن با کلیک
+        document.querySelectorAll('.tip-item, .definition-item, .responsibility-card ul li, .safety-alert ul li').forEach(el => {
+            el.style.cursor = 'pointer';
+            el.addEventListener('click', function() {
+                const text = this.textContent.trim();
+                navigator.clipboard.writeText(text).then(() => {
+                    const origBg = this.style.background;
+                    this.style.background = '#d4edda';
+                    setTimeout(() => {
+                        this.style.background = origBg || '';
+                    }, 400);
+                });
+            });
+        });
+
+        console.log('✅ آموزش جامع ایمنی داربست (کامل) بارگذاری شد.');
+        console.log('📋 کلیک روی هر متن برای کپی کردن');
+        console.log('📊 شامل 13 بخش کامل: تعاریف، بست‌ها، انبار، مقررات، فونداسیون، لجر، تیرهای متصل، مهاربندی، سکوی کار، نردبان، انواع داربست، Scafftag');
+    </script>
+
+<script src="hse-common.js"></script>
+
+<script src="assets/js/sw-register.js"></script>
+</body>
+</html>

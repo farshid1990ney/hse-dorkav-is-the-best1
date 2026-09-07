@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<script>window.fetchWithTimeout=window.fetchWithTimeout||function(url,options,timeoutMs){timeoutMs=timeoutMs||12000;var controller=new AbortController();var id=setTimeout(function(){controller.abort();},timeoutMs);var opts=Object.assign({},options||{},{signal:controller.signal});return fetch(url,opts).finally(function(){clearTimeout(id);});};</script>
+
+
+<script>
+/* ============================================================
+   ★ امنیت: گیت احراز هویت (سمت کلاینت)
+   هیچ صفحه‌ای بدون ورود به سامانه باز نمی‌شود. محتوای صفحه
+   مخفی می‌ماند و کاربر به صفحه ورود هدایت می‌شود.
+   (لایه نمایشی؛ لایه امنیتی واقعی در بکاند اعمال می‌شود.)
+   ============================================================ */
+(function(){
+  var ok = false;
+  try {
+    var _u = JSON.parse(localStorage.getItem('hse_user_activated') || 'null');
+    ok = !!(_u && _u.personnel && _u.fullname);
+  } catch(e) { ok = false; }
+  if (ok) return; // مجاز - ادامه می‌دهد
+
+  // پنهان‌کردن کل محتوا و نمایش قفل
+  var hide = function(){
+    try {
+      var d = document;
+      // مخفی کردن همه عناصر
+      var all = d.body ? d.body.children : [];
+      for (var i=0;i<all.length;i++){ all[i].style.display='none'; }
+      var lock = d.createElement('div');
+      lock.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#0f172a;color:#f8fafc;'
+        +'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+        +'font-family:Tahoma,sans-serif;text-align:center;padding:20px;direction:rtl;';
+      lock.innerHTML = '<div style="font-size:60px;margin-bottom:10px;">🔒</div>'
+        +'<h2 style="margin:0 0 8px;">دسترسی محدود است</h2>'
+        +'<p style="margin:0 0 20px;color:#94a3b8;">لطفاً ابتدا از صفحه اصلی وارد سامانه شوید.</p>'
+        +'<a href="index.html" style="background:#ff6208;color:#fff;padding:10px 26px;'
+        +'border-radius:10px;text-decoration:none;font-weight:bold;">بازگشت به صفحه ورود</a>';
+      d.body.appendChild(lock);
+    } catch(e){}
+  };
+  if (document.body) hide(); else document.addEventListener('DOMContentLoaded', hide);
+  setTimeout(function(){ try{ location.replace('index.html'); }catch(e){} }, 2500);
+})();
+</script>
+
+<meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#1e3c5c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HSE درکاو" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+<title>گردونه شانس [v3.1]</title>
+<link href="assets/fonts/vazirmatn/font-face.css" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#0F2E2B;--bg-panel:#163F3A;--bg-panel-2:#1C4944;
+    --gold:#C9A24B;--gold-soft:#E4C77E;--coral:#E0613D;
+    --text-light:#F3EFE6;--text-muted:#9FB3AE;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Vazirmatn',sans-serif;background:radial-gradient(circle at 50% 20%,var(--bg-panel-2) 0%,var(--bg-deep) 60%);color:var(--text-light);min-height:100vh;direction:rtl;padding:28px 16px 48px;}
+  .wrap{max-width:560px;margin:0 auto;}
+  header{text-align:center;margin-bottom:14px;}
+  header h1{font-size:28px;font-weight:800;margin:0 0 6px;color:var(--gold-soft);}
+  header p{margin:0;color:var(--text-muted);font-size:14px;font-weight:500;}
+
+  .user-bar{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--bg-panel);border:1px solid rgba(201,162,75,0.25);border-radius:12px;padding:10px 14px;margin-bottom:18px;font-size:13.5px;}
+  .user-bar .uname{font-weight:700;color:var(--gold-soft);}
+  .user-bar .upid{color:var(--text-muted);}
+
+  .blocked-box{background:var(--bg-panel);border:1px solid rgba(224,97,61,0.4);border-radius:16px;padding:28px 20px;text-align:center;margin-top:10px;}
+  .blocked-box .ic{font-size:38px;margin-bottom:10px;}
+  .blocked-box .msg{font-size:15px;font-weight:700;color:var(--text-light);margin-bottom:8px;line-height:1.7;}
+  .blocked-box .sub{font-size:13px;color:var(--text-muted);margin-bottom:18px;line-height:1.7;}
+  .blocked-box a.home-btn{display:inline-block;background:linear-gradient(145deg,var(--gold-soft),var(--gold));color:#1A1206;text-decoration:none;border-radius:12px;font-weight:800;font-size:14.5px;padding:12px 26px;}
+
+  .slots-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px;}
+  .slot{background:var(--bg-panel);border:1px solid rgba(201,162,75,0.25);border-radius:12px;padding:10px 6px;text-align:center;opacity:0.45;transition:all .2s;}
+  .slot.active{opacity:1;border-color:var(--gold);box-shadow:0 0 0 1px rgba(201,162,75,0.3) inset;}
+  .slot.used{opacity:0.35;}
+  .slot .ic{font-size:18px;display:block;margin-bottom:4px;}
+  .slot .lbl{font-size:11px;font-weight:700;color:var(--text-light);display:block;}
+  .slot .st{font-size:9.5px;color:var(--text-muted);display:block;margin-top:2px;}
+
+  .legend{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:26px;}
+  .legend .item{background:var(--bg-panel);border:1px solid rgba(201,162,75,0.25);border-radius:10px;padding:9px 4px;text-align:center;}
+  .legend .item .amt{font-size:12.5px;font-weight:700;color:var(--text-light);display:block;}
+  .legend .item .cap{font-size:10px;color:var(--text-muted);display:block;margin-top:2px;}
+  .stage{position:relative;display:flex;justify-content:center;align-items:center;margin-bottom:6px;}
+  .glow{position:absolute;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(201,162,75,0.22) 0%,rgba(201,162,75,0) 70%);filter:blur(2px);}
+  .pointer{position:absolute;top:-6px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-top:22px solid var(--gold);z-index:5;filter:drop-shadow(0 2px 3px rgba(0,0,0,0.4));}
+  .wheel-shell{position:relative;width:300px;height:300px;}
+  #wheel-svg{width:100%;height:100%;transform:rotate(0deg);transition:transform 4.2s cubic-bezier(0.12,0,0.16,1);}
+  .hub{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:46px;height:46px;border-radius:50%;background:linear-gradient(145deg,var(--gold-soft),var(--gold));box-shadow:0 0 0 4px var(--bg-deep),0 0 0 6px rgba(201,162,75,0.4);z-index:4;}
+  .panel{background:var(--bg-panel);border:1px solid rgba(201,162,75,0.2);border-radius:16px;padding:20px;margin-top:22px;}
+  .status-line{font-size:12.5px;color:var(--text-muted);margin-top:0;min-height:18px;text-align:center;}
+  button#spin-btn{width:100%;margin-top:4px;background:linear-gradient(145deg,var(--gold-soft),var(--gold));color:#1A1206;border:none;border-radius:12px;font-family:inherit;font-size:16px;font-weight:800;padding:14px;cursor:pointer;transition:transform 0.15s ease,box-shadow 0.15s ease;}
+  button#spin-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 18px rgba(201,162,75,0.35);}
+  button#spin-btn:disabled{background:var(--bg-panel-2);color:var(--text-muted);cursor:not-allowed;border:1px solid rgba(201,162,75,0.15);}
+  .result{margin-top:18px;border-radius:14px;padding:18px;text-align:center;display:none;}
+  .result.show{display:block;}
+  .result.win{background:rgba(224,97,61,0.16);border:1px solid rgba(224,97,61,0.45);}
+  .result.lose{background:rgba(159,179,174,0.08);border:1px solid rgba(159,179,174,0.25);}
+  .result .title{font-size:17px;font-weight:800;margin-bottom:4px;}
+  .result.win .title{color:var(--coral);}
+  .result.lose .title{color:var(--text-muted);}
+  .result .sub{font-size:13px;color:var(--text-muted);}
+  footer{text-align:center;margin-top:24px;font-size:11.5px;color:var(--text-muted);line-height:1.8;}
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>گردونه شانس</h1>
+    <p>هر کارگر در روز تا ۳ بار شانس چرخش دارد</p>
+  </header>
+
+  <!-- نمایش وقتی کاربر شناسایی نشده -->
+  <div id="blocked-box" class="blocked-box hidden">
+    <div class="ic">🔒</div>
+    <div class="msg">برای استفاده از گردونه شانس، ابتدا باید از صفحه‌ی اصلی وارد سامانه شوید.</div>
+    <div class="sub">اطلاعات شما (نام، پرسنلی) به‌صورت خودکار از ورود شما به سامانه خوانده می‌شود؛ نیازی به وارد کردن دوباره نیست.</div>
+    <a class="home-btn" href="index.html?v=202606300519">بازگشت به صفحه اصلی</a>
+  </div>
+
+  <!-- محتوای اصلی گردونه — فقط برای کاربر شناسایی‌شده -->
+  <div id="main-content" class="hidden">
+    <div class="user-bar">
+      <span>👤</span><span class="uname" id="ub-name"></span>
+      <span class="upid" id="ub-personnel"></span>
+    </div>
+
+    <div class="slots-row">
+      <div class="slot" id="slot-base">
+        <span class="ic">🎯</span><span class="lbl">پایه روزانه</span><span class="st" id="slot-base-st">—</span>
+      </div>
+      <div class="slot" id="slot-tbm">
+        <span class="ic">👥</span><span class="lbl">انجام TBM</span><span class="st" id="slot-tbm-st">—</span>
+      </div>
+      <div class="slot" id="slot-exam">
+        <span class="ic">🧪</span><span class="lbl">نمره ≥۱۴ آزمون</span><span class="st" id="slot-exam-st">—</span>
+      </div>
+    </div>
+
+    <div class="legend" id="legend"></div>
+    <div class="stage">
+      <div class="glow"></div>
+      <div class="wheel-shell">
+        <div class="pointer"></div>
+        <svg id="wheel-svg" viewBox="0 0 300 300"></svg>
+        <div class="hub"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="status-line" id="status-line">در حال بررسی وضعیت...</div>
+      <button id="spin-btn" disabled>در حال بررسی...</button>
+      <div class="result" id="result-box">
+        <div class="title" id="result-title"></div>
+        <div class="sub" id="result-sub"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>موفق باشید 🍀</footer>
+</div>
+
+<script>
+(function(){
+  const ENDPOINT = 'https://script.google.com/macros/s/AKfycbzDZiadFyzTOgSpMzSo9b_xQ29N_ZHD2vIOxmswrl0O2YNod2prV1qCN34myNsp653OjQ/exec';
+  const ACT_KEY = 'hse_user_activated';
+
+  const CAPS = {200000:3,300000:2,500000:1};
+  const PRIZE_LABELS = {200000:'۲۰۰,۰۰۰',300000:'۳۰۰,۰۰۰',500000:'۵۰۰,۰۰۰',none:'پوچ'};
+  const SLOT_TYPES = ['none','200000','none','300000','200000','none','500000','200000','none','300000','none'];
+  const SLOT_COUNT = SLOT_TYPES.length;
+  const SLICE_ANGLE = 360/SLOT_COUNT;
+  const COLORS = {none:'#1C4944',200000:'#2A5D55',300000:'#3C6F62',500000:'#C9A24B'};
+  const TEXT_COLORS = {none:'#7E9892',200000:'#F3EFE6',300000:'#F3EFE6',500000:'#1A1206'};
+
+  let currentRotation=0, spinning=false;
+  let monthlyCounts={200000:0,300000:0,500000:0};
+  let elig=null; // آخرین نتیجه‌ی check_spin_eligibility
+  let user=null; // {fullname, personnel, phone, national}
+
+  const blockedBox=document.getElementById('blocked-box');
+  const mainContent=document.getElementById('main-content');
+  const svg=document.getElementById('wheel-svg');
+  const legendEl=document.getElementById('legend');
+  const spinBtn=document.getElementById('spin-btn');
+  const statusLine=document.getElementById('status-line');
+  const resultBox=document.getElementById('result-box');
+  const resultTitle=document.getElementById('result-title');
+  const resultSub=document.getElementById('result-sub');
+
+  function faNum(n){return Number(n).toLocaleString('fa-IR');}
+  function polar(cx,cy,r,a){const rad=a*Math.PI/180;return{x:cx+r*Math.sin(rad),y:cy-r*Math.cos(rad)};}
+  function effectiveSlots(){return SLOT_TYPES.map(t=>t==='none'?'none':(monthlyCounts[t]||0)<CAPS[t]?t:'none');}
+
+  // ───────── خواندن کاربر از فعال‌سازی صفحه اصلی (بدون ورودی دستی) ─────────
+  function getActivatedUser(){
+    try{
+      const raw = localStorage.getItem(ACT_KEY);
+      if(!raw) return null;
+      const u = JSON.parse(raw);
+      if(u && u.fullname && u.personnel) return u;
+      return null;
+    }catch(e){return null;}
+  }
+
+  function drawWheel(){
+    const slots=effectiveSlots(),cx=150,cy=150,r=148;
+    let h='';
+    slots.forEach((type,i)=>{
+      const s=i*SLICE_ANGLE,e=s+SLICE_ANGLE,p1=polar(cx,cy,r,s),p2=polar(cx,cy,r,e);
+      h+=`<path d="M ${cx},${cy} L ${p1.x.toFixed(2)},${p1.y.toFixed(2)} A ${r},${r} 0 0 1 ${p2.x.toFixed(2)},${p2.y.toFixed(2)} Z" fill="${COLORS[type]}" stroke="#0F2E2B" stroke-width="2"></path>`;
+      const mid=s+SLICE_ANGLE/2,lp=polar(cx,cy,r*0.62,mid);
+      h+=`<text x="${lp.x.toFixed(2)}" y="${lp.y.toFixed(2)}" transform="rotate(${mid},${lp.x.toFixed(2)},${lp.y.toFixed(2)})" text-anchor="middle" dominant-baseline="middle" font-size="13" font-weight="700" fill="${TEXT_COLORS[type]}" font-family="Vazirmatn,sans-serif">${PRIZE_LABELS[type]}</text>`;
+    });
+    for(let i=0;i<44;i++){const p=polar(cx,cy,r+6,(360/44)*i);h+=`<circle cx="${p.x.toFixed(2)}" cy="${p.y.toFixed(2)}" r="1.6" fill="#E4C77E" opacity="0.55"></circle>`;}
+    svg.innerHTML=h;
+  }
+
+  function renderLegend(){
+    legendEl.innerHTML='';
+    [200000,300000,500000,'none'].forEach(prize=>{
+      const div=document.createElement('div');
+      div.className='item';
+      const label=prize==='none'?'پوچ':faNum(prize)+' تومان';
+      const rem=prize==='none'?'':faNum(CAPS[prize]-(monthlyCounts[prize]||0))+' باقی';
+      div.innerHTML=`<span class="amt">${label}</span>${rem?`<span class="cap">${rem}</span>`:''}`;
+      legendEl.appendChild(div);
+    });
+  }
+
+  function renderSlots(){
+    if(!elig) return;
+    const map=[
+      {key:'base', boxId:'slot-base', stId:'slot-base-st', usedLabel:'مصرف‌شده امروز', readyLabel:'آماده', lockedLabel:'—'},
+      {key:'tbm',  boxId:'slot-tbm',  stId:'slot-tbm-st',  usedLabel:'مصرف‌شده امروز', readyLabel:'آماده', lockedLabel:'TBM امروز را بزن'},
+      {key:'exam', boxId:'slot-exam', stId:'slot-exam-st', usedLabel:'مصرف‌شده امروز', readyLabel:'آماده', lockedLabel:'نمره ≥۱۴ بگیر'}
+    ];
+    map.forEach(m=>{
+      const box=document.getElementById(m.boxId);
+      const st=document.getElementById(m.stId);
+      const used = elig.usedToday[m.key];
+      const eligible = elig.eligibleToday[m.key];
+      box.classList.remove('active','used');
+      if(used){ box.classList.add('used'); st.textContent=m.usedLabel; }
+      else if(eligible){ box.classList.add('active'); st.textContent=m.readyLabel; }
+      else { st.textContent=m.lockedLabel; }
+    });
+  }
+
+  // همه درخواست‌ها از طریق GET — بدون CORS
+  async function api(params){
+    const qs=Object.entries(params).map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(v)).join('&');
+    const res=await fetchWithTimeout(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:qs},15000);
+    return res.json();
+  }
+
+  async function loadMonthlyCounts(){
+    try{
+      const d=await api({action:'monthly', personnel: (user && user.personnel)||''});
+      monthlyCounts={200000:d.c200||0,300000:d.c300||0,500000:d.c500||0};
+    }catch(e){monthlyCounts={200000:0,300000:0,500000:0};}
+  }
+
+  async function loadEligibility(){
+    try{
+      return await api({action:'check_spin_eligibility', personnel:user.personnel});
+    }catch(e){return null;}
+  }
+
+  async function recordSpin(outcome, slotType){
+    const resultText=outcome==='none'?'پوچ':faNum(outcome)+' تومان';
+    return api({
+      action:'record_spin',
+      code:user.personnel,
+      name:user.fullname||'',
+      personnel:user.personnel||'',
+      nationalId:user.national||'',
+      prize:outcome,
+      result:resultText,
+      slotType:slotType
+    });
+  }
+
+  function nextSlotType(){
+    if(!elig) return null;
+    if(elig.eligibleToday.base) return 'base';
+    if(elig.eligibleToday.tbm)  return 'tbm';
+    if(elig.eligibleToday.exam) return 'exam';
+    return null;
+  }
+
+  function slotTypeLabel(t){
+    return t==='tbm' ? 'سهمیه‌ی TBM امروز' : t==='exam' ? 'سهمیه‌ی نمره‌ی خوب آزمون' : 'سهمیه‌ی پایه‌ی امروز';
+  }
+
+  async function refreshStatus(){
+    resultBox.classList.remove('show');
+    spinBtn.disabled=true;
+    spinBtn.textContent='در حال بررسی...';
+    statusLine.textContent='';
+
+    elig = await loadEligibility();
+
+    if(!elig || !elig.ok){
+      statusLine.textContent='⚠️ خطا در اتصال به سرور. اینترنت رو چک کن.';
+      spinBtn.textContent='خطا در اتصال';
+      return;
+    }
+
+    renderSlots();
+
+    const slotType=nextSlotType();
+    if(!slotType){
+      spinBtn.disabled=true;
+      spinBtn.textContent='سهمیه‌ی امروز تمام شد';
+      statusLine.textContent='فردا دوباره سر بزن — یا با انجام TBM/کسب نمره خوب در آزمون، سهمیه بگیر.';
+      return;
+    }
+
+    spinBtn.disabled=false;
+    spinBtn.textContent='بزن بریم! 🎯  ('+slotTypeLabel(slotType)+')';
+    statusLine.textContent='تعداد کل چرخش‌های تو تا امروز: '+faNum(elig.spinCountTotal||0)+' بار';
+  }
+
+  async function doSpin(){
+    if(spinning)return;
+    if(!elig) return;
+    const slotType=nextSlotType();
+    if(!slotType) return;
+
+    spinning=true;
+    spinBtn.disabled=true;
+    resultBox.classList.remove('show');
+    statusLine.textContent='در حال بارگذاری سهمیه...';
+
+    await loadMonthlyCounts();
+    drawWheel();
+    renderLegend();
+    statusLine.textContent='';
+
+    const slots=effectiveSlots();
+    const pickIndex=Math.floor(Math.random()*SLOT_COUNT);
+    const outcome=slots[pickIndex];
+    const sliceCenter=pickIndex*SLICE_ANGLE+SLICE_ANGLE/2;
+    const delta=((-sliceCenter-currentRotation)%360+360)%360;
+    const targetRotation=currentRotation+delta+5*360;
+    currentRotation=targetRotation;
+    svg.style.transform='rotate('+targetRotation+'deg)';
+
+    setTimeout(async()=>{
+      statusLine.textContent='در حال ثبت نتیجه در شیت...';
+      try{
+        const rec=await recordSpin(outcome, slotType);
+        if(rec && rec.ok === false){
+          statusLine.textContent='⚠️ '+(rec.error==='no remaining spins today' ? 'سهمیه‌ی امروز تمام شده بود.' : 'خطا در ثبت نتیجه.');
+          spinning=false;
+          await refreshStatus();
+          return;
+        }
+        if(outcome!=='none') monthlyCounts[outcome]=(monthlyCounts[outcome]||0)+1;
+        renderLegend();
+        drawWheel();
+        svg.style.transform='rotate('+targetRotation+'deg)';
+
+        if(outcome!=='none'){
+          resultTitle.textContent='🎉 تبریک! برنده شدی';
+          resultSub.textContent=faNum(outcome)+' تومان جایزه گرفتی.';
+          resultBox.className='result show win';
+        }else{
+          resultTitle.textContent='پوچ آوردی';
+          resultSub.textContent='سهمیه‌ی بعدی‌ات را امتحان کن.';
+          resultBox.className='result show lose';
+        }
+        statusLine.textContent='';
+      }catch(err){
+        statusLine.textContent='⚠️ خطا در ثبت نتیجه. اینترنت رو چک کن.';
+      }
+      spinning=false;
+      await refreshStatus();
+    },4300);
+  }
+
+  spinBtn.addEventListener('click',doSpin);
+
+  (async function init(){
+    user=getActivatedUser();
+
+    if(!user){
+      blockedBox.classList.remove('hidden');
+      mainContent.classList.add('hidden');
+      return;
+    }
+
+    blockedBox.classList.add('hidden');
+    mainContent.classList.remove('hidden');
+
+    document.getElementById('ub-name').textContent = user.fullname;
+    document.getElementById('ub-personnel').textContent = 'پرسنلی: ' + (user.personnel || '—');
+
+    await loadMonthlyCounts();
+    drawWheel();
+    renderLegend();
+    await refreshStatus();
+  })();
+})();
+</script>
+
+<div style="text-align:center;padding:15px;font-size:0.85rem;color:#666;border-top:1px solid #eee;margin-top:20px;">تهیه شده توسط <strong>شرکت معدنی و صنایع معدنی درکاو</strong></div>
+<script src="assets/js/sw-register.js"></script>
+</body>
+</html>

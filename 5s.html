@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+
+<script>
+/* ============================================================
+   ★ امنیت: گیت احراز هویت (سمت کلاینت)
+   هیچ صفحه‌ای بدون ورود به سامانه باز نمی‌شود. محتوای صفحه
+   مخفی می‌ماند و کاربر به صفحه ورود هدایت می‌شود.
+   (لایه نمایشی؛ لایه امنیتی واقعی در بکاند اعمال می‌شود.)
+   ============================================================ */
+(function(){
+  var ok = false;
+  try {
+    var _u = JSON.parse(localStorage.getItem('hse_user_activated') || 'null');
+    ok = !!(_u && _u.personnel && _u.fullname);
+  } catch(e) { ok = false; }
+  if (ok) return; // مجاز - ادامه می‌دهد
+
+  // پنهان‌کردن کل محتوا و نمایش قفل
+  var hide = function(){
+    try {
+      var d = document;
+      // مخفی کردن همه عناصر
+      var all = d.body ? d.body.children : [];
+      for (var i=0;i<all.length;i++){ all[i].style.display='none'; }
+      var lock = d.createElement('div');
+      lock.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#0f172a;color:#f8fafc;'
+        +'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+        +'font-family:Tahoma,sans-serif;text-align:center;padding:20px;direction:rtl;';
+      lock.innerHTML = '<div style="font-size:60px;margin-bottom:10px;">🔒</div>'
+        +'<h2 style="margin:0 0 8px;">دسترسی محدود است</h2>'
+        +'<p style="margin:0 0 20px;color:#94a3b8;">لطفاً ابتدا از صفحه اصلی وارد سامانه شوید.</p>'
+        +'<a href="index.html" style="background:#ff6208;color:#fff;padding:10px 26px;'
+        +'border-radius:10px;text-decoration:none;font-weight:bold;">بازگشت به صفحه ورود</a>';
+      d.body.appendChild(lock);
+    } catch(e){}
+  };
+  if (document.body) hide(); else document.addEventListener('DOMContentLoaded', hide);
+  setTimeout(function(){ try{ location.replace('index.html'); }catch(e){} }, 2500);
+})();
+</script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#1e3c5c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HSE درکاو" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+    <title>آموزش نظام 5S | نظم و ترتیب در کار - آژند همت توس</title>
+
+    <style>
+        :root {
+            --primary: #ff6208;
+            --primary-hover: #e05300;
+            --secondary: #f39c12;
+            --success: #27ae60;
+            --safety: #2c6e4e;
+            --danger: #c0392b;
+            --dark-blue: #1e3c5c;
+            --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #dfe7f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --text-main: #1e2a2e;
+            --text-muted: #64748b;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body { padding-bottom: 75px !important;
+            background: var(--bg-gradient);
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text-main);
+            line-height: 1.8;
+        }
+
+        .main-container {
+            max-width: 1000px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            background: var(--dark-blue);
+            padding: 35px 20px;
+            color: white;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+            position: relative;
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        .header h1 .icon {
+            margin-left: 10px;
+        }
+        .header p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        .header .back-home {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .header .back-home:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+        .card:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        }
+        .card-title {
+            color: var(--dark-blue);
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-right: 4px solid var(--primary);
+            padding-right: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title .icon {
+            font-size: 1.5rem;
+        }
+        .card-subtitle {
+            color: var(--primary);
+            font-size: 1.05rem;
+            font-weight: bold;
+            margin: 18px 0 10px 0;
+            border-bottom: 2px solid rgba(255, 98, 8, 0.15);
+            padding-bottom: 6px;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .tips-grid .tip-item {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 10px 14px;
+            border-radius: var(--border-radius-sm);
+            border-right: 3px solid var(--safety);
+            font-size: 0.9rem;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .tips-grid .tip-item:hover {
+            background: rgba(44, 110, 78, 0.04);
+            transform: translateX(-3px);
+        }
+        .tips-grid .tip-item.danger-tip {
+            border-right-color: var(--danger);
+        }
+        .tips-grid .tip-item.warning-tip {
+            border-right-color: var(--secondary);
+        }
+        .tips-grid .tip-item.primary-tip {
+            border-right-color: var(--primary);
+        }
+        .tips-grid .tip-item.info-tip {
+            border-right-color: #3498db;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+        .spec-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .spec-table th,
+        .spec-table td {
+            padding: 10px 12px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        .spec-table th {
+            background: var(--dark-blue);
+            color: white;
+            font-weight: bold;
+        }
+        .spec-table tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .spec-table tr:hover {
+            background: rgba(255, 98, 8, 0.04);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+            justify-content: center;
+        }
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn-back {
+            background: var(--danger);
+            color: white;
+        }
+        .btn-back:hover {
+            background: #a93226;
+        }
+        .btn-software {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-software:hover {
+            background: var(--primary-hover);
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .footer .highlight {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .badge-standard {
+            display: inline-block;
+            background: var(--safety);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-danger {
+            display: inline-block;
+            background: var(--danger);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-warning {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-info {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+
+        .safety-alert {
+            background: rgba(192, 57, 43, 0.04);
+            border-right: 4px solid var(--danger);
+            padding: 15px;
+            border-radius: var(--border-radius-sm);
+            margin: 10px 0;
+        }
+        .safety-alert strong {
+            color: var(--danger);
+        }
+        .safety-alert ul {
+            padding-right: 20px;
+            margin-top: 5px;
+        }
+        .safety-alert ul li {
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .highlight-box {
+            background: rgba(44, 110, 78, 0.04);
+            padding: 15px 18px;
+            border-radius: var(--border-radius-sm);
+            border-right: 4px solid var(--safety);
+            margin: 10px 0;
+        }
+        .highlight-box.danger {
+            background: rgba(192, 57, 43, 0.04);
+            border-right-color: var(--danger);
+        }
+        .highlight-box.gold {
+            background: rgba(243, 156, 18, 0.04);
+            border-right-color: var(--secondary);
+        }
+        .highlight-box.green {
+            background: rgba(39, 174, 96, 0.04);
+            border-right-color: var(--success);
+        }
+        .highlight-box.purple {
+            background: rgba(155, 89, 182, 0.04);
+            border-right-color: #9b59b6;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+        .grid-4 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        .item-box {
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: var(--border-radius-sm);
+            padding: 14px 16px;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .item-box:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+        }
+        .item-box .icon {
+            color: var(--primary);
+            font-size: 1.3rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .item-box .title {
+            color: var(--dark-blue);
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .item-box .desc {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            margin-top: 2px;
+        }
+
+        .s-number {
+            display: inline-block;
+            background: var(--dark-blue);
+            color: #fff;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            text-align: center;
+            line-height: 36px;
+            font-weight: 700;
+            margin-left: 10px;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .s-number.gold { background: var(--secondary); }
+        .s-number.danger { background: var(--danger); }
+        .s-number.green { background: var(--success); }
+        .s-number.purple { background: #9b59b6; }
+
+        .card .card-title .s-number {
+            display: inline-block;
+        }
+
+        @media(max-width:700px) {
+            .content { padding: 15px; }
+            .header h1 { font-size: 1.3rem; }
+            .header .back-home { width: 36px; height: 36px; font-size: 1rem; left: 10px; top: 15px; }
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+            .tips-grid { grid-template-columns: 1fr; }
+            .spec-table { font-size: 0.75rem; }
+            .spec-table th, .spec-table td { padding: 6px 4px; }
+            .btn-row { flex-direction: column; }
+            .btn { width: 100%; justify-content: center; }
+            .card-title { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <a href="index.html" class="back-home" title="بازگشت به صفحه اصلی">🏠</a>
+            <h1><span class="icon">🧹</span> نظام 5S</h1>
+            <p>نظم و ترتیب در کار — پایه‌ای‌ترین ابزار ارتقای بهره‌وری سازمانی</p>
+            <div style="margin-top:8px; display:flex; flex-wrap:wrap; justify-content:center; gap:8px;">
+                <span class="badge-standard">📘 بر اساس استانداردهای جهانی</span>
+                <span class="badge-standard">✅ ویژه صنایع، ادارات و منازل</span>
+                <span class="badge-standard">📋 همراه با تکنیک‌های اجرایی</span>
+            </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <!-- ===== مقدمه ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📌</span> مقدمه</div>
+                <p style="margin-bottom:10px;">
+                    <strong>نظام 5S</strong> پایه‌ای‌ترین و اصولی‌ترین ابزار ارتقای بهره‌وری سازمانی است. این نظام، پایه و اولین گام نظام‌های جامعی مانند <strong>TPM، TQM، TQC و JIT</strong> محسوب می‌شود و بسیار فراتر از پاکیزه‌سازی ساده است.
+                </p>
+                <div class="highlight-box gold">
+                    <strong>🔑 5S در یک نگاه:</strong><br>
+                    <strong>ساماندهی</strong> • <strong>نظم و ترتیب</strong> • <strong>پاکیزه‌سازی</strong> • <strong>استانداردسازی</strong> • <strong>انضباط</strong>
+                </div>
+                <div class="grid-2" style="margin-top:10px;">
+                    <div class="item-box">
+                        <span class="icon">🎯</span>
+                        <span class="title">هدف</span>
+                        <span class="desc">حذف اتلاف‌ها • بهبود بهره‌وری • ایجاد محیط کاری آراسته • نهادینه‌سازی نظم و انضباط</span>
+                    </div>
+                    <div class="item-box" style="border-color:var(--secondary);">
+                        <span class="icon">📋</span>
+                        <span class="title">روش</span>
+                        <span class="desc">تشخیص ضروری از غیرضروری • تعیین بهترین مکان برای هر چیز • پاکیزه‌سازی کامل • استانداردسازی • فرهنگ‌سازی</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== تاریخچه ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📜</span> تاریخچه 5S</div>
+                <ul>
+                    <li><strong>۱.</strong> در گذشته پاکیزه‌سازی وجود داشت، اما <strong>فاقد نظام</strong> بود.</li>
+                    <li><strong>۲.</strong> اولین بار نظام 5S در سال <strong>۱۹۸۵</strong> در ژاپن طرح شد (در ابتدا محدود به ۳ S بود).</li>
+                    <li><strong>۳.</strong> اولین کتاب در سال <strong>۱۹۸۶</strong> در ژاپن چاپ شد (کتاب سوزوکی: کایزن عملی).</li>
+                    <li><strong>۴.</strong> اولین کشور پس از ژاپن که به 5S توجه کرد، <strong>سنگاپور</strong> بود.</li>
+                    <li><strong>۵.</strong> از دهه ۹۰، 5S در کشورهای غربی معرفی و رواج یافت.</li>
+                    <li><strong>۶.</strong> از اواسط دهه ۱۳۷۰ شمسی، 5S در ایران معرفی شد و حدود <strong>۵۰ سازمان</strong> به استقرار آن مبادرت کرده‌اند.</li>
+                </ul>
+            </div>
+
+            <!-- ===== S1: ساماندهی ===== -->
+            <div class="card" style="border-right-color:var(--secondary);">
+                <div class="card-title"><span class="s-number gold">۱</span> ساماندهی (SEIRI — SORT)</div>
+                <p style="margin-bottom:10px;">
+                    <strong>تعریف:</strong> جداسازی اقلام ضروری از غیرضروری و دور ریختن اشیای زائد.
+                </p>
+                <div class="highlight-box gold">
+                    <strong>📌 رئوس فعالیت‌های S اول:</strong><br>
+                    • مرزبندی و تعیین محدوده فعالیت تیم‌ها • تشکیل تیم‌های اجرایی و تعیین نقش‌ها • ترسیم نقشه و لی‌اوت محل فعالیت • عکس‌برداری از زوایای ثابت (قبل و بعد) • لیست‌برداری از تمام اقلام و موجودی‌ها • تهیه و نصب تابلوهای مدیریت دیداری
+                </div>
+
+                <div class="card-subtitle">🔴 تکنیک برچسب قرمز (RED TAG)</div>
+                <p>برچسب‌های قرمز روی اقلام غیرضروری یا مشکوک نصب می‌شوند تا پس از بررسی، تعیین تکلیف شوند.</p>
+
+                <div class="card-subtitle">📊 راهنمای تشخیص اقلام ضروری از غیرضروری</div>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr><th>ردیف</th><th>تعدد استفاده در واحد زمان</th><th>نوع</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>اول</td><td>کمتر از یکساعت، یکبار استفاده شود</td><td><strong>بسیار ضروری</strong></td></tr>
+                            <tr><td>دوم</td><td>از یکساعت تا یکروز، یکبار استفاده شود</td><td><strong>ضروری</strong></td></tr>
+                            <tr><td>سوم</td><td>از یکروز تا یکماه، یکبار استفاده شود</td><td><strong>نیمه ضروری</strong></td></tr>
+                            <tr><td>چهارم</td><td>از یکماه تا ششماه، یکبار استفاده شود</td><td><strong>کمتر ضروری</strong></td></tr>
+                            <tr><td>پنجم</td><td>بیش از ۶ ماه، یکبار استفاده شود</td><td><strong>غیر ضروری</strong></td></tr>
+                            <tr><td>ششم</td><td>مورد استفاده آن مشخص نیست</td><td><strong>مطلقاً غیر ضروری</strong></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card-subtitle">🚫 مضار وجود اقلام غیرضروری</div>
+                <div class="tips-grid">
+                    <div class="tip-item danger-tip">کند کردن عملیات</div>
+                    <div class="tip-item danger-tip">اشغال فضای مفید</div>
+                    <div class="tip-item danger-tip">معطلی سرمایه</div>
+                    <div class="tip-item danger-tip">استهلاک اقلام مفید</div>
+                    <div class="tip-item danger-tip">اتلاف وقت برای جستجوی اقلام ضروری</div>
+                    <div class="tip-item danger-tip">ناآراسته و شلوغ کردن محیط کار</div>
+                    <div class="tip-item danger-tip">گم شدن اقلام ضروری</div>
+                    <div class="tip-item danger-tip">افزایش حوادث و مشکلات ایمنی</div>
+                </div>
+
+                <div class="highlight-box gold">
+                    <strong>🏠 مصادیق S اول در منزل:</strong><br>
+                    لباس‌های اضافی • داروهای تاریخ گذشته • ابزار قدیمی • فنگ‌شویی • انباری‌ها • مواد غذایی منقضی • استفاده چندگانه از ابزار موجود
+                </div>
+            </div>
+
+            <!-- ===== S2: نظم و ترتیب ===== -->
+            <div class="card" style="border-right-color:var(--success);">
+                <div class="card-title"><span class="s-number green">۲</span> نظم و ترتیب (SEITON — SET IN ORDER)</div>
+                <p style="margin-bottom:10px;">
+                    <strong>تعریف:</strong> تعیین بهترین مکان برای اقلام ضروری، به‌گونه‌ای که هر چیزی در جای خود قرار گیرد.
+                </p>
+                <div class="highlight-box green">
+                    <strong>📌 رئوس فعالیت‌های S دوم:</strong><br>
+                    • مالک تعیین مکان • آموزش اتلاف‌ها • اصل «یک بهترین» • مدیریت دیداری (نامگذاری، نشانه‌گذاری، تهیه شناسنامه واحدها و تجهیزات) • بهره‌گیری از روش FIFO • استانداردسازی عملیات S دوم • ممیزی اجرا و انتخاب تیم برتر
+                </div>
+
+                <div class="card-subtitle">📍 راهنمای مکانیابی بر اساس تعداد استفاده</div>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr><th>ردیف</th><th>تعدد استفاده</th><th>مکانیابی</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>بسیار ضروری</td><td>کمتر از یکساعت</td><td>در محل کار و نقطه کانونی (میز یا تابلو ابزار)</td></tr>
+                            <tr><td>ضروری</td><td>یکساعت تا یکروز</td><td>در دسترس خود یا همراه داشته باشید</td></tr>
+                            <tr><td>نیمه ضروری</td><td>یکروز تا یکماه</td><td>در محل کار و نقطه کانونی</td></tr>
+                            <tr><td>کمتر ضروری</td><td>یکماه تا ششماه</td><td>دور از دسترس و در انبار</td></tr>
+                            <tr><td>غیرضروری</td><td>بیش از ۶ ماه</td><td>نگهداری نکنید یا دور از دسترس</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="highlight-box green">
+                    <strong>🏠 مصادیق S دوم در آشپزخانه:</strong><br>
+                    • وسایل را در کابینت‌های نزدیک محل استفاده قرار دهید (مثلاً ادویه نزدیک اجاق گاز).<br>
+                    • موارد مشابه را در یک گروه کنار هم قرار دهید.<br>
+                    • پرکاربردترین وسایل را در دسترس‌ترین فضا قرار دهید.<br>
+                    • سالانه آشپزخانه را از وسایل کم‌استفاده پاکسازی کنید.
+                </div>
+
+                <div class="card-subtitle">⭐ اصل «یک بهترین» در 5S</div>
+                <div class="tips-grid">
+                    <div class="tip-item info-tip">یک ساعت جلسه</div>
+                    <div class="tip-item info-tip">یک صفحه گزارش</div>
+                    <div class="tip-item info-tip">یک دقیقه مکالمه تلفنی</div>
+                    <div class="tip-item info-tip">یک پرونده برای هر موضوع</div>
+                    <div class="tip-item info-tip">یک نام برای نامیدن اقلام توسط همه</div>
+                    <div class="tip-item info-tip">یک مکان برای قرار دادن هر چیز</div>
+                    <div class="tip-item info-tip">یک کپی از هر نامه</div>
+                    <div class="tip-item info-tip">انجام یک کار در هر زمان</div>
+                    <div class="tip-item info-tip">وجود مدارک یک کار روی میز</div>
+                    <div class="tip-item info-tip">یکبار بررسی نامه وارده</div>
+                </div>
+            </div>
+
+            <!-- ===== S3: پاکیزه‌سازی ===== -->
+            <div class="card" style="border-right-color:var(--danger);">
+                <div class="card-title"><span class="s-number danger">۳</span> پاکیزه‌سازی (SEISO — SHINE)</div>
+                <p style="margin-bottom:10px;">
+                    <strong>تعریف:</strong> پاکیزه‌سازی و پاکیزه‌داری محیط کار و تمامی اقلام.
+                </p>
+                <div class="highlight-box danger">
+                    <strong>📌 رئوس فعالیت‌های S سوم:</strong><br>
+                    • مزایای پاکیزه بودن محیط کار • پاکیزه‌داری، تعهد اخلاقی نسبت به ابزار کار • مبارزه با منشأ آلودگی‌ها • رنگ‌آمیزی و اصول آن در 5S • پاکیزه‌سازی پایه PM و TPM • استانداردسازی عملیات S سوم • ممیزی و انتخاب تیم برتر
+                </div>
+
+                <div class="card-subtitle">🧹 موارد پاکیزه‌سازی</div>
+                <div class="tips-grid">
+                    <div class="tip-item primary-tip">پاکیزه‌سازی دستگاه‌ها</div>
+                    <div class="tip-item primary-tip">پاکیزه‌سازی کف کارگاه</div>
+                    <div class="tip-item primary-tip">پاکیزه‌سازی دیوارها و پنجره‌ها</div>
+                    <div class="tip-item primary-tip">پاکیزه‌سازی کمدها و کشوها</div>
+                    <div class="tip-item primary-tip">پاکیزه‌سازی ابزارها</div>
+                    <div class="tip-item primary-tip">پاکیزه‌سازی کارکنان و لباس کاری آنها</div>
+                    <div class="tip-item primary-tip">پاکیزه‌سازی مکان‌های عمومی</div>
+                </div>
+
+                <div class="card-subtitle">🎨 رنگ‌شناسی ژاپنی</div>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr><th>رنگ</th><th>کاربرد</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>آبی</td><td>آب</td></tr>
+                            <tr><td>قرمز تیره</td><td>بخار</td></tr>
+                            <tr><td>سفید</td><td>هوا</td></tr>
+                            <tr><td>زرد روشن</td><td>گاز</td></tr>
+                            <tr><td>بنفش یا خاکستری</td><td>اسید</td></tr>
+                            <tr><td>قهوه‌ای</td><td>روغن</td></tr>
+                            <tr><td>قرمز یا زرد روشن</td><td>برق</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="highlight-box danger">
+                    <strong>📋 من تعهد می‌کنم:</strong><br>
+                    • چیزی یا جایی را حتی‌المکان کثیف نکنم.<br>
+                    • ریخت و پاش ننمایم.<br>
+                    • هر چیزی را بلافاصله پس از کثیف شدن تمیز نمایم.<br>
+                    • نوشته‌ها و رنگ‌آمیزی‌های کهنه را بازنویسی و رنگ نمایم.<br>
+                    • محل کار را همچون خانه خود بدانم.<br>
+                    • خود را مسئول تمیزی محیط کار خود بدانم.
+                </div>
+
+                <div class="card-subtitle">🔑 نکات کلیدی در پاکیزه‌سازی</div>
+                <ul>
+                    <li>تمام کارکنان از هر رده، مسئول پاکیزه‌سازی محیط کاری خود هستند.</li>
+                    <li>پاکیزه‌سازی باید با ابزار مناسب انجام شود تا مفرح باشد و مشقت‌بار نباشد.</li>
+                    <li>نیروهای خدماتی بر پاکیزه‌سازی مکان‌های عمومی متمرکز شوند.</li>
+                    <li>پاکیزه‌سازی فعالیتی مستمر است.</li>
+                    <li>اصل بر جلوگیری از آلوده شدن است.</li>
+                </ul>
+            </div>
+
+            <!-- ===== S4: استانداردسازی ===== -->
+            <div class="card" style="border-right-color:#9b59b6;">
+                <div class="card-title"><span class="s-number purple">۴</span> استانداردسازی (SEIKETSU — STANDARDIZE)</div>
+                <p style="margin-bottom:10px;">
+                    <strong>تعریف:</strong> استاندارد نمودن وضعیت حاصل از اجرای سه S قبلی.
+                </p>
+                <div class="highlight-box purple">
+                    <strong>📌 رئوس فعالیت‌های S چهارم:</strong><br>
+                    • تعیین چگونگی، زمان و مسئولین انجام دوره‌ای اقدامات سه S قبلی • بهره‌گیری از مدیریت دیداری در استانداردسازی • تهیه آیین‌نامه اجرایی 5S با ترکیب استانداردهای قبلی
+                </div>
+
+                <div class="card-subtitle">⏰ زمان‌بندی استاندارد</div>
+                <ul>
+                    <li><strong>۵ دقیقه</strong> 5S روزانه</li>
+                    <li><strong>5S هفتگی</strong></li>
+                    <li><strong>5S اساسی</strong> دوبار در سال (با مشارکت همه، تعطیلی کار و به‌صورت برنامه‌ریزی شده و جذاب)</li>
+                </ul>
+                <div class="highlight-box">
+                    <strong>📋 در استانداردها باید زمان‌های انجام دوره‌ای Sها مشخص باشد.</strong>
+                </div>
+            </div>
+
+            <!-- ===== S5: انضباط ===== -->
+            <div class="card">
+                <div class="card-title"><span class="s-number">۵</span> انضباط (SHITSUKE — SUSTAIN)</div>
+                <p style="margin-bottom:10px;">
+                    <strong>تعریف:</strong> زمینه‌سازی (ایجاد آگاهی و تعهد) فردی و گروهی برای انجام دقیق، درست و به‌موقع استانداردها توسط کارکنان.
+                </p>
+                <div class="highlight-box">
+                    <strong>📌 رئوس فعالیت‌های S پنجم:</strong><br>
+                    • آموزش • فرهنگ‌سازی • ممیزی (خودممیزی و ممیزی رسمی) • ایجاد عادات صحیح
+                </div>
+                <div class="grid-3" style="margin-top:10px;">
+                    <div class="item-box">
+                        <span class="icon">📚</span>
+                        <span class="title">آموزش</span>
+                        <span class="desc">آموزش بدو ورود برای کارکنان جدید • دوره‌های بازآموزی سالانه • آموزش تئوری و عملی</span>
+                    </div>
+                    <div class="item-box" style="border-color:var(--secondary);">
+                        <span class="icon">🎯</span>
+                        <span class="title">فرهنگ‌سازی</span>
+                        <span class="desc">تکرار و عادت‌سازی • ایجاد انگیزه و مشارکت • مسابقات و جوایز</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">📊</span>
+                        <span class="title">ممیزی</span>
+                        <span class="desc">خودممیزی توسط تیم‌ها • ممیزی رسمی توسط کمیته 5S • تعیین تیم برتر</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== مزایا ===== -->
+            <div class="card" style="border-right-color:var(--secondary);">
+                <div class="card-title"><span class="icon">🎯</span> مزایای استقرار نظام 5S</div>
+                <div class="grid-3">
+                    <div class="item-box" style="border-color:var(--secondary);">
+                        <span class="icon">⏱️</span>
+                        <span class="title">اتلاف‌زدایی زمانی</span>
+                        <span class="desc">کاهش زمان دسترسی به اقلام</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">🔧</span>
+                        <span class="title">بهبود وضعیت PM</span>
+                        <span class="desc">جلوگیری از خرابی‌ها و توقفات ناخواسته</span>
+                    </div>
+                    <div class="item-box" style="border-color:var(--secondary);">
+                        <span class="icon">📈</span>
+                        <span class="title">بهبود بهره‌وری</span>
+                        <span class="desc">استفاده صحیح، مکانیابی صحیح و جلوگیری از گم شدن ابزار</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">✅</span>
+                        <span class="title">بهبود کیفیت</span>
+                        <span class="desc">پاکیزه‌گی محیط کار اولین شرط کیفیت است</span>
+                    </div>
+                    <div class="item-box" style="border-color:var(--secondary);">
+                        <span class="icon">👥</span>
+                        <span class="title">تقویت کار تیمی</span>
+                        <span class="desc">عملیات اجرایی در قالب فعالیت تیم‌ها صورت می‌پذیرد</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">😊</span>
+                        <span class="title">بهبود روحیه کارکنان</span>
+                        <span class="desc">آراستگی، زیبایی و دلپذیرتر شدن محیط کار</span>
+                    </div>
+                    <div class="item-box" style="border-color:var(--secondary);">
+                        <span class="icon">🛡️</span>
+                        <span class="title">افزایش ایمنی</span>
+                        <span class="desc">بازرسی‌های ادواری، رنگ‌آمیزی، هشدارها و پیشگیری از حوادث</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">📏</span>
+                        <span class="title">نهادینه‌سازی انضباط</span>
+                        <span class="desc">رعایت استانداردها در میان کارکنان</span>
+                    </div>
+                    <div class="item-box" style="border-color:var(--secondary);">
+                        <span class="icon">👀</span>
+                        <span class="title">تأثیر بر بازدیدکنندگان</span>
+                        <span class="desc">ایجاد تصویر مثبت از سازمان</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">💪</span>
+                        <span class="title">شکستن رکود</span>
+                        <span class="desc">ایجاد پارادایم بهبودجویی در سازمان</span>
+                    </div>
+                    <div class="item-box" style="border-color:var(--secondary);">
+                        <span class="icon">♻️</span>
+                        <span class="title">کاهش ضایعات</span>
+                        <span class="desc">مکانیابی صحیح و حذف اقلام غیرضروری</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">📦</span>
+                        <span class="title">مزایا از دیدگاه JIT</span>
+                        <span class="desc">حذف موجودی غیرضروری، حذف انبارش غیرضروری، کاهش ملزومات</span>
+                    </div>
+                </div>
+                <div class="highlight-box gold" style="margin-top:10px;">
+                    <strong>✨ نتایج نظام 5S:</strong><br>
+                    محیط کار آراسته • ابزار و اقلام آراسته • همکار آراسته • رفتار آراسته • پندار آراسته • فرآیندهای آراسته
+                </div>
+            </div>
+
+            <!-- ===== نقش مدیریت ارشد ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">👔</span> نقش مدیریت ارشد در نظام 5S</div>
+                <div class="grid-3">
+                    <div class="item-box">
+                        <span class="icon">📖</span>
+                        <span class="title">دانش و آگاهی</span>
+                        <span class="desc">مطالعه و کسب آگاهی از تئوری 5S • شرکت در همایش‌ها و بازدیدها</span>
+                    </div>
+                    <div class="item-box" style="border-color:var(--secondary);">
+                        <span class="icon">👤</span>
+                        <span class="title">تعیین مسئول</span>
+                        <span class="desc">انتخاب فرد یا واحد مناسب برای استقرار نظام • اعطای اختیارات مناسب و حمایت از وی</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">🔄</span>
+                        <span class="title">حمایت عملی</span>
+                        <span class="desc">ابراز حمایت عملی و واقعی از نظام • حضور در جلسات موردی نظام</span>
+                    </div>
+                    <div class="item-box" style="border-color:var(--secondary);">
+                        <span class="icon">💰</span>
+                        <span class="title">تأمین منابع</span>
+                        <span class="desc">تأمین نیازمندی‌های هزینه‌ای • آزاد کردن وقت مورد نیاز کارکنان • بودجه انگیزشی</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">📊</span>
+                        <span class="title">پیگیری و نظارت</span>
+                        <span class="desc">پیگیری پیشرفت پروژه از مسئولین • پیوند سیستمی با سایر سیستم‌های مدیریتی</span>
+                    </div>
+                    <div class="item-box" style="border-color:var(--secondary);">
+                        <span class="icon">⏳</span>
+                        <span class="title">صبر و استقامت</span>
+                        <span class="desc">ثبات قدم • اجتناب از تعجیل در نهادینه‌سازی نظام</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== جمع‌بندی ===== -->
+            <div class="card" style="border-right-color:#b45309; background:rgba(255,248,240,0.4);">
+                <div class="card-title"><span class="icon">📌</span> جمع‌بندی</div>
+                <div class="highlight-box">
+                    <strong>🔑 5S فراتر از پاکیزه‌سازی:</strong><br>
+                    نظام 5S را نباید به پاکیزه‌سازی و رنگ‌آمیزی محدود دانست، چرا که این نظام، همراه با کایزن، تکنیک حل مسئله و اتلاف‌زدایی، مزایای بسیاری برای سازمان خواهد داشت.
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-top:15px;">
+                    <div class="tip-item primary-tip"><strong>🔹 ساماندهی</strong><br>جداسازی ضروری از غیرضروری</div>
+                    <div class="tip-item warning-tip"><strong>🔹 نظم و ترتیب</strong><br>هر چیزی در جای خود</div>
+                    <div class="tip-item info-tip"><strong>🔹 پاکیزه‌سازی</strong><br>تمیز کردن و پاکیزه‌داری</div>
+                    <div class="tip-item primary-tip"><strong>🔹 استانداردسازی</strong><br>یکنواخت کردن روش‌ها</div>
+                    <div class="tip-item warning-tip"><strong>🔹 انضباط</strong><br>فرهنگ‌سازی و عادت‌سازی</div>
+                </div>
+                <div class="highlight-box gold" style="margin-top:15px;">
+                    🚀 <strong>یادآوری:</strong> هیچ راه میان‌بری برای اجرای 5S وجود ندارد. اقدامات باید با حمایت همراه باشد و کارکنان به همفکری و ارائه پیشنهاد تشویق شوند. شاید اجرای 5S ساده به‌نظر برسد، اما کمتر سازمانی تا نهادینه‌سازی کامل نظام پیش رفته است.
+                </div>
+            </div>
+
+
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            طراحی شده توسط <span class="highlight">شرکت معدنی و صنایع معدنی درکاو</span> | 09178680173
+        </div>
+
+    </div>
+
+    <script>
+        // اضافه کردن قابلیت کپی متن با کلیک
+        document.querySelectorAll('.tip-item, .item-box, .highlight-box, .card ul li, .card ol li, .spec-table tr, .safety-alert').forEach(el => {
+            el.style.cursor = 'pointer';
+            el.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') return;
+                const text = this.textContent.trim();
+                navigator.clipboard.writeText(text).then(() => {
+                    const origBg = this.style.background;
+                    this.style.background = '#d4edda';
+                    setTimeout(() => {
+                        this.style.background = origBg || '';
+                    }, 400);
+                });
+            });
+        });
+
+        console.log('✅ آموزش نظام 5S (کامل) بارگذاری شد.');
+        console.log('📋 کلیک روی هر متن برای کپی کردن');
+        console.log('🧹 شامل ۵ مرحله کامل: ساماندهی، نظم، پاکیزه‌سازی، استانداردسازی، انضباط');
+    </script>
+
+<script src="hse-common.js"></script>
+
+<script src="assets/js/sw-register.js"></script>
+</body>
+</html>

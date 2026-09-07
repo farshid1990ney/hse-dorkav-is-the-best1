@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<!--
+  © تهیه شده توسط شرکت معدنی و صنایع معدنی درکاو
+  هرگونه کپی یا استفاده بدون اجازه ممنوع است.
+-->
+<html lang="fa" dir="rtl">
+<head>
+<script>window.fetchWithTimeout=window.fetchWithTimeout||function(url,options,timeoutMs){timeoutMs=timeoutMs||12000;var controller=new AbortController();var id=setTimeout(function(){controller.abort();},timeoutMs);var opts=Object.assign({},options||{},{signal:controller.signal});return fetch(url,opts).finally(function(){clearTimeout(id);});};</script>
+
+
+<script>
+/* ============================================================
+   ★ امنیت: گیت احراز هویت (سمت کلاینت)
+   هیچ صفحه‌ای بدون ورود به سامانه باز نمی‌شود. محتوای صفحه
+   مخفی می‌ماند و کاربر به صفحه ورود هدایت می‌شود.
+   (لایه نمایشی؛ لایه امنیتی واقعی در بکاند اعمال می‌شود.)
+   ============================================================ */
+(function(){
+  var ok = false;
+  try {
+    var _u = JSON.parse(localStorage.getItem('hse_user_activated') || 'null');
+    ok = !!(_u && _u.personnel && _u.fullname);
+  } catch(e) { ok = false; }
+  if (ok) return; // مجاز - ادامه می‌دهد
+
+  // پنهان‌کردن کل محتوا و نمایش قفل
+  var hide = function(){
+    try {
+      var d = document;
+      // مخفی کردن همه عناصر
+      var all = d.body ? d.body.children : [];
+      for (var i=0;i<all.length;i++){ all[i].style.display='none'; }
+      var lock = d.createElement('div');
+      lock.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#0f172a;color:#f8fafc;'
+        +'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+        +'font-family:Tahoma,sans-serif;text-align:center;padding:20px;direction:rtl;';
+      lock.innerHTML = '<div style="font-size:60px;margin-bottom:10px;">🔒</div>'
+        +'<h2 style="margin:0 0 8px;">دسترسی محدود است</h2>'
+        +'<p style="margin:0 0 20px;color:#94a3b8;">لطفاً ابتدا از صفحه اصلی وارد سامانه شوید.</p>'
+        +'<a href="index.html" style="background:#ff6208;color:#fff;padding:10px 26px;'
+        +'border-radius:10px;text-decoration:none;font-weight:bold;">بازگشت به صفحه ورود</a>';
+      d.body.appendChild(lock);
+    } catch(e){}
+  };
+  if (document.body) hide(); else document.addEventListener('DOMContentLoaded', hide);
+  setTimeout(function(){ try{ location.replace('index.html'); }catch(e){} }, 2500);
+})();
+</script>
+
+    <meta charset="UTF-8" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#1e3c5c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HSE درکاو" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+    <title>تشویق و تنبیه [v3.1]</title>
+    <link href="assets/fonts/vazir/font-face.css" rel="stylesheet" />
+    <style>
+        :root {
+            --primary: #ff6208;
+            --dark-blue: #1e3c5c;
+            --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #dfe7f0 100%);
+            --card-bg: rgba(255,255,255,0.98);
+            --text-main: #1e2a2e;
+            --text-muted: #64748b;
+            --shadow: 0 10px 30px rgba(0,0,0,0.06);
+            --transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Vazir',Tahoma,sans-serif; }
+        body { padding-bottom: 75px !important;
+            background: var(--bg-gradient);
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text-main);
+        }
+        .main-container {
+            max-width: 1000px; width: 100%;
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        .header {
+            background: var(--dark-blue);
+            padding: 28px 20px;
+            color: white;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+            position: relative;
+        }
+        .header h1 { font-size: 1.5rem; margin-bottom: 4px; }
+        .header p  { opacity: 0.8; font-size: 0.85rem; }
+        .back-home {
+            position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+            background: rgba(255,255,255,0.15); border: none; border-radius: 50%;
+            width: 42px; height: 42px; font-size: 1.1rem; cursor: pointer;
+            color: white; display: flex; align-items: center; justify-content: center;
+            text-decoration: none; transition: var(--transition);
+        }
+        .back-home:hover { background: rgba(255,255,255,0.3); }
+
+        .content { padding: 20px; }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px 12px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border-top: 4px solid var(--primary);
+        }
+        .stat-card.green { border-top-color: #27ae60; }
+        .stat-card.red   { border-top-color: #c0392b; }
+        .stat-card .num  { font-size: 2rem; font-weight: 800; color: var(--dark-blue); }
+        .stat-card .lbl  { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; font-weight: 600; }
+
+        .search-box {
+            display: flex; gap: 10px; margin-bottom: 16px; align-items: center;
+        }
+        .search-box input {
+            flex: 1; padding: 10px 14px;
+            border: 2px solid #e2e8f0; border-radius: 12px;
+            font-family: 'Vazir',Tahoma,sans-serif; font-size: 0.9rem;
+            outline: none; transition: border-color 0.2s;
+        }
+        .search-box input:focus { border-color: var(--primary); }
+        .search-box select {
+            padding: 10px 12px; border-radius: 12px;
+            border: 2px solid #e2e8f0; font-family: 'Vazir',Tahoma,sans-serif;
+            font-size: 0.85rem; outline: none; background: white; cursor: pointer;
+        }
+        .search-box select:focus { border-color: var(--primary); }
+
+        .card {
+            background: var(--card-bg); border-radius: 16px;
+            box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        .card-title {
+            color: var(--dark-blue); font-size: 1rem; font-weight: bold;
+            border-right: 4px solid var(--primary); padding: 14px 16px;
+            display: flex; align-items: center; gap: 8px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .table-wrap { overflow-x: auto; max-height: 60vh; overflow-y: auto; }
+        table {
+            width: 100%; border-collapse: collapse; font-size: 0.85rem;
+            min-width: 650px;
+        }
+        thead th {
+            background: var(--dark-blue); color: white;
+            padding: 12px 10px; text-align: center; font-weight: 700;
+            position: sticky; top: 0; z-index: 2; white-space: nowrap;
+        }
+        tbody td {
+            padding: 11px 10px; text-align: center;
+            border-bottom: 1px solid #f1f5f9; vertical-align: middle;
+        }
+        tbody tr:hover { background: rgba(255,98,8,0.03); }
+
+        .badge {
+            display: inline-block; padding: 3px 12px;
+            border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+        }
+        .badge-تشویق { background: #bbf7d0; color: #14532d; }
+        .badge-تنبیه { background: #fecaca; color: #991b1b; }
+        .badge-default { background: #f1f5f9; color: #475569; }
+
+        tr.row-تشویق td:first-child { border-right: 3px solid #27ae60; }
+        tr.row-تنبیه td:first-child { border-right: 3px solid #c0392b; }
+
+        .score-cell { font-weight: 800; font-size: 1rem; }
+        .score-positive { color: #27ae60; }
+        .score-negative { color: #c0392b; }
+
+        .empty-state, .loading-state, .error-state {
+            text-align: center; padding: 50px 20px;
+            color: var(--text-muted); font-size: 0.9rem;
+        }
+        .loading-state .spinner {
+            display: inline-block; width: 32px; height: 32px;
+            border: 3px solid #e2e8f0; border-top-color: var(--primary);
+            border-radius: 50%; animation: spin 0.8s linear infinite;
+            margin-bottom: 10px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .update-info {
+            text-align: center; font-size: 0.75rem; color: var(--text-muted);
+            padding: 10px; border-top: 1px solid #f1f5f9;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .refresh-btn {
+            background: none; border: 1px solid #e2e8f0; border-radius: 8px;
+            padding: 3px 10px; font-size: 0.72rem; cursor: pointer; color: var(--primary);
+            font-family: 'Vazir',Tahoma,sans-serif; transition: var(--transition);
+        }
+        .refresh-btn:hover { background: rgba(255,98,8,0.06); border-color: var(--primary); }
+
+        .footer {
+            background: rgba(0,0,0,0.02); padding: 12px 20px;
+            text-align: center; font-size: 0.8rem; color: var(--text-muted);
+            border-top: 1px solid rgba(0,0,0,0.05);
+        }
+        .footer .highlight { color: var(--primary); font-weight: bold; }
+
+        @media (max-width: 600px) {
+            .search-box { flex-wrap: wrap; }
+            .search-box select { width: 100%; }
+            .stat-card .num { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="main-container">
+
+    <div class="header">
+        <a href="index.html?v=202606300519" class="back-home" title="بازگشت">🏠</a>
+        <h1>🏆 تشویق و تنبیه</h1>
+        <p>مشاهده و پیگیری موارد تشویق و تنبیه کارکنان</p>
+    </div>
+
+    <div class="content">
+
+        <div class="stats-row">
+            <div class="stat-card green">
+                <div class="num" id="statTashvigh">—</div>
+                <div class="lbl">موارد تشویقی</div>
+            </div>
+            <div class="stat-card red">
+                <div class="num" id="statTanbih">—</div>
+                <div class="lbl">موارد تنبیهی</div>
+            </div>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="🔍 جستجو در نام، پرسنلی، توضیحات..." />
+            <select id="filterType">
+                <option value="">همه موارد</option>
+                <option value="تشویق">تشویق</option>
+                <option value="تنبیه">تنبیه</option>
+            </select>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📋 لیست تشویق و تنبیه</div>
+            <div class="table-wrap">
+                <div class="loading-state" id="tableState">
+                    <div class="spinner"></div>
+                    <div>در حال بارگذاری...</div>
+                </div>
+                <table id="dataTable" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>تاریخ ثبت</th>
+                            <th>نام</th>
+                            <th>پرسنلی</th>
+                            <th>نوع</th>
+                            <th>امتیاز</th>
+                            <th>توضیحات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataBody"></tbody>
+                </table>
+            </div>
+            <div class="update-info">
+                <span id="lastUpdate">—</span>
+                <button class="refresh-btn" id="refreshBtn">🔄 به‌روزرسانی</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer">
+        تهیه شده توسط <span class="highlight">شرکت معدنی و صنایع معدنی درکاو</span> &nbsp;|&nbsp;
+        <span style="direction:ltr;display:inline-block;">📞 09178680173</span>
+    </div>
+</div>
+
+<script>
+    const ENDPOINT = 'https://script.google.com/macros/s/AKfycbzDZiadFyzTOgSpMzSo9b_xQ29N_ZHD2vIOxmswrl0O2YNod2prV1qCN34myNsp653OjQ/exec';
+    let allRows = [];
+
+    // ★ امنیت: فرار داده‌ها برای جلوگیری از XSS ذخیره‌شده
+    function esc(v) {
+        if (v === null || v === undefined) return '';
+        return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function currentPersonnel() {
+        try {
+            const raw = localStorage.getItem('hse_user_activated');
+            if (raw) { const u = JSON.parse(raw); return (u && u.personnel) ? String(u.personnel) : ''; }
+        } catch (e) {}
+        return '';
+    }
+
+    function getBadgeClass(type) {
+        if (!type) return 'badge-default';
+        if (type.includes('تشویق')) return 'badge-تشویق';
+        if (type.includes('تنبیه')) return 'badge-تنبیه';
+        return 'badge-default';
+    }
+    function getRowClass(type) {
+        if (!type) return '';
+        if (type.includes('تشویق')) return 'row-تشویق';
+        if (type.includes('تنبیه')) return 'row-تنبیه';
+        return '';
+    }
+    function getScoreClass(score) {
+        const n = parseFloat(score);
+        if (isNaN(n)) return '';
+        return n >= 0 ? 'score-positive' : 'score-negative';
+    }
+
+    function renderTable(rows) {
+        const tbody = document.getElementById('dataBody');
+        const table = document.getElementById('dataTable');
+        const state = document.getElementById('tableState');
+
+        if (!rows || rows.length === 0) {
+            state.innerHTML = '<div class="empty-state">📭 هیچ رکوردی یافت نشد.</div>';
+            state.style.display = 'block';
+            table.style.display = 'none';
+            return;
+        }
+
+        tbody.innerHTML = '';
+        rows.forEach(function(row, i) {
+            const type = row[3] || '';
+            const tr = document.createElement('tr');
+            tr.className = getRowClass(type);
+            tr.innerHTML = `
+                <td>${i + 1}</td>
+                <td style="white-space:nowrap;font-size:0.78rem;">${esc(row[0]) || '—'}</td>
+                <td style="font-weight:600;">${esc(row[1]) || '—'}</td>
+                <td>${esc(row[2]) || '—'}</td>
+                <td><span class="badge ${esc(getBadgeClass(type))}">${esc(type) || '—'}</span></td>
+                <td class="score-cell ${esc(getScoreClass(row[4]))}">${esc(row[4]) || '—'}</td>
+                <td style="text-align:right;padding-right:14px;font-size:0.8rem;color:var(--text-muted);">${esc(row[5]) || '—'}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        state.style.display = 'none';
+        table.style.display = 'table';
+    }
+
+    function updateStats(rows) {
+        var tashvigh = 0, tanbih = 0;
+        (rows || []).forEach(function(r) {
+            const t = r[3] || '';
+            if (t.includes('تشویق')) tashvigh++;
+            else if (t.includes('تنبیه')) tanbih++;
+        });
+        document.getElementById('statTashvigh').textContent = tashvigh;
+        document.getElementById('statTanbih').textContent   = tanbih;
+    }
+
+    function applyFilter() {
+        const q    = document.getElementById('searchInput').value.trim().toLowerCase();
+        const type = document.getElementById('filterType').value;
+        const filtered = allRows.filter(function(r) {
+            const matchType = !type || (r[3] || '').includes(type);
+            const matchQ = !q ||
+                (r[1] || '').toLowerCase().includes(q) ||
+                (r[2] || '').toLowerCase().includes(q) ||
+                (r[5] || '').toLowerCase().includes(q);
+            return matchType && matchQ;
+        });
+        renderTable(filtered);
+    }
+
+    async function loadData() {
+        const state = document.getElementById('tableState');
+        const table = document.getElementById('dataTable');
+        state.innerHTML = '<div class="loading-state"><div class="spinner"></div><div>در حال بارگذاری...</div></div>';
+        state.style.display = 'block';
+        table.style.display = 'none';
+
+        try {
+            const res  = await fetchWithTimeout(ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'action=tashvighi_list&personnel=' + encodeURIComponent(currentPersonnel())
+            }, 15000);
+            const data = await res.json();
+            if (data && data.denied) {
+                state.innerHTML = '<div class=\"error-state\">⛔ شما مجوز مشاهده این بخش را ندارید.</div>';
+                state.style.display = 'block';
+                return;
+            }
+            if (data && data.success && data.items) {
+                allRows = data.items;
+                updateStats(allRows);
+                applyFilter();
+                const now = new Date();
+                document.getElementById('lastUpdate').textContent =
+                    'آخرین به‌روزرسانی: ' + now.toLocaleTimeString('fa-IR');
+            } else {
+                state.innerHTML = '<div class="error-state">⚠️ خطا در دریافت داده.</div>';
+            }
+        } catch(e) {
+            state.innerHTML = '<div class="error-state">⚠️ خطا در اتصال. اینترنت خود را بررسی کنید.</div>';
+            state.style.display = 'block';
+            table.style.display = 'none';
+        }
+    }
+
+    document.getElementById('searchInput').addEventListener('input', applyFilter);
+    document.getElementById('filterType').addEventListener('change', applyFilter);
+    document.getElementById('refreshBtn').addEventListener('click', loadData);
+
+    loadData();
+</script>
+<script src="hse-common.js"></script>
+<script src="assets/js/sw-register.js"></script>
+</body>
+</html>

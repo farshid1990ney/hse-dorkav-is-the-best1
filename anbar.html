@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+
+<script>
+/* ============================================================
+   ★ امنیت: گیت احراز هویت (سمت کلاینت)
+   هیچ صفحه‌ای بدون ورود به سامانه باز نمی‌شود. محتوای صفحه
+   مخفی می‌ماند و کاربر به صفحه ورود هدایت می‌شود.
+   (لایه نمایشی؛ لایه امنیتی واقعی در بکاند اعمال می‌شود.)
+   ============================================================ */
+(function(){
+  var ok = false;
+  try {
+    var _u = JSON.parse(localStorage.getItem('hse_user_activated') || 'null');
+    ok = !!(_u && _u.personnel && _u.fullname);
+  } catch(e) { ok = false; }
+  if (ok) return; // مجاز - ادامه می‌دهد
+
+  // پنهان‌کردن کل محتوا و نمایش قفل
+  var hide = function(){
+    try {
+      var d = document;
+      // مخفی کردن همه عناصر
+      var all = d.body ? d.body.children : [];
+      for (var i=0;i<all.length;i++){ all[i].style.display='none'; }
+      var lock = d.createElement('div');
+      lock.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#0f172a;color:#f8fafc;'
+        +'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+        +'font-family:Tahoma,sans-serif;text-align:center;padding:20px;direction:rtl;';
+      lock.innerHTML = '<div style="font-size:60px;margin-bottom:10px;">🔒</div>'
+        +'<h2 style="margin:0 0 8px;">دسترسی محدود است</h2>'
+        +'<p style="margin:0 0 20px;color:#94a3b8;">لطفاً ابتدا از صفحه اصلی وارد سامانه شوید.</p>'
+        +'<a href="index.html" style="background:#ff6208;color:#fff;padding:10px 26px;'
+        +'border-radius:10px;text-decoration:none;font-weight:bold;">بازگشت به صفحه ورود</a>';
+      d.body.appendChild(lock);
+    } catch(e){}
+  };
+  if (document.body) hide(); else document.addEventListener('DOMContentLoaded', hide);
+  setTimeout(function(){ try{ location.replace('index.html'); }catch(e){} }, 2500);
+})();
+</script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#1e3c5c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HSE درکاو" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+    <title>آموزش جامع ایمنی در انبار - آژند همت توس</title>
+
+    <style>
+        :root {
+            --primary: #ff6208;
+            --primary-hover: #e05300;
+            --secondary: #f39c12;
+            --success: #27ae60;
+            --safety: #2c6e4e;
+            --danger: #c0392b;
+            --dark-blue: #1e3c5c;
+            --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #dfe7f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --text-main: #1e2a2e;
+            --text-muted: #64748b;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body { padding-bottom: 75px !important;
+            background: var(--bg-gradient);
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text-main);
+            line-height: 1.8;
+        }
+
+        .main-container {
+            max-width: 1000px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            background: var(--dark-blue);
+            padding: 35px 20px;
+            color: white;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+            position: relative;
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        .header h1 .icon {
+            margin-left: 10px;
+        }
+        .header p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        .header .back-home {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .header .back-home:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+        .card:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        }
+        .card-title {
+            color: var(--dark-blue);
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-right: 4px solid var(--primary);
+            padding-right: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title .icon {
+            font-size: 1.5rem;
+        }
+        .card-subtitle {
+            color: var(--primary);
+            font-size: 1.05rem;
+            font-weight: bold;
+            margin: 18px 0 10px 0;
+            border-bottom: 2px solid rgba(255, 98, 8, 0.15);
+            padding-bottom: 6px;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .tips-grid .tip-item {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 10px 14px;
+            border-radius: var(--border-radius-sm);
+            border-right: 3px solid var(--safety);
+            font-size: 0.9rem;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .tips-grid .tip-item:hover {
+            background: rgba(44, 110, 78, 0.04);
+            transform: translateX(-3px);
+        }
+        .tips-grid .tip-item.danger-tip {
+            border-right-color: var(--danger);
+        }
+        .tips-grid .tip-item.warning-tip {
+            border-right-color: var(--secondary);
+        }
+        .tips-grid .tip-item.primary-tip {
+            border-right-color: var(--primary);
+        }
+        .tips-grid .tip-item.info-tip {
+            border-right-color: #3498db;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+        .spec-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .spec-table th,
+        .spec-table td {
+            padding: 10px 12px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        .spec-table th {
+            background: var(--dark-blue);
+            color: white;
+            font-weight: bold;
+        }
+        .spec-table tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .spec-table tr:hover {
+            background: rgba(255, 98, 8, 0.04);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+            justify-content: center;
+        }
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn-back {
+            background: var(--danger);
+            color: white;
+        }
+        .btn-back:hover {
+            background: #a93226;
+        }
+        .btn-software {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-software:hover {
+            background: var(--primary-hover);
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .footer .highlight {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .badge-standard {
+            display: inline-block;
+            background: var(--safety);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-danger {
+            display: inline-block;
+            background: var(--danger);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-warning {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-info {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+
+        .safety-alert {
+            background: rgba(192, 57, 43, 0.04);
+            border-right: 4px solid var(--danger);
+            padding: 15px;
+            border-radius: var(--border-radius-sm);
+            margin: 10px 0;
+        }
+        .safety-alert strong {
+            color: var(--danger);
+        }
+        .safety-alert ul {
+            padding-right: 20px;
+            margin-top: 5px;
+        }
+        .safety-alert ul li {
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .highlight-box {
+            background: rgba(44, 110, 78, 0.04);
+            padding: 15px 18px;
+            border-radius: var(--border-radius-sm);
+            border-right: 4px solid var(--safety);
+            margin: 10px 0;
+        }
+        .highlight-box.danger {
+            background: rgba(192, 57, 43, 0.04);
+            border-right-color: var(--danger);
+        }
+        .highlight-box.gold {
+            background: rgba(243, 156, 18, 0.04);
+            border-right-color: var(--secondary);
+        }
+        .highlight-box.green {
+            background: rgba(39, 174, 96, 0.04);
+            border-right-color: var(--success);
+        }
+        .highlight-box.purple {
+            background: rgba(155, 89, 182, 0.04);
+            border-right-color: #9b59b6;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+
+        .item-box {
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: var(--border-radius-sm);
+            padding: 14px 16px;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .item-box:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+        }
+        .item-box .icon {
+            color: var(--primary);
+            font-size: 1.3rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .item-box .title {
+            color: var(--dark-blue);
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .item-box .desc {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            margin-top: 2px;
+        }
+
+        @media(max-width:700px) {
+            .content { padding: 15px; }
+            .header h1 { font-size: 1.3rem; }
+            .header .back-home { width: 36px; height: 36px; font-size: 1rem; left: 10px; top: 15px; }
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .tips-grid { grid-template-columns: 1fr; }
+            .spec-table { font-size: 0.75rem; }
+            .spec-table th, .spec-table td { padding: 6px 4px; }
+            .btn-row { flex-direction: column; }
+            .btn { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <a href="index.html" class="back-home" title="بازگشت به صفحه اصلی">🏠</a>
+            <h1><span class="icon">📦</span> ایمنی در انبار</h1>
+            <p>آموزش جامع ایمنی، اصول انبارداری، حفاظت از کالاها و پیشگیری از حوادث</p>
+            <div style="margin-top:8px; display:flex; flex-wrap:wrap; justify-content:center; gap:8px;">
+                <span class="badge-standard">⛑️ انبار ایمن = سرمایه‌ای پایدار</span>
+                <span class="badge-standard">📘 بر اساس استانداردهای جهانی</span>
+                <span class="badge-standard">✅ ویژه مدیران و کارکنان انبار</span>
+            </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <!-- ===== مقدمه ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📌</span> مقدمه</div>
+                <p style="margin-bottom:10px;">
+                    انبار، محلی برای نگهداری کالا و مواد است. در صنعت برای نگهداری مواد اولیه، کالاهای نیمه‌ساخته، قطعات یدکی، محصولات و کالاهای اسقاطی از انبار استفاده می‌شود.
+                </p>
+                <div class="highlight-box gold">
+                    <strong>🔑 تقسیم‌بندی انبارها بر اساس:</strong><br>
+                    • نوع کالاهای نگهداری<br>
+                    • چگونگی و ماهیت عملکرد<br>
+                    • ساختمان<br>
+                    • انجام عملیات توسط انسان یا تجهیزات
+                </div>
+                <div class="grid-2" style="margin-top:10px;">
+                    <div class="item-box">
+                        <span class="icon">🎯</span>
+                        <span class="title">هدف انبارداری</span>
+                        <span class="desc">حفاظت و نگهداری از کالاها • جلوگیری از آسیب‌های درون و برون سازمانی • دسترسی سریع به کالاها</span>
+                    </div>
+                    <div class="item-box" style="border-color:var(--secondary);">
+                        <span class="icon">⚡</span>
+                        <span class="title">انواع انبار از نظر کالا</span>
+                        <span class="desc">مواد قابل اشتعال و انفجار • مواد فسادپذیر • مواد شیمیایی • مواد فله‌ای</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== تعاریف ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🏗️</span> تعاریف و انواع انبار از نظر ساختمانی</div>
+                <p>انبارها از نظر ساختمانی بر سه نوع هستند:</p>
+                <ol>
+                    <li><strong>انبارهای روباز</strong> (محوطه روباز)</li>
+                    <li><strong>انبارهای مسقف</strong> یا کاملاً پوشیده</li>
+                    <li><strong>انبارهای سرپوشیده</strong> بدون دیوار</li>
+                </ol>
+
+                <div class="card-subtitle">نکات احداث انبار</div>
+                <div class="grid-3">
+                    <div class="item-box">
+                        <span class="icon">🏛️</span>
+                        <span class="title">ساختار</span>
+                        <span class="desc">بلندتر از سطح زمین‌های اطراف • غیر آبگیر و نمناک • دیوار و سقف از مصالح غیرقابل اشتعال • کف دارای شیب مناسب برای دفع آب</span>
+                    </div>
+                    <div class="item-box" style="border-color:var(--secondary);">
+                        <span class="icon">🚪</span>
+                        <span class="title">دسترسی و ایمنی</span>
+                        <span class="desc">فاصله کافی برای تردد ماشین‌های آتش‌نشانی • درب‌های فلزی با سطح داخلی صاف • پنجره‌های فلزی با حفاظ و تور سیمی • تهویه مناسب به نسبت حجم انبار</span>
+                    </div>
+                    <div class="item-box" style="border-color:var(--danger);">
+                        <span class="icon">⚡</span>
+                        <span class="title">تأسیسات برقی</span>
+                        <span class="desc">سیم‌کشی توکار با لوله‌های مخصوص • کلید و پریز و روشنایی از نوع ضد جرقه • لامپ‌های دارای حفاظ با حباب • ممنوعیت استفاده از دستگاه‌های دارای حرارت شعله‌باز</span>
+                    </div>
+                </div>
+
+                <div class="highlight-box gold" style="margin-top:10px;">
+                    <strong>📏 ابعاد و فواصل استاندارد:</strong><br>
+                    • فاصله کالاها با دیوار جانبی: حداقل <strong>۶۰ تا ۱۰۰ سانتیمتر</strong><br>
+                    • فاصله بین هر ردیف کالا: حداقل <strong>۲ متر</strong><br>
+                    • ارتفاع چیدمان: حداکثر <strong>۴٫۵ متر</strong><br>
+                    • فاصله سقف تا نزدیکترین روشنایی: حداقل <strong>۱ متر</strong>
+                </div>
+            </div>
+
+            <!-- ===== کف، سقف و تجهیزات ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🧱</span> کف، سقف و تجهیزات انبار</div>
+
+                <div class="card-subtitle">کف انبار</div>
+                <ul>
+                    <li>نسبت به مایعات قابل نفوذ باشد</li>
+                    <li>سطح صاف و غیرلغزنده</li>
+                    <li>فاقد هرگونه ترک و شکاف</li>
+                    <li>به راحتی تمیز شود</li>
+                    <li>مقاومت متناسب با نوع کالا و تجهیزات</li>
+                </ul>
+
+                <div class="card-subtitle">سقف انبار</div>
+                <ul>
+                    <li>جلوگیری از ورود آب باران</li>
+                    <li>خروج دود و گرمای حاصله در هنگام آتش‌سوزی</li>
+                    <li>بازدید دوره‌ای قبل از فصل سرما و باران</li>
+                </ul>
+            </div>
+
+            <!-- ===== چیدمان کالا ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📦</span> طبقه‌بندی و چیدمان کالا در انبار</div>
+
+                <div class="card-subtitle">عوامل مهم در استقرار کالا</div>
+                <ul>
+                    <li>میزان مراجعه به انبار</li>
+                    <li>هم‌خانواده بودن اقلام</li>
+                    <li>خصوصیات اقلام</li>
+                </ul>
+
+                <div class="card-subtitle">اصول اساسی چیدمان</div>
+                <div class="grid-3">
+                    <div class="item-box">
+                        <span class="icon">📋</span>
+                        <span class="title">قبل از چیدن</span>
+                        <span class="desc">مسیر و جا برای چیدن را انتخاب کنید • کالاهای ناهمجنس را کنار هم نچینید • قفسه‌ها را از نظر شکاف و تیزی بررسی کنید</span>
+                    </div>
+                    <div class="item-box" style="border-color:var(--secondary);">
+                        <span class="icon">🔄</span>
+                        <span class="title">هنگام چیدن</span>
+                        <span class="desc">تمام مواد را در سطح صاف بچینید • اجسام سنگین‌تر را نزدیک کف قرار دهید • اصل مراجعه به کالا را رعایت کنید • هرگز ارتفاع چیدمان را تا زیر آبفشان ادامه ندهید</span>
+                    </div>
+                    <div class="item-box" style="border-color:var(--danger);">
+                        <span class="icon">🚫</span>
+                        <span class="title">ممنوعات</span>
+                        <span class="desc">از کالاها به عنوان پله استفاده نکنید • کالاها از قفسه به سمت راهرو بیرون نزند • در باز و بسته کردن کالاها احتیاط کنید</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== مسائل ایمنی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">⚠️</span> مسائل ایمنی مرتبط با فضای انبار</div>
+
+                <div class="grid-2">
+                    <div class="item-box" style="border-color:var(--danger);">
+                        <span class="icon">🟡</span>
+                        <span class="title">سطوح لیز و لغزان</span>
+                        <span class="desc">زیر پایی لغزان مانند میز، صندلی، جعبه خطرناک است • داربست‌های لغزان باعث سقوط می‌شوند • روغن ریخته شده باید شستشو و خشک شود • خاک‌اره به‌تنهایی کافی نیست</span>
+                    </div>
+                    <div class="item-box" style="border-color:var(--secondary);">
+                        <span class="icon">💡</span>
+                        <span class="title">کمبود نور و روشنایی</span>
+                        <span class="desc">تأمین روشنایی اطراف ساختمان و محوطه • پله‌ها و راهروها نیاز به روشنایی کافی دارند • کمبود نور باعث خستگی و زمینه‌ساز حادثه می‌شود</span>
+                    </div>
+                    <div class="item-box" style="border-color:var(--danger);">
+                        <span class="icon">🧪</span>
+                        <span class="title">گازهای سمی یا آتش‌گیر</span>
+                        <span class="desc">مسمومیت‌های حاد یا مزمن • ایجاد شرایط ناایمن برای آتش‌سوزی و انفجار • نیاز به هواکش ضد جرقه، هود و دستگاه‌های اعلام خطر</span>
+                    </div>
+                    <div class="item-box">
+                        <span class="icon">🚧</span>
+                        <span class="title">وجود موانع</span>
+                        <span class="desc">در راهروها، روی پله‌ها، دیوارها • برخورد با چشم‌ها یا سر • دریچه‌های باز، اشیاء زائد • جلوگیری از انباشت وسایل در راهروها</span>
+                    </div>
+                </div>
+
+                <div class="highlight-box gold">
+                    <strong>🧹 نظافت:</strong><br>
+                    کثیف و آلوده بودن محل کار از عوامل اصلی بروز حادثه و آتش‌سوزی است. مواد زائد باید در ظروف فلزی درپوش‌دار ریخته شده و روزانه از محوطه انبار خارج شود. رعایت نظم و نظافت در انبار از تعداد و شدت حوادث به مقدار زیادی می‌کاهد.
+                </div>
+            </div>
+
+            <!-- ===== مواد شیمیایی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🧪</span> نگهداری مواد شیمیایی خطرناک</div>
+
+                <div class="safety-alert">
+                    <strong>⚠️ خصوصیات ویژه مواد شیمیایی:</strong>
+                    <ul>
+                        <li>برخی با جذب اکسیژن، خودبه‌خود آتش می‌گیرند</li>
+                        <li>ترکیب برخی با هم، ماده‌ای سومی تولید می‌کنند که ممکن است منفجر شود</li>
+                        <li>برخی در اثر حرارت به ترکیبات سمی کشنده تبدیل می‌شوند</li>
+                        <li>تماس با بدن یا سایر مواد اثرات نامطلوب دارد</li>
+                    </ul>
+                </div>
+
+                <div class="card-subtitle">شرایط نگهداری</div>
+                <div class="grid-3">
+                    <div class="item-box">
+                        <span class="icon">🌡️</span>
+                        <span class="title">محیط</span>
+                        <span class="desc">خشک و عاری از رطوبت • سیستم تهویه مناسب • دور از اتصالات الکتریکی و جرقه • نزدیک محل تهویه برای دفع بخارات سمی</span>
+                    </div>
+                    <div class="item-box" style="border-color:var(--secondary);">
+                        <span class="icon">🛡️</span>
+                        <span class="title">تجهیزات و ایمنی</span>
+                        <span class="desc">درب‌های خروج اضطراری • انبارهای جداگانه برای مواد آتش‌زا • برچسب‌های مشخص کننده • بطری‌ها در قفسه‌های پایین نزدیک کف</span>
+                    </div>
+                    <div class="item-box" style="border-color:var(--danger);">
+                        <span class="icon">🚫</span>
+                        <span class="title">ممنوعات</span>
+                        <span class="desc">سیگار کشیدن و ایجاد شعله ممنوع • نگهداری در مسیر عبور و مرور ممنوع • تماس مستقیم نور خورشید با ظروف پلاستیکی ممنوع</span>
+                    </div>
+                </div>
+
+                <div class="card-subtitle">جداسازی انبارها</div>
+                <ul>
+                    <li>مواد با خطر فوق‌العاده در انبارهای جداگانه ویژه نگهداری شوند</li>
+                    <li>مایعات قابل اشتعال (بنزین، الکل) در ظروف خاص و مجزا</li>
+                    <li>مواد شیمیایی که با یکدیگر واکنش دارند، نباید کنار هم قرار گیرند</li>
+                    <li>تابلوهای اخطار با زمینه سفید و خط قرمز در کنار درب انبار نصب شود</li>
+                </ul>
+            </div>
+
+            <!-- ===== لیفتراک ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🛵</span> نکات کلیدی کار با لیفتراک و وسایل حمل‌ونقل</div>
+
+                <div class="grid-3">
+                    <div class="item-box">
+                        <span class="icon">🔧</span>
+                        <span class="title">قبل از کار</span>
+                        <span class="desc">فرد حتماً آموزش دیده باشد • قبل از هر بار استفاده، لیفتراک را بررسی کنید • کمربند ایمنی را ببندید • ترمزها تنظیم باشند</span>
+                    </div>
+                    <div class="item-box" style="border-color:var(--secondary);">
+                        <span class="icon">🚦</span>
+                        <span class="title">هنگام کار</span>
+                        <span class="desc">لیفتراک را به سمت هیچ کس نرانید • هیچ کس زیر شاخک بالابری نایستد • در تقاطع‌ها سرعت را کم کرده و بوق بزنید • اگر بار دید را مختل کرد، دنده عقب بروید</span>
+                    </div>
+                    <div class="item-box" style="border-color:var(--danger);">
+                        <span class="icon">⏹️</span>
+                        <span class="title">ترک لیفتراک</span>
+                        <span class="desc">بار کاملاً پایین آورده شود • کنترل‌ها به حالت خنثی • نیرو خاموش و ترمز گرفته شود • چرخ‌ها قفل شوند (در شیب)</span>
+                    </div>
+                </div>
+
+                <div class="card-subtitle">نکات ایمنی چرخ‌های دستی</div>
+                <ul>
+                    <li>استفاده از چرخ دستی متناسب با حجم و وزن کالا</li>
+                    <li>بارها را با طناب یا وسیله مناسب ببندید</li>
+                    <li>چرخ‌ها ماهی یکبار چک شوند</li>
+                    <li>چرخ‌های ۴ چرخ ایمن‌تر از ۳ چرخ هستند</li>
+                    <li>در سطح شیب‌دار، چرخ‌ها را با شیئی محکم ببندید</li>
+                </ul>
+            </div>
+
+            <!-- ===== آتش‌سوزی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🔥</span> پیشگیری و مقابله با آتش‌سوزی</div>
+
+                <div class="safety-alert">
+                    <strong>🔺 مثلث آتش‌سوزی:</strong>
+                    <p style="margin-top:5px;"><strong>اکسیژن + ماده سوختی + حرارت</strong> — با حذف هر یک از این سه عنصر، آتش خاموش می‌شود.</p>
+                </div>
+
+                <div class="card-subtitle">عوامل اصلی آتش‌سوزی</div>
+                <ul>
+                    <li><strong>آتش سیگار و کبریت:</strong> بی‌توجهی افراد سیگاری</li>
+                    <li><strong>وسایل الکتریکی و سیم‌کشی ناقص:</strong> جرقه در نقاط اتصال، سیم‌های داغ شده، لامپ‌های پرحرارت</li>
+                    <li><strong>شعله‌های آزاد:</strong> روشن کردن آتش در نزدیکی انبار</li>
+                    <li><strong>اشتعال خودبه‌خود:</strong> نشت مواد شیمیایی بر روی مواد قابل اشتعال</li>
+                    <li><strong>صاعقه:</strong> نبودن برق‌گیر متصل به زمین</li>
+                </ul>
+
+                <div class="card-subtitle">تجهیزات اطفای حریق</div>
+                <ul>
+                    <li>کپسول‌های خاموش‌کننده، هیدرات، CO₂</li>
+                    <li>کشف‌کننده‌های حرارت (Heat Detector)</li>
+                    <li>کشف‌کننده‌های دود (Smoke Detector) مجهز به سلول‌های فتوالکتریک</li>
+                    <li>شیرهای آب در خارج از انبار با فاصله حداکثر ۲٫۵ متر</li>
+                    <li>آزمایش سالانه لوله‌ها تحت فشار</li>
+                </ul>
+
+                <div class="highlight-box gold">
+                    <strong>🆘 اقدامات هنگام حریق:</strong><br>
+                    • کارکنان انبار باید فوراً آتش‌سوزی را به مأمورین اطلاع دهند<br>
+                    • وسایل اعلام خطر با رنگ قرمز در نقاط مختلف نصب شوند<br>
+                    • در جعبه‌های با در شیشه‌ای قرار دارند تا در موقع حریق بشکنند
+                </div>
+            </div>
+
+            <!-- ===== 5S در انبار ===== -->
+            <div class="card" style="border-right-color:var(--secondary);">
+                <div class="card-title"><span class="icon">🧹</span> آراستگی و ساماندهی انبار بر اساس 5S</div>
+
+                <div class="highlight-box gold">
+                    <strong>🔑 5S در انبار:</strong><br>
+                    <strong>S1 - تفکیک و تشخیص (SEIRI):</strong> تقسیم اقلام به ضروری و غیرضروری<br>
+                    <strong>S2 - تنظیم و ترتیب (SEITON):</strong> هر چیز در جای خود<br>
+                    <strong>S3 - تمیزی و نظافت (SEISO):</strong> پاکیزه‌سازی محیط<br>
+                    <strong>S4 - تعهد، تداوم و تلاش (SEIKETSU):</strong> حفظ و نگهداری وضعیت<br>
+                    <strong>S5 - فرهنگ سازمانی و انضباط (SHITSUKE):</strong> نهادینه‌سازی
+                </div>
+
+                <div class="card-subtitle">S1: تفکیک</div>
+                <ul>
+                    <li>تهیه فهرست کامل از اقلام موجود در انبار</li>
+                    <li>جداسازی اجناس مورد نیاز از راکد، غیرقابل مصرف و ضایعات</li>
+                    <li>اجناس غیرقابل مصرف به واحدهای مربوط تحویل شوند</li>
+                    <li>ضایعات قابل بازیافت به واحد مربوط تحویل شوند</li>
+                    <li>قطعات قابل تعمیر در اختیار واحد تعمیرات قرار گیرند</li>
+                </ul>
+
+                <div class="card-subtitle">S2: تنظیم و ترتیب</div>
+                <ul>
+                    <li>اجناس بر اساس تشابه صفات و کاربرد در دسته‌ها قرار گیرند</li>
+                    <li>تهیه نقشه محیط استقرار اجناس در داخل و خارج ساختمان</li>
+                    <li>کدگذاری محل استقرار و نصب برچسب</li>
+                    <li>اجناس پر مصرف در دسترس‌ترین محل قرار گیرند</li>
+                    <li>خط‌کشی راهروها و محل عبور لیفتراک</li>
+                </ul>
+
+                <div class="card-subtitle">S3: تمیزی و نظافت</div>
+                <ul>
+                    <li>رنگ‌آمیزی قفسه‌ها و دیوارها با رنگ‌های مناسب</li>
+                    <li>مشخص کردن محل‌های خطرناک با رنگ قرمز</li>
+                    <li>نظافت اجناس داخل قفسه‌ها</li>
+                    <li>سیمانکاری و نگهداری کف انبار</li>
+                    <li>استفاده از لیفتراک برقی در انبارهای پوشیده</li>
+                    <li>نصب سیستم تهویه مناسب</li>
+                </ul>
+
+                <div class="card-subtitle">S4: تعهد، تداوم و تلاش</div>
+                <ul>
+                    <li>افزایش تعهد کارکنان با تعهد و علاقه‌مندی مدیران</li>
+                    <li>ساماندهی روزانه به مدت حداقل ۳ دقیقه در شروع کار</li>
+                    <li>مستندسازی امور ساماندهی</li>
+                    <li>بازنگری و یافتن مشکلات برای اقدامات اصلاحی</li>
+                </ul>
+
+                <div class="card-subtitle">S5: فرهنگ سازمانی و انضباط</div>
+                <ul>
+                    <li>پذیرش و اجرای نظم و نظافت توسط کارکنان</li>
+                    <li>فرهنگ‌سازی شامل رفتارها، ادراکات و ارزش‌های مشترک</li>
+                    <li>انجام دقیق، درست و به‌موقع تکالیف</li>
+                </ul>
+            </div>
+
+            <!-- ===== چک‌لیست ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📋</span> چک‌لیست بازدید از انبارها</div>
+                <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:10px;">
+                    <strong>راهنما:</strong> ✅ = رعایت اصول • ❌ = عدم رعایت • ➖ = سؤال مرتبط نیست
+                </p>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr><th>ردیف</th><th>موضوع</th><th>✅</th><th>❌</th><th>➖</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>۱</td><td>آیا کالا و مواد موجود در انبار بیمه شده‌اند؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۲</td><td>آیا موقعیت ساختمان انبار برای عبور و مرور وسایل نقلیه مناسب است؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۳</td><td>آیا کف انبار از جنس بتن یا سنگ‌فرش است؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۴</td><td>آیا در انبار دستگاه‌های هواکش نصب شده است؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۵</td><td>آیا تهویه در انبار به خوبی صورت می‌گیرد؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۶</td><td>آیا محوطه انبار از پوشال، خاشاک و مواد پراکنده پاک است؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۷</td><td>آیا راهروهای طولی انبار خط‌کشی شده‌اند؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۸</td><td>آیا کارکنان انبار آموزش‌های ایمنی و آتش‌نشانی را فرا گرفته‌اند؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۹</td><td>آیا وسایل موتوری داخل انبار مجهز به کپسول آتش‌نشانی هستند؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۱۰</td><td>آیا در انبار جعبه کمک‌های اولیه نصب شده است؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۱۱</td><td>آیا در اطراف بارانداز و انبار روشنایی مناسبی پیش‌بینی شده است؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۱۲</td><td>آیا روزانه توسط مسئول ایمنی بازدید و ثبت می‌شود؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۱۳</td><td>آیا علائم هشداردهنده استعمال دخانیات نصب شده است؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۱۴</td><td>آیا کالا حداقل ۵ سانتیمتر از سطح زمین فاصله دارد؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۱۵</td><td>آیا مواد شیمیایی با قابلیت اشتعال با فاصله ۱۵ متر از سایر مواد قرار دارند؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۱۶</td><td>آیا ظروف و بشکه‌های خالی برای انتقال محتویات موجود است؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۱۷</td><td>آیا از پالت برای انبار کردن مواد استفاده می‌شود؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۱۸</td><td>آیا راه‌های عبور علامت‌گذاری و قابل دسترس هستند؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۱۹</td><td>آیا کالاهای انبار شده در فاصله ایمن از وسایل برقی قرار دارند؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۲۰</td><td>آیا مایعات قابل اشتعال در ظروف سربسته نگهداری می‌شوند؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۲۱</td><td>آیا کلیه وسایل و تجهیزات برقی به طور منظم بازرسی می‌شوند؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۲۲</td><td>آیا کلیدهای برق دارای پوشش ایمنی هستند؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۲۳</td><td>آیا سیم‌کشی برق توکار و استاندارد است؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۲۴</td><td>آیا دستگاه‌های گرمایشی و سرمایشی ایمن هستند؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۲۵</td><td>آیا مواد شیمیایی و سموم برچسب‌گذاری شده‌اند؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۲۶</td><td>آیا سیستم خنک‌کننده و گرم‌کننده طوری طراحی شده که گرم و سرد شدن مستقیم مواد را موجب نشود؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۲۷</td><td>آیا مواد شیمیایی در معرض تابش مستقیم نور خورشید قرار ندارند؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۲۸</td><td>آیا روی آسیب دیده و نشتی بسته‌بندی برچسب‌گذاری می‌شود؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۲۹</td><td>آیا کلیه تجهیزات آتش‌نشانی به طور منظم تست می‌شوند؟</td><td></td><td></td><td></td></tr>
+                            <tr><td>۳۰</td><td>آیا راه‌های خروج اضطراری مشخص و باز هستند؟</td><td></td><td></td><td></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===== جمع‌بندی ===== -->
+            <div class="card" style="border-right-color:#b45309; background:rgba(255,248,240,0.4);">
+                <div class="card-title"><span class="icon">📌</span> جمع‌بندی و نتایج</div>
+                <div class="highlight-box gold">
+                    <strong>🔑 انبار ایمن = سرمایه‌ای پایدار</strong><br>
+                    رعایت نکردن نکات ایمنی در انبارها ضایعات و خسارات جانی و مالی فراوانی وارد می‌کند. موجودی‌های هر انباری بخش مهمی از دارایی‌های سازمان را تشکیل می‌دهد.
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-top:15px;">
+                    <div class="tip-item primary-tip"><strong>🔹 علل حوادث</strong><br>عمل ناایمن • شرایط ناایمن</div>
+                    <div class="tip-item warning-tip"><strong>🔹 آسیب‌ها</strong><br>طبیعی • صنعتی • انسانی</div>
+                    <div class="tip-item info-tip"><strong>🔹 نگهداری صحیح</strong><br>جلوگیری از آتش‌سوزی • کنترل موجودی • توجه به خصوصیات کالاها</div>
+                    <div class="tip-item primary-tip"><strong>🔹 سه عامل ضروری</strong><br>نیروی انسانی کارآمد • نظام صحیح انبارداری • وسایل و تجهیزات مناسب</div>
+                </div>
+                <div class="highlight-box gold" style="margin-top:15px;">
+                    🚀 <strong>نتیجه نهایی:</strong><br>
+                    انبارداری صحیح و دفع ضایعات و زباله‌ها، از عوامل مهم جلوگیری از حریق است. وجود سیم اتصال به زمین برای تأسیسات و ماشین‌آلات الکتریکی، کمک زیادی به ایمنی خواهد کرد. همچنین استفاده از علائم و تابلوهای راهنمایی، خط‌کشی کف و محوطه، و آموزش مداوم کارکنان، نقش بسزایی در کاهش حوادث انبار دارد.
+                </div>
+            </div>
+
+
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            تهیه شده توسط <span class="highlight">شرکت معدنی و صنایع معدنی درکاو</span><br>
+            <span style="direction:ltr; display:inline-block;">📞 09178680173</span>
+        </div>
+
+    </div>
+
+    <script>
+        // اضافه کردن قابلیت کپی متن با کلیک
+        document.querySelectorAll('.tip-item, .item-box, .highlight-box, .card ul li, .card ol li, .spec-table tr, .safety-alert').forEach(el => {
+            el.style.cursor = 'pointer';
+            el.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') return;
+                const text = this.textContent.trim();
+                navigator.clipboard.writeText(text).then(() => {
+                    const origBg = this.style.background;
+                    this.style.background = '#d4edda';
+                    setTimeout(() => {
+                        this.style.background = origBg || '';
+                    }, 400);
+                });
+            });
+        });
+
+        console.log('✅ آموزش جامع ایمنی در انبار بارگذاری شد.');
+        console.log('📋 کلیک روی هر متن برای کپی کردن');
+        console.log('📦 شامل: تعاریف، چیدمان، خطرات، مواد شیمیایی، لیفتراک، آتش‌سوزی، 5S، چک‌لیست');
+    </script>
+
+<script src="hse-common.js"></script>
+
+<script src="assets/js/sw-register.js"></script>
+</body>
+</html>

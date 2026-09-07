@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<script>window.fetchWithTimeout=window.fetchWithTimeout||function(url,options,timeoutMs){timeoutMs=timeoutMs||12000;var controller=new AbortController();var id=setTimeout(function(){controller.abort();},timeoutMs);var opts=Object.assign({},options||{},{signal:controller.signal});return fetch(url,opts).finally(function(){clearTimeout(id);});};</script>
+
+
+<script>
+/* ============================================================
+   ★ امنیت: گیت احراز هویت (سمت کلاینت)
+   هیچ صفحه‌ای بدون ورود به سامانه باز نمی‌شود. محتوای صفحه
+   مخفی می‌ماند و کاربر به صفحه ورود هدایت می‌شود.
+   (لایه نمایشی؛ لایه امنیتی واقعی در بکاند اعمال می‌شود.)
+   ============================================================ */
+(function(){
+  var ok = false;
+  try {
+    var _u = JSON.parse(localStorage.getItem('hse_user_activated') || 'null');
+    ok = !!(_u && _u.personnel && _u.fullname);
+  } catch(e) { ok = false; }
+  if (ok) return; // مجاز - ادامه می‌دهد
+
+  // پنهان‌کردن کل محتوا و نمایش قفل
+  var hide = function(){
+    try {
+      var d = document;
+      // مخفی کردن همه عناصر
+      var all = d.body ? d.body.children : [];
+      for (var i=0;i<all.length;i++){ all[i].style.display='none'; }
+      var lock = d.createElement('div');
+      lock.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#0f172a;color:#f8fafc;'
+        +'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+        +'font-family:Tahoma,sans-serif;text-align:center;padding:20px;direction:rtl;';
+      lock.innerHTML = '<div style="font-size:60px;margin-bottom:10px;">🔒</div>'
+        +'<h2 style="margin:0 0 8px;">دسترسی محدود است</h2>'
+        +'<p style="margin:0 0 20px;color:#94a3b8;">لطفاً ابتدا از صفحه اصلی وارد سامانه شوید.</p>'
+        +'<a href="index.html" style="background:#ff6208;color:#fff;padding:10px 26px;'
+        +'border-radius:10px;text-decoration:none;font-weight:bold;">بازگشت به صفحه ورود</a>';
+      d.body.appendChild(lock);
+    } catch(e){}
+  };
+  if (document.body) hide(); else document.addEventListener('DOMContentLoaded', hide);
+  setTimeout(function(){ try{ location.replace('index.html'); }catch(e){} }, 2500);
+})();
+</script>
+
+    <meta charset="UTF-8" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#1e3c5c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HSE درکاو" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+    <title>فرم گزارش شبه حادثه | آژند همت توس [v3.1]</title>
+
+    <style>
+        :root {
+            --primary: #ff6208;
+            --primary-hover: #e05300;
+            --secondary: #f39c12;
+            --success: #27ae60;
+            --safety: #2c6e4e;
+            --danger: #c0392b;
+            --dark-blue: #1e3c5c;
+            --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #dfe7f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --text-main: #1e2a2e;
+            --text-muted: #64748b;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body { padding-bottom: 75px !important;
+            background: var(--bg-gradient);
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text-main);
+            line-height: 1.8;
+        }
+
+        .main-container {
+            max-width: 550px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            background: var(--dark-blue);
+            padding: 30px 20px;
+            color: white;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+            position: relative;
+        }
+        .header h1 {
+            font-size: 1.6rem;
+            margin-bottom: 5px;
+        }
+        .header h1 .icon {
+            margin-left: 10px;
+        }
+        .header p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        .header .back-home {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .header .back-home:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+        .card:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        }
+        .card-title {
+            color: var(--dark-blue);
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-right: 4px solid var(--primary);
+            padding-right: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title .icon {
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            color: var(--text-main);
+        }
+        .form-group label .required {
+            color: var(--danger);
+            margin-right: 2px;
+        }
+        .form-group label .hint {
+            font-weight: 400;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid rgba(0, 0, 0, 0.06);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            background: #f8fafc;
+            color: var(--text-main);
+            transition: var(--transition);
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(255, 98, 8, 0.06);
+        }
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 14px center;
+            padding-left: 36px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .submit-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 98, 8, 0.3);
+        }
+        .submit-btn:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .status-msg {
+            display: none;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-top: 14px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .status-msg.success {
+            display: block;
+            background: #dcfce7;
+            color: #166534;
+            border: 2px solid #86efac;
+        }
+        .status-msg.error {
+            display: block;
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #fca5a5;
+        }
+        .status-msg.loading {
+            display: block;
+            background: #e0f2fe;
+            color: #0369a1;
+            border: 2px solid #7dd3fc;
+        }
+
+        .note-box {
+            background: #f1f6fa;
+            padding: 14px 18px;
+            border-radius: 12px;
+            margin-top: 16px;
+            font-size: 0.85rem;
+            color: #475569;
+            border-right: 4px solid var(--primary);
+        }
+        .note-box strong {
+            color: var(--dark-blue);
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .footer .highlight {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        @media(max-width:600px) {
+            .header h1 {
+                font-size: 1.2rem;
+            }
+            .header .back-home {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+                left: 10px;
+            }
+            .content {
+                padding: 15px;
+            }
+            .card {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="main-container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <a href="index.html?v=202606300519" class="back-home" title="بازگشت به صفحه اصلی">🏠</a>
+            <h1><span class="icon">📝</span> فرم گزارش شبه حادثه</h1>
+            <p>ثبت و گزارش شرایط ناایمن، حوادث نزدیک به وقوع و خطرات محیط کار</p>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <div class="card">
+                <div class="card-title"><span class="icon">📋</span> اطلاعات گزارش</div>
+
+                <form id="hazardForm" action="https://formspree.io/f/xpqgzlqo" method="POST">
+
+                    <div class="form-group">
+                        <label>محل دقیق مشاهده خطر یا دپو: <span class="required">*</span></label>
+                        <input type="text" id="reportLocation" name="محل دقیق خطر" class="form-control" placeholder="مثال: پله سوم استخراج، سیلوی بارگیری" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>نوع ریسک یا مغایرت ایمنی: <span class="required">*</span></label>
+                        <select id="reportType" name="نوع ریسک ایمنی" class="form-control" required>
+                            <option value="">— انتخاب کنید —</option>
+                            <option value="ناایمنی ماشین‌آلات">نقص فنی یا ناایمنی ماشین‌آلات</option>
+                            <option value="عدم استفاده از PPE">عدم استفاده پرسنل از تجهیزات حفاظت فردی</option>
+                            <option value="ریزش دپو یا پله">ریزش دپو، پله یا مشکلات جاده‌ای معدن</option>
+                            <option value="خطرات برقی/جوشکاری">خطرات ناشی از کابل کشی یا جوشکاری</option>
+                            <option value="سایر">سایر</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>شرح مختصر مغایرت و پیشنهاد اصلاحی: <span class="required">*</span></label>
+                        <textarea id="reportDesc" name="شرح و پیشنهاد" class="form-control" rows="3" placeholder="توضیحات کامل خطر مشاهده شده..." required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>نام یا شماره تماس شما <span class="hint">(اختیاری - جهت پیگیری)</span></label>
+                        <input type="text" id="reportReporter" name="مشخصات گزارش‌دهنده" class="form-control" placeholder="اگر می‌خواهید ناشناس بمانید، خالی بگذارید">
+                    </div>
+
+                    <button type="submit" id="submitReportBtn" class="submit-btn">
+                        🚨 ارسال گزارش شبه حادثه
+                    </button>
+                    <div id="statusMsg" class="status-msg"></div>
+
+                </form>
+
+                <div class="note-box">
+                    <strong>💡 نکته مهم:</strong> گزارش شبه‌حادثه (Near Miss) به پیشگیری از حوادث واقعی کمک می‌کند.
+                    <br>هر شبه‌حادثه، یک فرصت برای بهبود ایمنی است.
+                </div>
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            ✅ توسعه فنی: <span class="highlight">شرکت معدنی و صنایع معدنی درکاو</span> &nbsp;|&nbsp; 📞 09178680173
+        </div>
+
+    </div>
+
+    <script>
+        // ============================================================
+        // ارسال فرم به ایمیل (Formspree) + ثبت در گوگل‌شیت (Apps Script)
+        // ============================================================
+        const NEARMISS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzDZiadFyzTOgSpMzSo9b_xQ29N_ZHD2vIOxmswrl0O2YNod2prV1qCN34myNsp653OjQ/exec';
+
+        const form = document.getElementById('hazardForm');
+        const submitBtn = document.getElementById('submitReportBtn');
+        const statusMsg = document.getElementById('statusMsg');
+
+        function showStatus(type, message) {
+            statusMsg.className = 'status-msg ' + type;
+            statusMsg.textContent = message;
+            clearTimeout(window.statusTimeout);
+            window.statusTimeout = setTimeout(() => {
+                statusMsg.className = 'status-msg';
+            }, 8000);
+        }
+
+        // ارسال موازی به شیت (بدون اینکه روی نتیجه ایمیل اثر بگذارد)
+        function sendToSheet() {
+            // ★ امنیت: ارسال شماره پرسنلی کاربر واردشده برای کنترل مجوز سمت سرور
+            let pUser = null;
+            try { const _r = localStorage.getItem('hse_user_activated'); if (_r) pUser = JSON.parse(_r); } catch (e) {}
+            const params = new URLSearchParams({
+                action: 'near_miss_report',
+                personnel: (pUser && pUser.personnel) ? String(pUser.personnel) : '',
+                location: document.getElementById('reportLocation').value.trim(),
+                riskType: document.getElementById('reportType').value,
+                description: document.getElementById('reportDesc').value.trim(),
+                reporter: document.getElementById('reportReporter').value.trim() || ((pUser && pUser.fullname) || 'ناشناس'),
+                datetime: new Date().toLocaleString('fa-IR')
+            });
+            // ★ امنیت: نتیجه سرور برگردانده می‌شود تا فقط پس از تأیید مجوز، ایمیل ارسال شود
+            return fetch(NEARMISS_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params.toString()
+            }).then(function(r){ return r.json(); }).catch(function(){ return null; });
+        }
+
+        form.onsubmit = function(e) {
+            e.preventDefault();
+            submitBtn.disabled = true;
+            submitBtn.textContent = "⏳ در حال ارسال...";
+            showStatus('loading', '⏳ در حال ارسال گزارش...');
+
+            const formData = new FormData(form);
+
+            // ★ امنیت: ابتدا ثبت در شیت (که سمت سرور مجوز را بررسی می‌کند) انجام می‌شود؛
+            //   ارسال ایمیل (Formspree) فقط در صورت موفقیت و تأیید مجوز انجام می‌شود.
+            (async () => {
+                const sheetResult = await sendToSheet();
+                if (!sheetResult || !sheetResult.ok) {
+                    showStatus('error', '⛔ امکان ثبت گزارش وجود ندارد (مجوز یا خطای سرور).');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "🚨 ارسال گزارش شبه حادثه";
+                    return;
+                }
+                // ثبت در شیت موفق شد → ارسال ایمیل به Formspree
+                try {
+                    const resp = await fetchWithTimeout(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'Accept': 'application/json' }
+                    }, 25000);
+                    if (resp.ok) {
+                        showStatus('success', '✅ گزارش با موفقیت ثبت و ارسال شد.');
+                        form.reset();
+                        setTimeout(() => { window.location.href = 'index.html'; }, 2500);
+                    } else {
+                        showStatus('error', '⚠️ گزارش ثبت شد اما ارسال ایمیل ناموفق بود.');
+                        form.reset();
+                        setTimeout(() => { window.location.href = 'index.html'; }, 2500);
+                    }
+                } catch (e) {
+                    showStatus('error', '⚠️ گزارش ثبت شد اما خطای شبکه برای ایمیل رخ داد.');
+                    form.reset();
+                }
+                submitBtn.disabled = false;
+                submitBtn.textContent = "🚨 ارسال گزارش شبه حادثه";
+            })();
+        };
+
+        console.log('✅ فرم گزارش شبه‌حادثه بارگذاری شد.');
+    </script>
+
+<script src="hse-common.js"></script>
+
+<script src="assets/js/sw-register.js"></script>
+</body>
+</html>

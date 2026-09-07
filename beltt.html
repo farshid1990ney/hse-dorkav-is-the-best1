@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+
+<script>
+/* ============================================================
+   ★ امنیت: گیت احراز هویت (سمت کلاینت)
+   هیچ صفحه‌ای بدون ورود به سامانه باز نمی‌شود. محتوای صفحه
+   مخفی می‌ماند و کاربر به صفحه ورود هدایت می‌شود.
+   (لایه نمایشی؛ لایه امنیتی واقعی در بکاند اعمال می‌شود.)
+   ============================================================ */
+(function(){
+  var ok = false;
+  try {
+    var _u = JSON.parse(localStorage.getItem('hse_user_activated') || 'null');
+    ok = !!(_u && _u.personnel && _u.fullname);
+  } catch(e) { ok = false; }
+  if (ok) return; // مجاز - ادامه می‌دهد
+
+  // پنهان‌کردن کل محتوا و نمایش قفل
+  var hide = function(){
+    try {
+      var d = document;
+      // مخفی کردن همه عناصر
+      var all = d.body ? d.body.children : [];
+      for (var i=0;i<all.length;i++){ all[i].style.display='none'; }
+      var lock = d.createElement('div');
+      lock.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#0f172a;color:#f8fafc;'
+        +'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+        +'font-family:Tahoma,sans-serif;text-align:center;padding:20px;direction:rtl;';
+      lock.innerHTML = '<div style="font-size:60px;margin-bottom:10px;">🔒</div>'
+        +'<h2 style="margin:0 0 8px;">دسترسی محدود است</h2>'
+        +'<p style="margin:0 0 20px;color:#94a3b8;">لطفاً ابتدا از صفحه اصلی وارد سامانه شوید.</p>'
+        +'<a href="index.html" style="background:#ff6208;color:#fff;padding:10px 26px;'
+        +'border-radius:10px;text-decoration:none;font-weight:bold;">بازگشت به صفحه ورود</a>';
+      d.body.appendChild(lock);
+    } catch(e){}
+  };
+  if (document.body) hide(); else document.addEventListener('DOMContentLoaded', hide);
+  setTimeout(function(){ try{ location.replace('index.html'); }catch(e){} }, 2500);
+})();
+</script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#1e3c5c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HSE درکاو" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+    <title>راهنمای جامع رنگ‌بندی بلت (تسمه حمل بار)</title>
+
+    <style>
+        :root {
+            --primary: #ff6208;
+            --primary-hover: #e05300;
+            --secondary: #f39c12;
+            --success: #27ae60;
+            --safety: #2c6e4e;
+            --danger: #c0392b;
+            --dark-blue: #1e3c5c;
+            --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #dfe7f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --text-main: #1e2a2e;
+            --text-muted: #64748b;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body { padding-bottom: 75px !important;
+            background: var(--bg-gradient);
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text-main);
+            line-height: 1.8;
+        }
+
+        .main-container {
+            max-width: 1100px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            background: var(--dark-blue);
+            padding: 35px 20px;
+            color: white;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+            position: relative;
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        .header h1 .icon {
+            margin-left: 10px;
+        }
+        .header p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        .header .back-home {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .header .back-home:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+        .card:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        }
+        .card-title {
+            color: var(--dark-blue);
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-right: 4px solid var(--primary);
+            padding-right: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title .icon {
+            font-size: 1.5rem;
+        }
+
+        .card-subtitle {
+            color: var(--primary);
+            font-size: 1.05rem;
+            font-weight: bold;
+            margin: 18px 0 10px 0;
+            border-bottom: 2px solid rgba(255, 98, 8, 0.15);
+            padding-bottom: 6px;
+        }
+
+        .selector-area {
+            text-align: center;
+            padding: 10px 0;
+        }
+        .selector-area label {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--dark-blue);
+            display: block;
+            margin-bottom: 10px;
+        }
+        .selector-area select {
+            padding: 12px 20px;
+            border-radius: var(--border-radius-sm);
+            border: 2px solid var(--dark-blue);
+            width: 100%;
+            max-width: 380px;
+            font-size: 1.05rem;
+            background-color: #f8f9fa;
+            text-align: center;
+            transition: var(--transition);
+            cursor: pointer;
+            color: var(--text-main);
+        }
+        .selector-area select:hover {
+            border-color: var(--primary);
+            background-color: #fff;
+        }
+        .selector-area select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 98, 8, 0.2);
+        }
+
+        .belt-info {
+            margin-top: 15px;
+            padding: 18px 22px;
+            border-radius: var(--border-radius-sm);
+            background: rgba(255, 98, 8, 0.04);
+            border: 2px solid rgba(255, 98, 8, 0.15);
+            display: none;
+            text-align: right;
+            animation: fadeIn 0.3s ease;
+        }
+        .belt-info.show {
+            display: block;
+        }
+        .belt-info .capacity {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        .belt-info .usage {
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+        .belt-info .detail {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+            padding: 10px 14px;
+            background: rgba(0,0,0,0.02);
+            border-radius: var(--border-radius-sm);
+        }
+
+        .spec-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 0.95rem;
+        }
+        .spec-table th,
+        .spec-table td {
+            padding: 10px 12px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        .spec-table th {
+            background: var(--dark-blue);
+            color: white;
+            font-weight: bold;
+        }
+        .spec-table tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .spec-table .color-indicator {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            vertical-align: middle;
+            margin-left: 6px;
+        }
+
+        .method-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin: 10px 0;
+        }
+        .method-card {
+            background: #f8fafc;
+            padding: 16px 18px;
+            border-radius: var(--border-radius-sm);
+            border-right: 4px solid var(--primary);
+            transition: var(--transition);
+        }
+        .method-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+        }
+        .method-card .method-title {
+            font-weight: 700;
+            color: var(--dark-blue);
+            font-size: 1rem;
+            margin-bottom: 6px;
+        }
+        .method-card .method-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        .method-card .method-example {
+            font-size: 0.85rem;
+            color: var(--primary);
+            font-weight: 600;
+            margin-top: 6px;
+        }
+
+        .guide-section {
+            background: rgba(44, 110, 78, 0.04);
+            border-radius: var(--border-radius-sm);
+            padding: 18px;
+            margin-top: 15px;
+            border-right: 4px solid var(--safety);
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .guide-section.show {
+            display: block;
+        }
+        .guide-section h3 {
+            color: var(--safety);
+            margin-bottom: 12px;
+        }
+        .guide-section ul {
+            padding-right: 20px;
+            margin: 10px 0;
+        }
+        .guide-section ul li {
+            margin-bottom: 6px;
+        }
+
+        .highlight-box {
+            background: rgba(192, 57, 43, 0.06);
+            border-right: 3px solid var(--danger);
+            padding: 12px 15px;
+            margin: 10px 0;
+            border-radius: var(--border-radius-sm);
+        }
+        .highlight-box strong {
+            color: var(--danger);
+        }
+
+        .success-box-inner {
+            background: rgba(39, 174, 96, 0.06);
+            padding: 12px 15px;
+            border-radius: var(--border-radius-sm);
+            border-right: 3px solid var(--success);
+            margin-bottom: 12px;
+        }
+        .success-box-inner h4 {
+            color: var(--success);
+            margin-bottom: 8px;
+        }
+
+        .warning-box-inner {
+            background: rgba(243, 156, 18, 0.06);
+            padding: 12px 15px;
+            border-radius: var(--border-radius-sm);
+            border-right: 3px solid var(--secondary);
+            margin-top: 12px;
+        }
+        .warning-box-inner h4 {
+            color: var(--secondary);
+            margin-bottom: 8px;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+        }
+        .btn-guide {
+            background: var(--safety);
+            color: white;
+        }
+        .btn-guide:hover {
+            background: #1e4f3a;
+        }
+        .btn-back {
+            background: #cbd5e1;
+            color: #334155;
+        }
+        .btn-back:hover {
+            background: #b0bec5;
+        }
+        .btn-primary-custom {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-primary-custom:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .footer .highlight {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .info-note {
+            background: #f1f6fa;
+            padding: 14px 20px;
+            border-radius: var(--border-radius-sm);
+            margin-top: 12px;
+            border-right: 4px solid #2563eb;
+            font-size: 0.92rem;
+            color: var(--text-muted);
+        }
+        .info-note strong {
+            color: var(--dark-blue);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media(max-width:700px) {
+            .content {
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            .header .back-home {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+                left: 10px;
+            }
+            .method-grid {
+                grid-template-columns: 1fr;
+            }
+            .spec-table {
+                font-size: 0.75rem;
+            }
+            .spec-table th,
+            .spec-table td {
+                padding: 6px 8px;
+            }
+            .selector-area select {
+                max-width: 100%;
+            }
+            .btn-row {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <a href="index.html" class="back-home" title="بازگشت به صفحه اصلی">🏠</a>
+            <h1><span class="icon">🔴</span> راهنمای جامع رنگ‌بندی بلت</h1>
+            <p>شناسایی ظرفیت تسمه‌های حمل بار (Belt) بر اساس استاندارد EN 1492-1 و EN 1492-2</p>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <!-- ============================================================ -->
+            <!-- مقدمه -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📌</span> مقدمه</div>
+                <p>
+                    <strong>بلت‌ها (تسمه‌های حمل بار)</strong> جزو ابزارهای کلیدی در صنعت حمل و نقل و ساخت‌وساز به حساب می‌آیند. 
+                    بلت‌ها به‌عنوان اتصالاتی برای بارگذاری و جابجایی مواد سنگین، نقش مهمی دارند. 
+                    یکی از ویژگی‌های اصلی بلت‌ها، <strong>رنگ‌های مختلف</strong> آن‌هاست که به شناسایی ظرفیت و استفاده‌های خاص هر یک کمک می‌کند.
+                </p>
+                <p style="margin-top:10px;">
+                    در این راهنما، با <strong>۳ روش آسان و کاربردی</strong> برای تشخیص سریع ظرفیت تحمل بار تسمه‌های حمل بار آشنا می‌شوید:
+                </p>
+                <ul style="margin-top:8px;">
+                    <li><strong>روش ۱:</strong> کد رنگ تسمه بر اساس تناژ</li>
+                    <li><strong>روش ۲:</strong> شمارش دوخت‌های مشکی روی تسمه</li>
+                    <li><strong>روش ۳:</strong> بررسی برچسب تولیدکننده</li>
+                </ul>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- انتخاب رنگ -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🎯</span> انتخاب و بررسی رنگ بلت</div>
+                <div class="selector-area">
+                    <label for="beltColor">لطفاً رنگ بلت مورد نظر را انتخاب کنید:</label>
+                    <select id="beltColor" onchange="showBeltInfo()">
+                        <option value="" disabled selected>— انتخاب کنید —</option>
+                        <option value="purple">🟣 بنفش — ظرفیت ۱ تن</option>
+                        <option value="green">🟢 سبز — ظرفیت ۲ تن</option>
+                        <option value="yellow">🟡 زرد — ظرفیت ۳ تن</option>
+                        <option value="gray">⚪ خاکستری — ظرفیت ۴ تن</option>
+                        <option value="red">🔴 قرمز — ظرفیت ۵ تن</option>
+                        <option value="brown">🟤 قهوه‌ای — ظرفیت ۶ تن</option>
+                        <option value="blue">🔵 آبی — ظرفیت ۸ تن</option>
+                        <option value="orange">🟠 نارنجی — ظرفیت ۱۰ و ۱۲ تن</option>
+                    </select>
+                </div>
+
+                <div class="belt-info" id="beltInfo">
+                    <div class="capacity" id="capacityDisplay">—</div>
+                    <div class="usage" id="usageDisplay">—</div>
+                    <div class="detail" id="detailDisplay"></div>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- جدول مشخصات فنی کامل -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📋</span> جدول کامل رنگ‌بندی و ظرفیت بلت‌ها</div>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr>
+                                <th>رنگ</th>
+                                <th>ظرفیت (تن)</th>
+                                <th>رنگ استاندارد</th>
+                                <th>کاربرد اصلی</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>🟣 بنفش</td><td>۱</td><td><span class="color-indicator" style="background:#8e44ad;"></span> بنفش</td><td>تجهیزات سبک و لوازم جانبی</td></tr>
+                            <tr><td>🟢 سبز</td><td>۲</td><td><span class="color-indicator" style="background:#27ae60;"></span> سبز</td><td>پروژه‌های ساختمانی و مصالح متوسط</td></tr>
+                            <tr><td>🟡 زرد</td><td>۳</td><td><span class="color-indicator" style="background:#f1c40f;"></span> زرد</td><td>ماشین‌آلات و پروژه‌های بزرگ صنعتی</td></tr>
+                            <tr><td>⚪ خاکستری</td><td>۴</td><td><span class="color-indicator" style="background:#95a5a6;"></span> خاکستری</td><td>صنایع سنگین و استخراج معادن</td></tr>
+                            <tr><td>🔴 قرمز</td><td>۵</td><td><span class="color-indicator" style="background:#e74c3c;"></span> قرمز</td><td>بارهای حساس با ایمنی بالا</td></tr>
+                            <tr><td>🟤 قهوه‌ای</td><td>۶</td><td><span class="color-indicator" style="background:#8d6e63;"></span> قهوه‌ای</td><td>بارهای فوق‌العاده سنگین</td></tr>
+                            <tr><td>🔵 آبی</td><td>۸</td><td><span class="color-indicator" style="background:#2980b9;"></span> آبی</td><td>بارهای صنعتی سنگین</td></tr>
+                            <tr><td>🟠 نارنجی</td><td>۱۰ و ۱۲</td><td><span class="color-indicator" style="background:#e67e22;"></span> نارنجی</td><td>بارهای حجیم و فوق‌سنگین</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="info-note">
+                    <strong>📌 نکته مهم:</strong> رنگ‌ها بر اساس استاندارد بین‌المللی <strong>EN 1492-1</strong> (تسمه‌های بافته شده) و <strong>EN 1492-2</strong> (تسمه‌های گرد) طبقه‌بندی شده‌اند.
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- ۳ روش شناسایی ظرفیت -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🔍</span> ۳ روش آسان برای شناسایی SWL بلت</div>
+
+                <div class="method-grid">
+                    <div class="method-card">
+                        <div class="method-title">✅ روش ۱: کد رنگ</div>
+                        <div class="method-desc">هر رنگ نشان‌دهنده ظرفیت مشخصی است. طبق جدول بالا، رنگ بلت را با ظرفیت آن مطابقت دهید.</div>
+                        <div class="method-example">مثال: بنفش = ۱ تن، سبز = ۲ تن، زرد = ۳ تن</div>
+                    </div>
+                    <div class="method-card">
+                        <div class="method-title">✅ روش ۲: دوخت‌های مشکی</div>
+                        <div class="method-desc">تعداد دوخت‌های مشکی روی بلت نشان‌دهنده ظرفیت آن است.</div>
+                        <div class="method-example">مثال: ۱ دوخت = ۱ تن | ۲ دوخت = ۲ تن | ۳ دوخت = ۳ تن</div>
+                    </div>
+                    <div class="method-card">
+                        <div class="method-title">✅ روش ۳: برچسب تولیدکننده</div>
+                        <div class="method-desc">برای بلت‌های بالای ۱۲ تن، برچسب تولیدکننده شامل تمام اطلاعات ظرفیت است.</div>
+                        <div class="method-example">مثال: برچسب WLL، SWL، تاریخ تولید و شماره سریال</div>
+                    </div>
+                </div>
+
+                <!-- جدول دوخت‌های مشکی -->
+                <div class="card-subtitle" style="margin-top:20px;">📊 تعداد دوخت‌های مشکی و ظرفیت</div>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr><th>تعداد دوخت مشکی</th><th>ظرفیت (تن)</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>۱</td><td>۱ تن</td></tr>
+                            <tr><td>۲</td><td>۲ تن</td></tr>
+                            <tr><td>۳</td><td>۳ تن</td></tr>
+                            <tr><td>۴</td><td>۴ تن</td></tr>
+                            <tr><td>۶</td><td>۶ تن</td></tr>
+                            <tr><td>۷</td><td>۷ تن</td></tr>
+                            <tr><td>۸</td><td>۸ تن</td></tr>
+                            <tr><td>۹</td><td>۹ تن</td></tr>
+                            <tr><td>۱۰</td><td>۱۰ تن</td></tr>
+                            <tr><td>۱۲</td><td>۱۲ تن</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="info-note">
+                    <strong>📌 نکته:</strong> برای تسمه‌های با WLL معادل ۱۲ تن و بیشتر، <strong>هیچ نوار مشکی</strong> روی تسمه وجود ندارد و باید از برچسب تولیدکننده استفاده شود.
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- راهنمای بازرسی و دوخت -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🔧</span> راهنمای بازرسی و نگهداری بلت</div>
+                <button class="btn btn-guide" onclick="toggleGuide()">📖 نمایش / مخفی کردن راهنما</button>
+
+                <div class="guide-section" id="beltGuide">
+                    <h3>🔎 نکات کلیدی بازرسی بلت</h3>
+
+                    <div class="success-box-inner">
+                        <h4>✅ موارد قابل قبول (Pass):</h4>
+                        <ul>
+                            <li><strong>دوخت‌ها:</strong> یکنواخت، بدون پارگی و با حداقل ۳ ردیف بخیه</li>
+                            <li><strong>برچسب:</strong> خوانا و شامل ظرفیت، طول، تاریخ تولید</li>
+                            <li><strong>سطح بلت:</strong> بدون ساییدگی، بریدگی یا نخ‌کش شدگی</li>
+                            <li><strong>اتصالات:</strong> حلقه‌ها سالم و بدون تغییر شکل</li>
+                            <li><strong>گره‌ها:</strong> هیچگونه گره یا پیچ‌خوردگی در طول بلت</li>
+                        </ul>
+                    </div>
+
+                    <div class="highlight-box">
+                        <h4 style="color:var(--danger); margin-bottom:8px;">⛔ موارد ریجکت (Reject):</h4>
+                        <ul>
+                            <li><strong>پارگی یا بریدگی:</strong> هرگونه پارگی در سطح بلت یا محل دوخت</li>
+                            <li><strong>فرسودگی شدید:</strong> تغییر رنگ شدید، سفیدشدگی یا ساییدگی بیش از حد</li>
+                            <li><strong>خرابی دوخت:</strong> باز شدن یا پارگی درزهای دوخت</li>
+                            <li><strong>ناخوانا بودن برچسب:</strong> عدم وجود یا مخدوش بودن برچسب مشخصات</li>
+                            <li><strong>کشیدگی غیرعادی:</strong> افزایش طول بیش از ۵٪ نسبت به طول اولیه</li>
+                            <li><strong>آسیب شیمیایی:</strong> قرارگیری در معرض اسید، روغن یا حرارت شدید</li>
+                            <li><strong>تغییر شکل حلقه‌ها:</strong> حلقه‌های انتهایی تغییر شکل داده یا شکسته</li>
+                        </ul>
+                    </div>
+
+                    <div class="warning-box-inner">
+                        <h4>📌 نکات مهم نگهداری:</h4>
+                        <ul>
+                            <li>بلت‌ها را در محیط خشک و دور از نور مستقیم خورشید نگهداری کنید.</li>
+                            <li>پس از هر استفاده، بلت را از نظر آسیب بررسی کنید.</li>
+                            <li>بلت‌های آلوده به روغن یا مواد شیمیایی را قبل از استفاده تمیز کنید.</li>
+                            <li>از بارگذاری بیش از حد ظرفیت نامی بلت خودداری کنید.</li>
+                            <li>بلت‌های دارای تاریخ انقضا را به موقع تعویض کنید.</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-note" style="margin-top:12px;">
+                        <strong>⚠️ هشدار مهم:</strong> هرگز از بلت‌های آسیب‌دیده یا فرسوده استفاده نکنید. 
+                        بازرسی دوره‌ای و نگهداری صحیح، ضامن ایمنی عملیات باربرداری است.
+                    </div>
+                </div>
+            </div>
+
+
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            تهیه شده توسط <span class="highlight">شرکت معدنی و صنایع معدنی درکاو</span><br>
+            <span style="direction:ltr; display:inline-block;">📞 09178680173</span>
+        </div>
+
+    </div>
+
+    <script>
+        // اطلاعات کامل بلت‌ها
+        const beltData = {
+            purple: {
+                capacity: '۱ تن',
+                usage: 'مناسب برای جابجایی تجهیزات کوچک و لوازم جانبی سبک',
+                detail: '✅ رنگ استاندارد: بنفش | نوع: پلی‌استر | طول استاندارد: ۲ متر | مناسب برای مصارف عمومی'
+            },
+            green: {
+                capacity: '۲ تن',
+                usage: 'مناسب برای پروژه‌های ساختمانی و مصالح متوسط',
+                detail: '✅ رنگ استاندارد: سبز | نوع: نایلون | طول استاندارد: ۳ متر | مناسب برای کارگاه‌های ساختمانی'
+            },
+            yellow: {
+                capacity: '۳ تن',
+                usage: 'حمل‌ونقل ماشین‌آلات و پروژه‌های بزرگ صنعتی',
+                detail: '✅ رنگ استاندارد: زرد | نوع: پلی‌استر با روکش | طول استاندارد: ۴ متر | مقاوم در برابر سایش'
+            },
+            gray: {
+                capacity: '۴ تن',
+                usage: 'مناسب برای صنایع سنگین و استخراج معادن',
+                detail: '✅ رنگ استاندارد: خاکستری | نوع: نایلون صنعتی | طول استاندارد: ۵ متر | مقاومت بالا در برابر کشش'
+            },
+            red: {
+                capacity: '۵ تن',
+                usage: 'مناسب برای بارهای حساس با ایمنی بالا',
+                detail: '✅ رنگ استاندارد: قرمز | نوع: پلی‌استر با کیفیت | طول استاندارد: ۶ متر | دارای نشانگر ایمنی'
+            },
+            brown: {
+                capacity: '۶ تن',
+                usage: 'حمل بارهای فوق‌العاده سنگین و تجهیزات بزرگ',
+                detail: '✅ رنگ استاندارد: قهوه‌ای | نوع: نایلون تقویت‌شده | طول استاندارد: ۸ متر | مقاوم در برابر پارگی'
+            },
+            blue: {
+                capacity: '۸ تن',
+                usage: 'مناسب برای بارهای صنعتی سنگین و تجهیزات حساس',
+                detail: '✅ رنگ استاندارد: آبی | نوع: پلی‌استر صنعتی | طول استاندارد: ۱۰ متر | دارای استاندارد EN'
+            },
+            orange: {
+                capacity: '۱۰ و ۱۲ تن',
+                usage: 'مناسب برای بارهای حجیم و فوق‌سنگین در معادن',
+                detail: '✅ رنگ استاندارد: نارنجی | نوع: نایلون فوق‌مقاوم | طول استاندارد: ۱۲ متر | مناسب برای معادن و صنایع سنگین'
+            }
+        };
+
+        function showBeltInfo() {
+            const select = document.getElementById('beltColor');
+            const selected = select.value;
+            const infoBox = document.getElementById('beltInfo');
+            const capacityDisplay = document.getElementById('capacityDisplay');
+            const usageDisplay = document.getElementById('usageDisplay');
+            const detailDisplay = document.getElementById('detailDisplay');
+
+            if (!selected || !beltData[selected]) {
+                infoBox.classList.remove('show');
+                return;
+            }
+
+            const data = beltData[selected];
+            capacityDisplay.textContent = '🔹 ظرفیت: ' + data.capacity;
+            usageDisplay.textContent = '📌 ' + data.usage;
+            detailDisplay.textContent = data.detail;
+
+            infoBox.classList.add('show');
+
+            setTimeout(() => {
+                infoBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 200);
+        }
+
+        function toggleGuide() {
+            const guide = document.getElementById('beltGuide');
+            guide.classList.toggle('show');
+
+            if (guide.classList.contains('show')) {
+                setTimeout(() => {
+                    guide.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 200);
+            }
+        }
+
+        function resetSelection() {
+            const select = document.getElementById('beltColor');
+            select.value = '';
+            document.getElementById('beltInfo').classList.remove('show');
+            document.getElementById('beltGuide').classList.remove('show');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const select = document.getElementById('beltColor');
+            if (select.value) {
+                showBeltInfo();
+            }
+        });
+    </script>
+
+<script src="hse-common.js"></script>
+
+<script src="assets/js/sw-register.js"></script>
+</body>
+</html>

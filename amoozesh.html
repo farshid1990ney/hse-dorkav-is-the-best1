@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+
+<script>
+/* ============================================================
+   ★ امنیت: گیت احراز هویت (سمت کلاینت)
+   هیچ صفحه‌ای بدون ورود به سامانه باز نمی‌شود. محتوای صفحه
+   مخفی می‌ماند و کاربر به صفحه ورود هدایت می‌شود.
+   (لایه نمایشی؛ لایه امنیتی واقعی در بکاند اعمال می‌شود.)
+   ============================================================ */
+(function(){
+  var ok = false;
+  try {
+    var _u = JSON.parse(localStorage.getItem('hse_user_activated') || 'null');
+    ok = !!(_u && _u.personnel && _u.fullname);
+  } catch(e) { ok = false; }
+  if (ok) return; // مجاز - ادامه می‌دهد
+
+  // پنهان‌کردن کل محتوا و نمایش قفل
+  var hide = function(){
+    try {
+      var d = document;
+      // مخفی کردن همه عناصر
+      var all = d.body ? d.body.children : [];
+      for (var i=0;i<all.length;i++){ all[i].style.display='none'; }
+      var lock = d.createElement('div');
+      lock.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#0f172a;color:#f8fafc;'
+        +'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+        +'font-family:Tahoma,sans-serif;text-align:center;padding:20px;direction:rtl;';
+      lock.innerHTML = '<div style="font-size:60px;margin-bottom:10px;">🔒</div>'
+        +'<h2 style="margin:0 0 8px;">دسترسی محدود است</h2>'
+        +'<p style="margin:0 0 20px;color:#94a3b8;">لطفاً ابتدا از صفحه اصلی وارد سامانه شوید.</p>'
+        +'<a href="index.html" style="background:#ff6208;color:#fff;padding:10px 26px;'
+        +'border-radius:10px;text-decoration:none;font-weight:bold;">بازگشت به صفحه ورود</a>';
+      d.body.appendChild(lock);
+    } catch(e){}
+  };
+  if (document.body) hide(); else document.addEventListener('DOMContentLoaded', hide);
+  setTimeout(function(){ try{ location.replace('index.html'); }catch(e){} }, 2500);
+})();
+</script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#1e3c5c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HSE درکاو" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+    <title>آموزش‌های تخصصی | سامانه ایمنی آژند همت توس</title>
+
+    <style>
+        :root {
+            --primary: #ff6208;
+            --primary-hover: #e05300;
+            --secondary: #f39c12;
+            --success: #27ae60;
+            --safety: #2c6e4e;
+            --danger: #c0392b;
+            --dark-blue: #1e3c5c;
+            --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #dfe7f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --text-main: #1e2a2e;
+            --text-muted: #64748b;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body { padding-bottom: 75px !important;
+            background: var(--bg-gradient);
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text-main);
+            line-height: 1.8;
+        }
+
+        .main-container {
+            max-width: 800px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            background: var(--dark-blue);
+            padding: 35px 20px;
+            color: white;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+            position: relative;
+        }
+        .header h1 { font-size: 1.8rem; margin-bottom: 5px; }
+        .header h1 .icon { margin-left: 10px; }
+        .header p { opacity: 0.8; font-size: 0.9rem; }
+        .header .back-home {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .header .back-home:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .content { padding: 25px; }
+
+        .intro-note {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            padding: 0 10px;
+        }
+
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+
+        .course-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(0,0,0,0.06);
+            border-radius: var(--border-radius-md);
+            padding: 18px 14px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .course-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+            border-color: var(--primary);
+        }
+        .course-card:active { transform: scale(0.97); }
+        .course-card .icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            background: rgba(255, 98, 8, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.7rem;
+        }
+        .course-card .title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--dark-blue);
+            line-height: 1.4;
+        }
+
+        .btn-back {
+            background: #cbd5e1;
+            border: none;
+            padding: 10px 24px;
+            border-radius: var(--border-radius-sm);
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 22px;
+            color: #334155;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .btn-back:hover { background: #b0bec5; transform: translateY(-2px); }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .footer .highlight { color: var(--primary); font-weight: bold; }
+
+        @media (max-width: 600px) {
+            .content { padding: 15px; }
+            .header h1 { font-size: 1.3rem; }
+            .header .back-home { width: 36px; height: 36px; font-size: 1rem; left: 10px; }
+            .course-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .course-card { padding: 14px 8px; }
+            .course-card .icon { width: 46px; height: 46px; font-size: 1.4rem; }
+            .course-card .title { font-size: 0.75rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <a href="index.html" class="back-home" title="بازگشت به صفحه اصلی">🏠</a>
+            <h1><span class="icon">🎓</span> آموزش‌های تخصصی</h1>
+            <p>مجموعه دوره‌های آموزشی ایمنی، بهداشت و محیط کار (HSE)</p>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <p class="intro-note">یکی از دوره‌های زیر را برای مشاهده محتوای آموزشی انتخاب کنید.</p>
+
+            <div class="course-grid">
+
+                <a href="5s.html" class="course-card">
+                    <span class="icon">🧹</span>
+                    <span class="title">نظام 5S<br>نظم و ترتیب در کار</span>
+                </a>
+
+                <a href="oumumi.html" class="course-card">
+                    <span class="icon">🦺</span>
+                    <span class="title">ایمنی عمومی<br>HSE</span>
+                </a>
+
+                <a href="kardarertefa.html" class="course-card">
+                    <span class="icon">🧗</span>
+                    <span class="title">کار در ارتفاع</span>
+                </a>
+
+                <a href="jarsaghil.html" class="course-card">
+                    <span class="icon">🏗️</span>
+                    <span class="title">جرثقیل و<br>باربرداری</span>
+                </a>
+
+                <a href="bargh.html" class="course-card">
+                    <span class="icon">⚡</span>
+                    <span class="title">ایمنی برق</span>
+                </a>
+
+                <a href="harig.html" class="course-card">
+                    <span class="icon">🔥</span>
+                    <span class="title">ایمنی و<br>اطفاء حریق</span>
+                </a>
+
+                <a href="faza.html" class="course-card">
+                    <span class="icon">🚪</span>
+                    <span class="title">کار در<br>فضای بسته</span>
+                </a>
+
+                <a href="darbast.html" class="course-card">
+                    <span class="icon">🪜</span>
+                    <span class="title">ایمنی داربست</span>
+                </a>
+
+                <a href="anbar.html" class="course-card">
+                    <span class="icon">📦</span>
+                    <span class="title">ایمنی در انبار</span>
+                </a>
+
+                <a href="emdad.html" class="course-card">
+                    <span class="icon">🩹</span>
+                    <span class="title">کمک‌های اولیه</span>
+                </a>
+
+                <a href="vakonesh.html" class="course-card">
+                    <span class="icon">🚨</span>
+                    <span class="title">آمادگی و واکنش<br>در شرایط اضطراری</span>
+                </a>
+
+                <a href="ranandegi.html" class="course-card">
+                    <span class="icon">🚛</span>
+                    <span class="title">رانندگی تدافعی<br>در معدن</span>
+                </a>
+
+                <a href="permit.html" class="course-card">
+                    <span class="icon">📑</span>
+                    <span class="title">سیستم صدور<br>مجوز کار (PTW)</span>
+                </a>
+
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            تهیه شده توسط <span class="highlight">شرکت معدنی و صنایع معدنی درکاو</span><br>
+            <span style="direction:ltr; display:inline-block;">📞 09178680173</span>
+        </div>
+
+    </div>
+
+    <script src="hse-common.js"></script>
+
+<script src="assets/js/sw-register.js"></script>
+</body>
+</html>

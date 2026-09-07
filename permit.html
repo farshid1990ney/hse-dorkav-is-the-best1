@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+
+<script>
+/* ============================================================
+   ★ امنیت: گیت احراز هویت (سمت کلاینت)
+   هیچ صفحه‌ای بدون ورود به سامانه باز نمی‌شود. محتوای صفحه
+   مخفی می‌ماند و کاربر به صفحه ورود هدایت می‌شود.
+   (لایه نمایشی؛ لایه امنیتی واقعی در بکاند اعمال می‌شود.)
+   ============================================================ */
+(function(){
+  var ok = false;
+  try {
+    var _u = JSON.parse(localStorage.getItem('hse_user_activated') || 'null');
+    ok = !!(_u && _u.personnel && _u.fullname);
+  } catch(e) { ok = false; }
+  if (ok) return; // مجاز - ادامه می‌دهد
+
+  // پنهان‌کردن کل محتوا و نمایش قفل
+  var hide = function(){
+    try {
+      var d = document;
+      // مخفی کردن همه عناصر
+      var all = d.body ? d.body.children : [];
+      for (var i=0;i<all.length;i++){ all[i].style.display='none'; }
+      var lock = d.createElement('div');
+      lock.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#0f172a;color:#f8fafc;'
+        +'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+        +'font-family:Tahoma,sans-serif;text-align:center;padding:20px;direction:rtl;';
+      lock.innerHTML = '<div style="font-size:60px;margin-bottom:10px;">🔒</div>'
+        +'<h2 style="margin:0 0 8px;">دسترسی محدود است</h2>'
+        +'<p style="margin:0 0 20px;color:#94a3b8;">لطفاً ابتدا از صفحه اصلی وارد سامانه شوید.</p>'
+        +'<a href="index.html" style="background:#ff6208;color:#fff;padding:10px 26px;'
+        +'border-radius:10px;text-decoration:none;font-weight:bold;">بازگشت به صفحه ورود</a>';
+      d.body.appendChild(lock);
+    } catch(e){}
+  };
+  if (document.body) hide(); else document.addEventListener('DOMContentLoaded', hide);
+  setTimeout(function(){ try{ location.replace('index.html'); }catch(e){} }, 2500);
+})();
+</script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#1e3c5c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HSE درکاو" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+    <title>دوره آموزشی سیستم صدور مجوز کار (PTW)</title>
+
+    <style>
+        :root {
+            --primary: #ff6208;
+            --primary-hover: #e05300;
+            --secondary: #f39c12;
+            --success: #27ae60;
+            --safety: #2c6e4e;
+            --danger: #c0392b;
+            --dark-blue: #1e3c5c;
+            --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #dfe7f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --text-main: #1e2a2e;
+            --text-muted: #64748b;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body { padding-bottom: 75px !important;
+            background: var(--bg-gradient);
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text-main);
+            line-height: 1.8;
+        }
+
+        .main-container {
+            max-width: 1100px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            background: var(--dark-blue);
+            padding: 35px 20px;
+            color: white;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+            position: relative;
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        .header h1 .icon {
+            margin-left: 10px;
+        }
+        .header p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        .header .back-home {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .header .back-home:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+        .card:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        }
+        .card-title {
+            color: var(--dark-blue);
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-right: 4px solid var(--primary);
+            padding-right: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title .icon {
+            font-size: 1.5rem;
+        }
+
+        .card-subtitle {
+            color: var(--primary);
+            font-size: 1.05rem;
+            font-weight: bold;
+            margin: 18px 0 10px 0;
+            border-bottom: 2px solid rgba(255, 98, 8, 0.15);
+            padding-bottom: 6px;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .tips-grid .tip-item {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 10px 14px;
+            border-radius: var(--border-radius-sm);
+            border-right: 3px solid var(--safety);
+            font-size: 0.9rem;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .tips-grid .tip-item:hover {
+            background: rgba(44, 110, 78, 0.04);
+            transform: translateX(-3px);
+        }
+        .tips-grid .tip-item.danger-tip {
+            border-right-color: var(--danger);
+        }
+        .tips-grid .tip-item.warning-tip {
+            border-right-color: var(--secondary);
+        }
+        .tips-grid .tip-item.primary-tip {
+            border-right-color: var(--primary);
+        }
+        .tips-grid .tip-item.info-tip {
+            border-right-color: #3498db;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+        .spec-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .spec-table th,
+        .spec-table td {
+            padding: 10px 12px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        .spec-table th {
+            background: var(--dark-blue);
+            color: white;
+            font-weight: bold;
+        }
+        .spec-table tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .spec-table tr:hover {
+            background: rgba(255, 98, 8, 0.04);
+        }
+
+        .btn-back {
+            background: #cbd5e1;
+            border: none;
+            padding: 10px 24px;
+            border-radius: var(--border-radius-sm);
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 12px;
+            color: #334155;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .btn-back:hover {
+            background: #b0bec5;
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .footer .highlight {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .badge-standard {
+            display: inline-block;
+            background: var(--safety);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-danger {
+            display: inline-block;
+            background: var(--danger);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-warning {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-info {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+
+        .safety-alert {
+            background: rgba(192, 57, 43, 0.04);
+            border-right: 4px solid var(--danger);
+            padding: 15px;
+            border-radius: var(--border-radius-sm);
+            margin: 10px 0;
+        }
+        .safety-alert strong {
+            color: var(--danger);
+        }
+        .safety-alert ul {
+            padding-right: 20px;
+            margin-top: 5px;
+        }
+        .safety-alert ul li {
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .definition-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .definition-item {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 10px 14px;
+            border-radius: var(--border-radius-sm);
+            border-right: 3px solid var(--secondary);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .definition-item:hover {
+            background: rgba(255, 98, 8, 0.04);
+        }
+        .definition-item strong {
+            color: var(--dark-blue);
+            display: block;
+            font-size: 0.92rem;
+        }
+        .definition-item span {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: block;
+            margin-top: 2px;
+        }
+
+        .material-list {
+            list-style: none;
+            padding: 0;
+            margin: 5px 0;
+        }
+        .material-list li {
+            padding: 10px 15px;
+            margin-bottom: 6px;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: var(--border-radius-sm);
+            border-right: 3px solid var(--primary);
+            transition: var(--transition);
+            cursor: pointer;
+            font-size: 0.92rem;
+        }
+        .material-list li:hover {
+            background: rgba(255, 98, 8, 0.04);
+        }
+        .material-list li .mat-num {
+            font-weight: bold;
+            color: var(--dark-blue);
+            display: inline-block;
+            min-width: 40px;
+        }
+
+        .step-list {
+            counter-reset: step;
+            list-style: none;
+            padding-right: 0;
+        }
+        .step-list li {
+            counter-increment: step;
+            padding-right: 35px;
+            position: relative;
+            margin-bottom: 10px;
+            line-height: 1.8;
+            font-size: 1.02rem;
+        }
+        .step-list li::before {
+            content: counter(step);
+            position: absolute;
+            right: 0;
+            top: 0;
+            background: var(--danger);
+            color: white;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .two-column-list {
+            columns: 2;
+            column-gap: 40px;
+        }
+        @media (max-width: 600px) {
+            .two-column-list {
+                columns: 1;
+            }
+        }
+
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 12px 0;
+        }
+
+        .highlight-box {
+            background: #e8f0fe;
+            padding: 18px 24px;
+            border-radius: var(--border-radius-sm);
+            margin: 24px 0 12px 0;
+            border-right: 6px solid #2563eb;
+        }
+
+        .warning-box {
+            background: #fffbeb;
+            padding: 18px 24px;
+            border-radius: var(--border-radius-sm);
+            margin: 24px 0 12px 0;
+            border-right: 6px solid var(--secondary);
+        }
+
+        .danger-box {
+            background: #fef2f2;
+            padding: 18px 24px;
+            border-radius: var(--border-radius-sm);
+            margin: 24px 0 12px 0;
+            border-right: 6px solid var(--danger);
+        }
+
+        .success-box {
+            background: #f0fdf4;
+            padding: 18px 24px;
+            border-radius: var(--border-radius-sm);
+            margin: 24px 0 12px 0;
+            border-right: 6px solid var(--success);
+        }
+
+        .info-box {
+            background: #f1f6fa;
+            padding: 18px 24px;
+            border-radius: var(--border-radius-sm);
+            margin: 24px 0 12px 0;
+            border-right: 6px solid #2563eb;
+        }
+
+        .quote {
+            font-style: italic;
+            background: #f1f5f9;
+            padding: 16px 28px;
+            border-radius: 60px 20px 60px 20px;
+            color: #1e293b;
+        }
+
+        @media(max-width:700px) {
+            .content {
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            .header .back-home {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+                left: 10px;
+            }
+            .definition-grid {
+                grid-template-columns: 1fr;
+            }
+            .tips-grid {
+                grid-template-columns: 1fr;
+            }
+            .grid-2col {
+                grid-template-columns: 1fr;
+            }
+            .spec-table {
+                font-size: 0.75rem;
+            }
+            .spec-table th,
+            .spec-table td {
+                padding: 6px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <a href="index.html" class="back-home" title="بازگشت به صفحه اصلی">🏠</a>
+            <h1><span class="icon">📘</span> سیستم صدور مجوز کار (PTW)</h1>
+            <p>دوره آموزشی جامع — مفاهیم، انواع پروانه، مسئولین، فرآیندها و ایمنی</p>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <!-- ============================================================ -->
+            <!-- 1. چرا به پرمیت نیاز داریم؟ -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">❓</span> چرا به پرمیت نیاز داریم؟</div>
+                <ul>
+                    <li><strong>دلیل اول:</strong> کار مورد نظر دارای <span style="color:#b45309; font-weight:700;">ریسک بالایی</span> است.</li>
+                    <li><strong>دلیل دوم:</strong> کار به صورت <span style="color:#b45309; font-weight:700;">غیر روتین</span> انجام می‌شود.</li>
+                </ul>
+                <div class="danger-box">
+                    <strong>⚠️ هشدار مهم:</strong> پرمیت فقط یک کاغذ است و به تنهایی نمی‌تواند باعث ایمن انجام شدن کار شود! این موضوع کاملاً به <strong>رفتار و نگرش افراد</strong> بستگی دارد.
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 2. تعاریف پایه -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📖</span> تعاریف پایه</div>
+
+                <div class="card-subtitle">🔹 پروانه کار (Work Permit)</div>
+                <p>گواهی است که نشان می‌دهد مجوزهای لازم از طرف افراد ذی‌صلاح جهت انجام کار توسط کارکنان مجاز، در زمانی معین و مکانی مشخص صادر شده است. در این گواهی، خطرات و اقدامات پیشگیرانه شناسایی و اجرا می‌شود.</p>
+
+                <div class="card-subtitle">🔹 سیستم پروانه کار (PTW)</div>
+                <p>فرایندی نظام‌مند و هدف‌گرا که در آن کلیه فعالیت‌ها و فرآیندها بر طبق پروانه کار مدیریت می‌گردد.</p>
+
+                <div class="card-subtitle">🔹 کار مدت‌دار</div>
+                <p>کارهایی که انجام آن به بیش از یک نوبت کاری زمان نیاز دارند.</p>
+
+                <div class="card-subtitle">🔹 پروانه روزمره (MTS)</div>
+                <p>پروانه‌ای مختص انجام کارهای روزمره تعریف‌شده و مطابق رویه اجرایی که از قبل تهیه شده است.</p>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 3. انواع کار و پروانه‌ها -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🧩</span> انواع کار و پروانه‌ها</div>
+
+                <div class="card-subtitle">❄️ کار سرد (Cold Work)</div>
+                <p><strong>تعریف:</strong> کاری که شامل کار گرم و یا کار گرم همراه با شعله نباشد.</p>
+                <div class="info-box">
+                    <strong>مثال‌ها:</strong> تعمیرات مکانیکی بدون جرقه، بازدید چشمی، باز و بسته کردن پیچ‌ها (بدون پتک)، کارهای برقی در شرایط ایمن و ...
+                </div>
+
+                <div class="card-subtitle">🔥 کار گرم (Hot Work)</div>
+                <p><strong>تعریف:</strong> کاری که پتانسیل ایجاد جرقه و احتمال ایجاد شعله را دارد.</p>
+                <div class="warning-box">
+                    <strong>مثال‌ها:</strong> جوشکاری، برشکاری با شعله، سنگ‌زنی، سندبالست، استفاده از دستگاه‌های برقی غیر ضد انفجار، استفاده از موتورهای دیزلی (به جز در جاده‌های عمومی)، کویدین و باز کردن پیچ با پتک، عکاسی با فلش در مناطق خطرناک.
+                </div>
+
+                <div class="card-subtitle">⚠️ خطرات عمده کار گرم</div>
+                <ul>
+                    <li><strong>حریق در فضاهای باز:</strong> اشتعال مواد قابل اشتعال در محیط‌های باز</li>
+                    <li><strong>انفجار در فضاهای بسته:</strong> اشتعال مواد قابل اشتعال در تانک‌ها، لوله‌ها و مخازن</li>
+                </ul>
+
+                <div class="card-subtitle">🔥 کار گرم همراه با شعله باز (Hot Naked Flame Work)</div>
+                <p><strong>تعریف:</strong> کاری که در آن همواره منبع حرارتی، شعله، جرقه و پرتاب شراره به اطراف وجود دارد و از نظر خطر در بالاترین سطح قرار دارد.</p>
+                <ul>
+                    <li>انواع جوشکاری (برق، گاز، آرگون)</li>
+                    <li>لحیم‌کاری</li>
+                    <li>پرچ‌کاری حرارتی</li>
+                    <li>سوزاندن و برش با شعله</li>
+                    <li>حرارت دادن توسط شعله</li>
+                    <li>سنگ‌زنی</li>
+                </ul>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 4. پروانه تکمیلی -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📎</span> پروانه تکمیلی (Complementary Permit)</div>
+                <p><strong>تعریف:</strong> پروانه‌ای است که جهت انجام برخی کارهای حساس که نیازمند اقدامات ایمنی بیشتری هستند، صادر می‌شود.</p>
+                <div class="danger-box">
+                    <strong>⚠️ تذکر مهم:</strong> پروانه تکمیلی هرگز به تنهایی صادر نمی‌شود و همیشه همراه با پروانه اصلی صادر می‌گردد. شماره پروانه اصلی در پروانه تکمیلی و بالعکس درج می‌شود.
+                </div>
+
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr><th>نوع پروانه تکمیلی</th><th>کاربرد</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>پروانه تکمیلی حفاری</td><td>برای کارهای حفاری و خاک‌برداری</td></tr>
+                            <tr><td>پروانه تکمیلی ورود به فضای بسته</td><td>برای ورود و انجام کار داخل مخازن، برج‌ها و فضاهای بسته</td></tr>
+                            <tr><td>پروانه تکمیلی پرتونگاری</td><td>برای کارهایی که از منابع رادیواکتیو استفاده می‌کنند</td></tr>
+                            <tr><td>پروانه تکمیلی الکتریکی</td><td>برای قطع و وصل جریان برق وسایل الکتریکی</td></tr>
+                            <tr><td>پروانه تکمیلی کار در ارتفاع</td><td>برای کار در ارتفاع بیش از ۱/۲ متر</td></tr>
+                            <tr><td>پروانه تکمیلی جرثقیل</td><td>برای عملیات بلند کردن بار با جرثقیل</td></tr>
+                            <tr><td>پروانه تکمیلی جداسازی فرآیندی/مکانیکی</td><td>برای جداسازی تجهیزات از سیستم</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 5. وضعیت‌های پروانه -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📌</span> وضعیت‌های پروانه کار</div>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr><th>وضعیت</th><th>توضیح</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>پروانه کار اتمام‌یافته (Completed)</strong></td>
+                                <td>کاری که در آن تمام شده و باید حداقل ۶ ماه در بایگانی نگهداری شود.</td></tr>
+                            <tr><td><strong>پروانه کار به حالت تعلیق درآمده (Suspended)</strong></td>
+                                <td>کاری که تمام نشده ولی به دلایلی امکان ادامه کار وجود ندارد. در جلسات روزانه تعمیرات بررسی می‌شود.</td></tr>
+                            <tr><td><strong>پروانه کار باطل شده (Cancelled/Invalid)</strong></td>
+                                <td>پروانه‌ای که به دلایلی مانند مخدوش شدن، شرایط ناایمن یا بلایای طبیعی از درجه اعتبار ساقط می‌شود. برای ابطال، هر چهار برگ مجوز کار در دفتر ثبت جمع‌آوری شده و به مهر "باطل شد" ممهور می‌گردد.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 6. PSI -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📋</span> PSI (Production Site Instruction)</div>
+                <p><strong>تعریف:</strong> رویه اجرایی شامل لیست نفرات و روند انجام کار که جهت معرفی نفرات مجاز به امضای پروانه‌ها و ارائه یک رویه اجرایی در مدت زمان معین تهیه و با تأیید مدیر عامل/مدیر/سرپرست پالایشگاه ابلاغ می‌گردد.</p>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 7. خطاهای رایج -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">⚠️</span> خطاهای رایج مرتبط با پرمیت در پالایشگاه‌ها</div>
+                <div class="grid-2col">
+                    <ul>
+                        <li>کار بدون پروانه کار</li>
+                        <li>فاقد اعتبار بودن پروانه کار</li>
+                        <li>عدم ثبت پروانه کار</li>
+                        <li>عدم مهیا ساختن تمهیدات ایمنی</li>
+                        <li>کار بدون امضای گاز تست (Gas Test)</li>
+                        <li>شرح کار و شماره تجهیزات (نامشخص یا ناقص)</li>
+                    </ul>
+                    <ul>
+                        <li>نقض مقررات خاتمه پروانه کار</li>
+                        <li>عدم رعایت اولویت امضاء در پروانه کار</li>
+                        <li>خط خوردگی و اعمال تغییرات غیرمجاز</li>
+                        <li>عدم جداسازی تجهیزات</li>
+                        <li>صدور دو پروانه کار بر روی یک دستگاه</li>
+                        <li>سایر تخلفات اجرایی</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 8. مناطق خطر -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🧭</span> مناطق خطر (Hazardous Zones)</div>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr><th>منطقه</th><th>توضیح</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>Zone 0</strong></td>
+                                <td>مناطقی که ترکیبی از گاز و بخارهای قابل انفجار به طور مداوم یا برای مدت طولانی وجود دارد.</td></tr>
+                            <tr><td><strong>Zone 1</strong></td>
+                                <td>مناطقی که ترکیبی از گاز و بخارهای قابل انفجار به ندرت در شرایط نرمال وجود دارد.</td></tr>
+                            <tr><td><strong>Zone 2</strong></td>
+                                <td>مناطقی که ترکیبی از گاز و بخارهای قابل انفجار در شرایط غیرنرمال و برای مدت کوتاه وجود دارد.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p><strong>برای ذرات گرد و غبار:</strong></p>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr><th>منطقه</th><th>توضیح</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>Zone 20</strong></td>
+                                <td>مناطقی که ترکیبی از هوا و گرد و غبار قابل احتراق به طور مداوم وجود دارد.</td></tr>
+                            <tr><td><strong>Zone 21</strong></td>
+                                <td>مناطقی که ترکیبی از هوا و گرد و غبار قابل احتراق به ندرت وجود دارد.</td></tr>
+                            <tr><td><strong>Zone 22</strong></td>
+                                <td>مناطقی که ترکیبی از هوا و گرد و غبار قابل احتراق در شرایط غیرنرمال وجود دارد.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 9. سیستم‌های ایمنی -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🛡️</span> سیستم‌های ایمنی</div>
+
+                <div class="card-subtitle">🔹 سیستم‌های ایمنی کار (Safe Systems of Work)</div>
+                <p>سیستم‌های ایمنی کار باید به گونه‌ای طراحی شوند که ریسک باقی‌مانده به حد قابل قبول (ALARP) کاهش یابد. این سیستم شامل ترکیبی از:</p>
+                <ul>
+                    <li>روش‌ها و راهکارها</li>
+                    <li>تجهیزات</li>
+                    <li>اقدامات کنترلی مکتوب و مدون</li>
+                    <li>نظارت مستمر</li>
+                </ul>
+
+                <div class="card-subtitle">🔹 Fire Watch</div>
+                <p><strong>تعریف:</strong> مسئولیتی که به فرد یا افرادی سپرده می‌شود مبنی بر اینکه محل فعالیت گرم و محیط پیرامون، مادامی که کار گرم در حال انجام است و همچنین مدت زمان مورد نیاز پس از اتمام کار، به طور پیوسته و دائم پایش شود.</p>
+                <div class="info-box">
+                    <strong>وظایف Fire Watch:</strong>
+                    <ul>
+                        <li>اطمینان از دسترس بودن تجهیزات اطفاء حریق مناسب</li>
+                        <li>استقرار در محل مناسب</li>
+                        <li>واکنش مناسب در صورت بروز شرایط اضطراری</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 10. مسئولین -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">👥</span> مسئولین سیستم صدور مجوز</div>
+
+                <div class="card-subtitle">🔹 مسئول محوطه (Area Authority)</div>
+                <div class="info-box">
+                    <strong>مسئولیت‌ها:</strong>
+                    <ul>
+                        <li>تحریر و نگارش پروانه فعالیت با حضور در محل انجام کار</li>
+                        <li>شناسایی خطرات و تعیین اقدامات کنترلی (به طور مشترک با مسئول اجرای کار)</li>
+                        <li>حصول اطمینان از اینکه ریسک هر فعالیت در حد قابل قبول (Tolerable) است</li>
+                        <li>تعیین سطح ریسک (A یا B)</li>
+                        <li>حصول اطمینان از ایمنی محل انجام کار و حفظ آن مادامی که پروانه فعالیت اعتبار دارد</li>
+                        <li>سنجش گاز قبل از صدور پروانه فعالیت و در مواقع لازم</li>
+                        <li>حصول اطمینان از صلاحیت نفرات مجری (مهارت، تجربه و آموزش)</li>
+                        <li>حضور در محل انجام کار برای ارزیابی اولیه و بازدید چشمی (Visual Check)</li>
+                        <li>پایش پروانه‌های فعالیت صادر شده</li>
+                        <li>ابطال پروانه‌ها در صورت بروز شرایط ناایمن</li>
+                        <li>حضور در محل انجام کار برای ارزیابی نهایی جهت خاتمه پروانه فعالیت</li>
+                        <li>حصول اطمینان از انتقال اطلاعات در زمان تحویل/تعویض نوبت‌کاری</li>
+                        <li>تعیین نحوه جداسازی فرآیندی، مکانیکی و الکتریکی</li>
+                        <li>حصول اطمینان از اجرای کامل جداسازی‌ها</li>
+                        <li>حصول اطمینان از پایان کار و ایمن‌سازی محل</li>
+                    </ul>
+                </div>
+
+                <div class="card-subtitle">🔹 مسئول اجرای کار (Work Supervisor)</div>
+                <div class="info-box">
+                    <strong>مسئولیت‌ها:</strong>
+                    <ul>
+                        <li>اطمینان از رعایت الزامات قانونی، مقررات و روش‌های کاری</li>
+                        <li>نظارت و حضور دائمی در مدت زمان اعتبار پروانه فعالیت</li>
+                        <li>توقف فعالیت در صورت بروز شرایط ناایمن</li>
+                        <li>ارتباط مستمر با مسئول محوطه در خصوص پیشرفت کار</li>
+                        <li>حصول اطمینان از حفظ نظافت و ساماندهی محل کار</li>
+                        <li>حصول اطمینان از انتقال اطلاعات در زمان تحویل نوبت‌کاری</li>
+                        <li>حصول اطمینان از انجام فقط کارهای ذکر شده در شرح پروانه فعالیت</li>
+                        <li>اطمینان از صلاحیت و توانایی افراد تحت نظارت</li>
+                    </ul>
+                </div>
+
+                <div class="card-subtitle">🔹 واحد ایمنی / HSE</div>
+                <div class="info-box">
+                    <strong>فعالیت‌ها:</strong>
+                    <ul>
+                        <li>نظارت بر اجرای صحیح نظام پروانه‌های کار از طریق پایش و ممیزی</li>
+                        <li>تهیه گزارش جامع پایش و ممیزی هر ۶ ماه یکبار</li>
+                        <li>شناسایی موارد عدم انطباق و فرصت‌های بهبود</li>
+                        <li>احراز صلاحیت نفرات ارکان سیستم مجوزدهی</li>
+                        <li>بازدید و بازرسی موردی از فعالیت‌های اجرایی</li>
+                        <li>همکاری با واحدهای ذیربط به منظور آموزش نفرات</li>
+                        <li>ارائه مشاوره در ارتباط با شناسایی خطرات و اقدامات کنترلی</li>
+                        <li>بازدید از فعالیت‌های با ریسک بالا</li>
+                        <li>توقف کار در صورت عدم ایمنی</li>
+                        <li>حصول اطمینان از کالیبراسیون گازسنج‌ها</li>
+                        <li>ارزیابی نسخ پروانه‌های فعالیت</li>
+                        <li>بررسی و تایید/عدم تایید لیست فعالیت‌های سرد و گرم</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 11. LOTO -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🔒</span> LOTO (Lock Out / Tag Out)</div>
+                <p><strong>تعریف:</strong> سیستم قفل و برچسب‌زنی برای اطمینان از قطع کامل انرژی از تجهیزات قبل از شروع کار.</p>
+                <div class="success-box">
+                    <strong>مراحل LOTO:</strong>
+                    <ol>
+                        <li>شناسایی منبع انرژی</li>
+                        <li>خاموش کردن تجهیزات</li>
+                        <li>قطع و جداسازی منبع انرژی</li>
+                        <li>قفل‌گذاری (Lock Out)</li>
+                        <li>برچسب‌زنی (Tag Out)</li>
+                        <li>تست و تایید قطع انرژی</li>
+                        <li>انجام کار</li>
+                        <li>برداشتن قفل و برچسب پس از اتمام کار</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 12. اقدامات کنترلی -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🎯</span> اقدامات کنترلی پروانه‌های فعالیت</div>
+                <div class="card-subtitle">✅ اولویت‌های انتخاب اقدامات کنترلی:</div>
+                <ol>
+                    <li><strong>حذف خطر</strong> (Elimination)</li>
+                    <li><strong>جایگزینی با ریسک پایین‌تر</strong> (Substitution)</li>
+                    <li><strong>اقدامات مهندسی</strong> (Engineering Controls)</li>
+                    <li><strong>ایزولاسیون</strong> (Isolation)</li>
+                    <li><strong>کنترل‌های مدیریتی</strong> (Administrative Controls)</li>
+                    <li><strong>تجهیزات حفاظت فردی</strong> (PPE - آخرین راه حل)</li>
+                </ol>
+
+                <div class="warning-box">
+                    <strong>⚠️ ضوابط مهم:</strong>
+                    <ul>
+                        <li>هر مسئول اجرای کار می‌تواند در یک محدوده زمانی مشخص، فقط <strong>یک پروانه کار</strong> را امضا نماید.</li>
+                        <li>در هیچ شرایطی یک فرد نمی‌تواند به جای هر دو مسئول محوطه و اجرای کار، یک پروانه را امضا نماید.</li>
+                        <li>مسئول اجرای کار باید قبل از شروع کار، نفرات را از شرایط، خطرات، اقدامات کنترلی و روش فعالیت مطلع نماید (TBM - Tool Box Meeting).</li>
+                        <li>به هنگام فعالیت گرم، حداقل فاصله مواد قابل احتراق از محل فعالیت نباید از <strong>۱۵ متر</strong> کمتر باشد. در غیر این صورت باید از پوشش‌های نسوز استفاده شود.</li>
+                        <li>کلیه موارد درج شده در پروانه فعالیت باید به طور شفاف، خوانا و بدون خط‌خوردگی تکمیل گردد.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 13. اعتبار پروانه -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">⏳</span> اعتبار پروانه‌های فعالیت</div>
+                <p>عوامل موثر بر اعتبار پروانه عبارتند از:</p>
+                <ul>
+                    <li>تأثیر نوع کار و عوامل محیطی بر عملکرد نفرات</li>
+                    <li>زمان شروع و پایان کار (شب، سرد، گرم، تعطیلات رسمی)</li>
+                    <li>تنش‌های گرمایی و سایر عوامل استرس‌زا</li>
+                    <li>تداخل با سایر فعالیت‌ها</li>
+                    <li>رعایت حداکثر زمان مجاز ساعت کاری طبق مقررات وزارت کار</li>
+                </ul>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 14. سنجش گاز -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🧪</span> سنجش گاز (Gas Testing)</div>
+                <div class="info-box">
+                    <strong>الزامات سنجش گاز:</strong>
+                    <ul>
+                        <li>مسئول محوطه یا نماینده وی باید قبل از شروع به کار، سنجش گاز محدوده فعالیت را انجام داده و در پروانه فعالیت ثبت نماید.</li>
+                        <li>زمان سنجش گاز باید <strong>بلافاصله قبل از شروع به کار</strong> باشد.</li>
+                        <li>در صورت توقف کار یا ترک محل، سنجش گاز باید <strong>تکرار</strong> شود.</li>
+                        <li>در مکان‌هایی که احتمال وجود گاز سمی وجود دارد، نفرات باید مجهز به <strong>گازسنج شخصی</strong> بوده و آن را در نزدیک‌ترین قسمت به گوش خود نصب نمایند.</li>
+                    </ul>
+                </div>
+
+                <div class="table-container">
+                    <table class="spec-table">
+                        <caption style="caption-side:bottom; margin-top:6px;">⚠️ سطوح اکسیژن و علائم آن</caption>
+                        <thead>
+                            <tr><th>غلظت اکسیژن</th><th>علائم</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>۱۹.۵%</td><td>حداقل میزان اکسیژن قابل قبول</td></tr>
+                            <tr><td>۱۹-۱۵%</td><td>کاهش قدرت فعالیت و عدم هماهنگی در حرکات</td></tr>
+                            <tr><td>۱۴-۱۲%</td><td>افزایش تعداد تنفس و کاهش قدرت تشخیص</td></tr>
+                            <tr><td>۱۲-۱۰%</td><td>افزایش تعداد نفس‌ها و ضربان قلب، آبی شدن رنگ لب‌ها</td></tr>
+                            <tr><td>۱۰-۸%</td><td>از دست دادن قدرت تفکر، ضعف شدید، حالت تهوع، استفراغ و بیهوشی</td></tr>
+                            <tr><td>۸-۶%</td><td>در ۸ دقیقه مرگ، در ۶ دقیقه ۵۰% احتمال زنده ماندن</td></tr>
+                            <tr><td>۶-۴%</td><td>در ۴۰ ثانیه کما، بیهوشی و مرگ</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 15. فضای بسته -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🧊</span> پروانه تکمیلی ورود به فضای بسته</div>
+
+                <div class="card-subtitle">🔹 تعریف فضای بسته</div>
+                <p>فضایی که <strong>همزمان</strong> دارای سه ویژگی زیر باشد:</p>
+                <ol>
+                    <li>برای حضور دائم افراد طراحی نشده باشد</li>
+                    <li>ورود و خروج به آن به آسانی میسر نباشد</li>
+                    <li>ابعاد آن به گونه‌ای باشد که حداقل یک نفر بتواند به صورت تمام بدن درون آن قرار بگیرد</li>
+                </ol>
+                <div class="warning-box">
+                    <strong>⚠️ توجه:</strong> ورود تنها بخشی از بدن (مانند سر) نیز می‌تواند خطرات فضای بسته را داشته باشد.
+                </div>
+
+                <div class="card-subtitle">🔹 اتمسفر خطرناک در فضای بسته</div>
+                <ul>
+                    <li><strong>کمبود اکسیژن</strong> (کمتر از ۱۹.۵%)</li>
+                    <li><strong>اتمسفر قابل اشتعال</strong> (مواد قابل اشتعال و انفجار)</li>
+                    <li><strong>اتمسفر سمی</strong> (گازهای سمی مانند H₂S، SO₂ و ...)</li>
+                </ul>
+
+                <div class="card-subtitle">🔹 خطرات بالقوه در فضاهای بسته</div>
+                <div class="grid-2col">
+                    <ul>
+                        <li>کمبود اکسیژن (کمتر از ۱۹.۵%)</li>
+                        <li>گازهای سمی یا آتش‌گیر و گازهای جایگزین اکسیژن</li>
+                        <li>وسایل متحرک و گردنده با برق قطع نشده</li>
+                        <li>ورودی‌هایی که بسته (Blank) نشده‌اند</li>
+                        <li>باقیمانده فرآورده‌های قبلی (گاز، مایع، بخار)</li>
+                    </ul>
+                    <ul>
+                        <li>لغزیدن، افتادن یا سقوط به داخل فضا</li>
+                        <li>کمبود نور و روشنایی</li>
+                        <li>حرارت و گرما</li>
+                        <li>بوی نامطبوع</li>
+                        <li>برق‌گرفتگی</li>
+                    </ul>
+                </div>
+
+                <div class="card-subtitle">🔹 الزامات ایمنی فضای بسته</div>
+                <ul>
+                    <li><strong>پایش هوا</strong> (Testing and Monitoring)</li>
+                    <li><strong>تهویه</strong> (Ventilation)</li>
+                    <li><strong>استفاده از وسایل حفاظت فردی مناسب</strong> (PPE)</li>
+                    <li><strong>برقراری ارتباط</strong> (Communication)</li>
+                    <li><strong>تأمین روشنایی مناسب</strong> (Lighting)</li>
+                    <li><strong>ایجاد موانع و حفاظ‌ها</strong> (Barriers and Shields)</li>
+                    <li><strong>مسیرهای ورود و خروج</strong> (Entry and Exit)</li>
+                    <li><strong>امداد و نجات</strong> (Rescue and Emergency)</li>
+                </ul>
+
+                <div class="table-container">
+                    <table class="spec-table">
+                        <caption style="caption-side:bottom; margin-top:6px;">📊 درصدهای LEL و UEL برای گازهای رایج</caption>
+                        <thead>
+                            <tr><th>گاز</th><th>LEL (حد پایین انفجار)</th><th>UEL (حد بالای انفجار)</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>متان (CH₄)</td><td>۵%</td><td>۱۵%</td></tr>
+                            <tr><td>هیدروژن</td><td>۴%</td><td>۷۵%</td></tr>
+                            <tr><td>اتان</td><td>۳%</td><td>۱۲.۴%</td></tr>
+                            <tr><td>پروپان</td><td>۲.۱%</td><td>۹.۵%</td></tr>
+                            <tr><td>بوتان</td><td>۱.۸%</td><td>۸.۴%</td></tr>
+                            <tr><td>استیلن</td><td>۲.۵%</td><td>۱۰۰%</td></tr>
+                            <tr><td>اتیلن</td><td>۲.۷%</td><td>۳۶%</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card-subtitle">🔹 مراقب (Attendant/Standby)</div>
+                <p>فردی که در خارج از فضای بسته، در نزدیک‌ترین نقطه به محل ورود/خروج قرار دارد و وظایف زیر را انجام می‌دهد:</p>
+                <ul>
+                    <li>نظارت مستمر بر شرایط فضای بسته</li>
+                    <li>برقراری ارتباط مستقیم با فرد داخل فضا</li>
+                    <li>آشنایی با خطرات و اقدامات اضطراری</li>
+                    <li><strong>هرگز نباید فضای بسته را ترک کند</strong> (حتی به صورت موقت)</li>
+                </ul>
+
+                <div class="card-subtitle">🔹 اقدامات قبل از ورود به فضای بسته (AVOID - PREVENT - MINIMIZE)</div>
+                <div class="success-box">
+                    <strong>AVOID (اجتناب):</strong>
+                    <ul>
+                        <li>آیا می‌توان این کار را به شکل دیگری انجام داد؟</li>
+                        <li>آیا می‌توان از فضای بسته اجتناب کرد؟</li>
+                        <li>آیا می‌توان کار را از بیرون انجام داد (دوربین، کنترل از راه دور، ...)؟</li>
+                    </ul>
+                </div>
+                <div class="info-box">
+                    <strong>PREVENT (پیشگیری):</strong>
+                    <ul>
+                        <li>استفاده از سیستم ایمن انجام کار</li>
+                        <li>ایزولاسیون تجهیزات و مواد</li>
+                        <li>اطمینان از حضور افراد آموزش‌دیده و دارای صلاحیت</li>
+                        <li>بررسی مسیرهای ورود و خروج</li>
+                        <li>تهویه مناسب (طبیعی یا مکانیکی)</li>
+                        <li>پایش مستمر هوا</li>
+                    </ul>
+                </div>
+                <div class="warning-box">
+                    <strong>MINIMIZE (به حداقل رساندن):</strong>
+                    <ul>
+                        <li>استفاده از تجهیزات هوارسان (در صورت نیاز)</li>
+                        <li>آمادگی برای شرایط اضطراری و نجات</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 16. حفاری -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">⛏️</span> پروانه تکمیلی حفاری و گودبرداری (Excavation)</div>
+                <p><strong>تعریف:</strong> هر فعالیتی که در پی آن نیاز باشد زمین کنده شود، از جمله: شخم زدن، تونل‌زنی، انهدام، حفر، کندن گودال.</p>
+                <div class="danger-box">
+                    <strong>⚠️ نکته:</strong> این مجوز برای هر گودبرداری و حفاری بیش از <strong>۳۰ سانتی‌متر</strong> (به جز معدن و فضای سبز) اجباری است.
+                </div>
+
+                <div class="card-subtitle">🔹 آمار و ارقام</div>
+                <p>طبق آمار OSHA، مرگ ناشی از حفاری و گودبرداری <strong>۵۰ برابر</strong> بیشتر از مرگ ناشی از ساخت و ساز است.</p>
+                <ul>
+                    <li>عدم مدیریت و نظارت صحیح</li>
+                    <li>عدم تست زمین و خاک</li>
+                    <li>عدم نصب حفاظ مناسب</li>
+                    <li>استفاده از ماشین‌آلات غیرمجاز</li>
+                    <li>عدم توجه به شرایط آب و هوایی</li>
+                    <li>عدم توجه به فشار وارده بر دیواره‌ها</li>
+                </ul>
+
+                <div class="card-subtitle">🔹 ریسک‌های مرتبط با حفاری و گودبرداری</div>
+                <ul>
+                    <li>ریزش دیواره</li>
+                    <li>آسیب به تجهیزات زیرزمینی (لوله‌ها، کابل‌های برق، گاز، آب)</li>
+                    <li>سقوط ماشین‌آلات داخل گودال</li>
+                    <li>سقوط افراد</li>
+                    <li>انفجار</li>
+                    <li>تصادفات با ماشین‌آلات</li>
+                    <li>برق‌گرفتگی</li>
+                </ul>
+
+                <div class="card-subtitle">🔹 معیارهای تعیین نیاز به پرمیت حفاری</div>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr><th>معیار</th><th>پاسخ</th><th>نتیجه</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>عمق حفاری بیش از ۳۰ سانتی‌متر است؟</td><td>بله</td><td>نیاز به پرمیت</td></tr>
+                            <tr><td>قسمتی از زمین برداشته می‌شود؟</td><td>بله</td><td>نیاز به پرمیت</td></tr>
+                            <tr><td>احتمال وجود تجهیزات زیرزمینی وجود دارد؟</td><td>بله</td><td>نیاز به پرمیت</td></tr>
+                            <tr><td>احتمال وجود گازهای قابل اشتعال وجود دارد؟</td><td>بله</td><td>نیاز به پرمیت</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card-subtitle">🔹 مجوز گودبرداری (شناسایی تاسیسات زیرزمینی)</div>
+                <p>فرمی است که بر اساس مسیر، مشخصات جغرافیایی و گستره گودبرداری، مجوز گودبرداری را از همه طرفین ذی‌نفع اخذ می‌نماید.</p>
+
+                <div class="card-subtitle">🔹 الزامات حفاری و گودبرداری</div>
+                <ul>
+                    <li>هیچ نوع عملیات گودبرداری بدون اخذ پروانه فعالیت انجام نشود.</li>
+                    <li>مسئول محوطه باید از محل بازدید کرده و شرایط ایمن را تأیید نماید.</li>
+                    <li>پروانه گودبرداری به عنوان پروانه مکمل صادر می‌شود.</li>
+                    <li>برای کانال‌های با عمق بیش از <strong>۱۸۰ سانتی‌متر</strong>، باید از حفاظ‌های فیزیکی (گارد ریل، فنس، موانع) استفاده شود.</li>
+                </ul>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 17. کار در ارتفاع -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🧗</span> پروانه تکمیلی کار در ارتفاع (Work at Height)</div>
+                <p><strong>تعریف:</strong> فعالیتی که موقعیت انجام آن در ارتفاع بیش از <strong>۱/۲ متر</strong> نسبت به سطح مبنا انجام گیرد.</p>
+                <div class="info-box">
+                    <strong>نکته ۱:</strong> در محل‌هایی که پلتفرم یا جایگاه فیکس ایمن و استاندارد وجود دارد، نیازی به گرفتن پرمیت نیست.<br>
+                    <strong>نکته ۲:</strong> پلتفرم ایمن جایی است که دارای Toe Board، Knee Rail و Guard Rail باشد.
+                </div>
+
+                <div class="card-subtitle">🔹 آمار و ارقام</div>
+                <ul>
+                    <li>کار در ارتفاع، بالاترین دلیل مرگ و میر ناشی از کار در محیط‌های صنعتی است.</li>
+                    <li>به ازای هر مرگ ناشی از کار در ارتفاع، <strong>۵۰۰ حادثه جدی</strong> رخ می‌دهد.</li>
+                    <li>بیشترین ریسک کار در ارتفاع، سقوط افراد است، اما سقوط اشیا و ابزار نیز نیاز به مدیریت دارد.</li>
+                </ul>
+
+                <div class="card-subtitle">🔹 معیارهای تعیین نیاز به پرمیت کار در ارتفاع</div>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr><th>معیار</th><th>پاسخ</th><th>نتیجه</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>کار در ارتفاع پایین‌تر از ۲ متر انجام می‌شود؟</td><td>بله</td><td>ممکن است پرمیت نیاز نباشد</td></tr>
+                            <tr><td>جایگاه انجام کار ایمن است (فیکس، دارای Guard Rail)؟</td><td>بله</td><td>ممکن است پرمیت نیاز نباشد</td></tr>
+                            <tr><td>دسترسی از طریق نردبان یا مسیر دسترسی ایمن است؟</td><td>بله</td><td>ممکن است پرمیت نیاز نباشد</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p><strong>نکته:</strong> اگر پاسخ همه سوالات "بله" باشد، نیازی به پرمیت نیست. در غیر این صورت، پرمیت کار در ارتفاع الزامی است.</p>
+
+                <div class="card-subtitle">🔹 تجهیزات حفاظت از سقوط</div>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr><th>تجهیزات</th><th>توضیح</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>کمربند ایمنی (Safety Belt)</td><td>تجهیزات ساده، ولی احتمال آسیب به ستون فقرات در هنگام سقوط</td></tr>
+                            <tr><td>کمربند کامل بدن (Harness)</td><td>توزیع نیروی سقوط به تنه، شانه‌ها، سینه و ران‌ها</td></tr>
+                            <tr><td>لنیارد (Lanyard)</td><td>اتصال بین فرد و نقطه تکیه‌گاه</td></tr>
+                            <tr><td>میراکننده شوک (Shock Absorber)</td><td>جذب انرژی سقوط و کاهش شدت ضربه</td></tr>
+                            <tr><td>سامانه جلوگیری از سقوط (FRS/TRS)</td><td>محدود کردن دامنه حرکت و جلوگیری از رسیدن به لبه خطرناک</td></tr>
+                            <tr><td>سامانه نگهدارنده سقوط (FAS)</td><td>کاهش آسیب در صورت سقوط (نه جلوگیری از سقوط)</td></tr>
+                            <tr><td>تورهای ایمنی</td><td>کاهش ارتفاع سقوط و شدت صدمات</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card-subtitle">🔹 عوامل تعیین‌کننده شدت سقوط (Fall Factor)</div>
+                <ul>
+                    <li><strong>فاکتور سقوط صفر:</strong> تکیه‌گاه بالای سر فرد</li>
+                    <li><strong>فاکتور سقوط یک:</strong> تکیه‌گاه هم‌سطح با کمربند</li>
+                    <li><strong>فاکتور سقوط دو:</strong> تکیه‌گاه پایین‌تر از سطح ایستادن</li>
+                </ul>
+                <div class="warning-box">
+                    عدد بزرگتر = سقوط شدیدتر و آسیب بیشتر
+                </div>
+
+                <div class="card-subtitle">🔹 الزامات صدور پروانه کار در ارتفاع</div>
+                <ul>
+                    <li>پروانه مکمل کار در ارتفاع برای کارهایی در ارتفاع بیش از ۱/۲ متر صادر می‌شود.</li>
+                    <li>مدت اعتبار پروانه کار در ارتفاع حداکثر <strong>یک نوبت کاری</strong> می‌باشد.</li>
+                    <li>امکان تعلیق پروانه کار در ارتفاع وجود ندارد و در صورت توقف، ابطال می‌شود.</li>
+                    <li>مسئول اجرا و عامل کار باید دوره‌های آموزشی ایمنی کار در ارتفاع را گذرانده باشند.</li>
+                    <li>انجام‌دهندگان باید از توانایی‌های جسمانی و روانی مناسب برخوردار باشند.</li>
+                    <li>حداقل یک نفر از تیم کار در ارتفاع باید دوره کمک‌های اولیه را گذرانده باشد.</li>
+                </ul>
+
+                <div class="card-subtitle">🔹 شرایط توقف کار در ارتفاع</div>
+                <ul>
+                    <li>وزش باد با سرعت بیش از <strong>۴۰ تا ۵۰ کیلومتر در ساعت</strong></li>
+                    <li>هنگام وقوع رعد و برق</li>
+                    <li>استفاده از تجهیزات برقی در هنگام بارندگی و برف</li>
+                    <li>لغزنده بودن سطوح کار در اثر باران یا برف</li>
+                    <li>عدم وجود دید کافی به علت گرد و خاک، مه یا بارش</li>
+                </ul>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 18. جرثقیل -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🏗️</span> پروانه تکمیلی جرثقیل (Crane Operation)</div>
+                <p><strong>تعریف:</strong> هر گونه عملیات بلند کردن اجسام سنگین و غیرمعمول (از نظر سایز، وزن و ...) که بوسیله جرثقیل‌های متحرک انجام شود.</p>
+                <div class="info-box">
+                    <strong>توجه:</strong> این شامل جرثقیل‌های ثابت (سقفی) یا فعالیت‌های روتین نمی‌شود.
+                </div>
+
+                <div class="card-subtitle">🔹 چرا باید فعالیت‌های کار با جرثقیل را مدیریت کنیم؟</div>
+                <ul>
+                    <li>پیشگیری از مرگ افراد</li>
+                    <li>پیشگیری از فجایع و آسیب به اموال</li>
+                    <li>پیشگیری از توقفات تولید</li>
+                </ul>
+
+                <div class="card-subtitle">🔹 ریسک‌های مرتبط با کار با جرثقیل</div>
+                <ul>
+                    <li>آسیب به افراد به دلیل له‌شدگی و برخورد</li>
+                    <li>برخورد جرثقیل با کابل‌های برق‌دار</li>
+                    <li>تصادف جرثقیل با افراد و ماشین‌آلات</li>
+                </ul>
+
+                <div class="card-subtitle">🔹 چه زمانی باید برای کار با جرثقیل مجوز گرفت؟</div>
+                <p>هر فعالیت غیر روتین که در آن بار سنگین و یا غیرمعمول با جرثقیل متحرک جابجا شود.</p>
+
+                <div class="card-subtitle">🔹 برنامه‌ریزی برای کار با جرثقیل (PREVENT)</div>
+                <div class="grid-2col">
+                    <ul>
+                        <li>شرح فعالیت</li>
+                        <li>محل قرارگیری و حرکت جرثقیل</li>
+                        <li>ارتفاع بلند کردن بار</li>
+                        <li>ماتریس وزن</li>
+                        <li>طول بوم و زاویه</li>
+                        <li>سایز و وزن بار</li>
+                        <li>ظرفیت جرثقیل</li>
+                    </ul>
+                    <ul>
+                        <li>صلاحیت افراد درگیر (به ویژه ریگر - Rigger)</li>
+                        <li>روش ارتباطی</li>
+                        <li>شرایط زمین</li>
+                        <li>محصورسازی محل</li>
+                        <li>شرایط آب و هوایی</li>
+                        <li>قالب و هوک و قطعات جرثقیل</li>
+                        <li>سالم بودن کلیه تجهیزات جرثقیل و اتصالات</li>
+                    </ul>
+                </div>
+
+                <div class="success-box">
+                    <strong>AVOID (اجتناب):</strong> از حمل بار سنگین اجتناب کنیم و راه‌های دیگر را امتحان کنیم، مانند: نصب قطعات در محل، نصب روی زمین، استفاده از روش‌های جایگزین.
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 19. جداسازی الکتریکی -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">⚡</span> پروانه تکمیلی جداسازی الکتریکی</div>
+                <ul>
+                    <li>برای هر پروانه فعالیت اصلی، فقط <strong>یک پروانه مکمل جداسازی الکتریکی</strong> استفاده می‌شود.</li>
+                    <li>هر پروانه جداسازی الکتریکی باید دارای شماره منحصر به فرد باشد.</li>
+                    <li>قبل از کار بر روی تجهیزات برقی، باید منبع برق قطع شده و از قسمت منبع تغذیه، <strong>قفل و برچسب‌زنی (LOTO)</strong> انجام شود.</li>
+                    <li>جداسازی الکتریکی باید توسط <strong>مسئول ارشد برق</strong> هر محوطه انجام پذیرد.</li>
+                </ul>
+                <div class="info-box">
+                    <strong>مسئولیت اطمینان از جداسازی:</strong>
+                    <ol>
+                        <li>مسئول ارشد برق (به عنوان مجری جداسازی)</li>
+                        <li>مسئول محوطه (قبل از صدور پروانه اصلی)</li>
+                        <li>مسئول اجرای کار (قبل از شروع به کار)</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 20. جداسازی فرآیندی/مکانیکی -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🔧</span> پروانه تکمیلی جداسازی فرآیندی/مکانیکی</div>
+
+                <div class="card-subtitle">🔹 تعریف جداسازی (Isolation)</div>
+                <p>قطع ارتباط کامل منابع انرژی برای پیشگیری و حفاظت در برابر رهاسازی انرژی یا مواد به محدوده کار در حال انجام.</p>
+                <ul>
+                    <li>از هم باز کردن (Blank/Blind)</li>
+                    <li>ناهم‌تراز نمودن (Misalignment)</li>
+                    <li>باز کردن و برداشتن بخش‌هایی از خط لوله</li>
+                    <li>استفاده از مسدودسازی مضاعف و تخلیه (DBB: Double Block & Bleed)</li>
+                </ul>
+
+                <div class="card-subtitle">🔹 الزامات جداسازی فرآیندی/مکانیکی</div>
+                <ul>
+                    <li>فرم جداسازی ضمیمه پروانه اصلی بوده و شماره آن در پروانه اصلی درج می‌گردد.</li>
+                    <li>برای تثبیت تجهیزات قابل تغییر (مانند شیرها)، باید از علائم هشداردهنده و <strong>قفل و برچسب‌زنی (LOTO)</strong> استفاده شود.</li>
+                    <li>برای لغو جداسازی، همه پروانه‌های مرتبط باید پایان یافته باشند.</li>
+                    <li>لغو جداسازی باید توسط مسئول اجرای کاری که جداسازی را انجام داده است، صورت پذیرد.</li>
+                </ul>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 21. مراحل صدور و بستن پرمیت -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📋</span> مراحل صدور و بستن پروانه کار (فرآیند کلی)</div>
+
+                <div class="card-subtitle">مرحله ۱: توافق در خصوص نحوه ایمن انجام کار</div>
+                <p><strong>مسئولیت:</strong> صادر کننده پرمیت و انجام‌دهنده کار</p>
+                <ul>
+                    <li>بازدید حضوری از محل انجام کار</li>
+                    <li>توافق در خصوص نحوه ایمن انجام کار</li>
+                    <li>توافق در خصوص زمان انجام کار و تجهیزات مورد نیاز</li>
+                    <li>تعیین مسئولیت‌های هر یک از افراد</li>
+                    <li>تعیین روش ارتباطی بین افراد</li>
+                    <li>چک کردن نکات موجود در فرم پرمیت</li>
+                </ul>
+
+                <div class="card-subtitle">مرحله ۲: انجام پیش‌نیازهای توافق شده</div>
+                <p><strong>مسئولیت:</strong> انجام‌دهنده کار</p>
+                <ul>
+                    <li>تهیه تجهیزات مورد نیاز</li>
+                    <li>نصب نوار خطر، تابلوهای ایمن و حفاظ‌ها</li>
+                    <li>بازبینی کلیه تجهیزات حفاظت فردی (کلاه، دستکش، ماسک، کمربند و ...)</li>
+                    <li>کنترل سلامت کارگران</li>
+                </ul>
+
+                <div class="card-subtitle">مرحله ۳: تأیید انجام پیش‌نیازها و صدور پرمیت</div>
+                <p><strong>مسئولیت:</strong> صادر کننده مجوز</p>
+                <ul>
+                    <li>تأیید انجام پیش‌نیازها توسط انجام‌دهنده کار</li>
+                    <li>صدور پرمیت توسط صادرکننده</li>
+                    <li>قبول پرمیت توسط انجام‌دهنده کار</li>
+                </ul>
+
+                <div class="card-subtitle">مرحله ۴: نظارت بر انجام کار و تکمیل فرم پرمیت</div>
+                <p><strong>مسئولیت:</strong> انجام‌دهنده کار</p>
+                <ul>
+                    <li>نظارت کافی بر تمام کارکنان در حین انجام کار</li>
+                    <li>رعایت تمام موارد ذکر شده در پرمیت</li>
+                    <li>تکمیل قسمت‌های مربوط به حین انجام کار</li>
+                    <li>جمع‌آوری تجهیزات پس از انجام کار</li>
+                    <li>بازگرداندن محل به شکل اولیه</li>
+                </ul>
+
+                <div class="card-subtitle">مرحله ۵: بستن پرمیت</div>
+                <p><strong>مسئولیت:</strong> صادر کننده پرمیت</p>
+                <ul>
+                    <li>اطمینان از انجام صحیح تمام موارد ذکر شده در پرمیت</li>
+                    <li>اطمینان از بازگشت محیط به شرایط ایمن اولیه</li>
+                    <li>ثبت موارد قابل بهبود برای بررسی بعدی</li>
+                    <li>تأیید و بستن پرمیت</li>
+                </ul>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 22. خلاصه و جمع‌بندی -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📌</span> خلاصه و جمع‌بندی</div>
+
+                <div class="card-subtitle">🔹 نکات کلیدی سیستم PTW</div>
+                <ol>
+                    <li><strong>پرمیت یک ابزار ارتباطی و کنترلی است</strong>، نه یک تشریفات اداری.</li>
+                    <li><strong>رفتار و نگرش افراد</strong> مهم‌تر از خود پرمیت است.</li>
+                    <li><strong>شناسایی خطرات</strong> و <strong>اقدامات کنترلی</strong> قلب سیستم PTW هستند.</li>
+                    <li><strong>مسئولیت‌ها</strong> به وضوح تعریف شده‌اند و هر کس باید وظایف خود را بشناسد.</li>
+                    <li><strong>آموزش و صلاحیت</strong> نیروها، پیش‌نیاز اصلی صدور پرمیت است.</li>
+                    <li><strong>سنجش گاز</strong> و <strong>ایزولاسیون</strong> دو رکن اساسی ایمنی در کارهای پرخطر هستند.</li>
+                    <li><strong>بازدید حضوری از محل</strong> توسط مسئولین، الزامی و غیرقابل جایگزین است.</li>
+                    <li><strong>پایان کار</strong> به معنای بازگشت کامل به شرایط ایمن اولیه است.</li>
+                </ol>
+
+                <div class="card-subtitle">🔹 خطاهای رایج و راه‌های پیشگیری</div>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr><th>خطا</th><th>راه پیشگیری</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>کار بدون پرمیت</td><td>فرهنگ‌سازی و نظارت مستمر</td></tr>
+                            <tr><td>عدم رعایت اولویت امضاء</td><td>شفاف‌سازی فرآیند و آموزش</td></tr>
+                            <tr><td>شرح کار ناقص</td><td>تکمیل دقیق فرم با حضور در محل</td></tr>
+                            <tr><td>عدم سنجش گاز</td><td>الزام به ثبت نتایج سنجش قبل از شروع</td></tr>
+                            <tr><td>عدم جداسازی تجهیزات</td><td>استفاده از سیستم LOTO و بازرسی</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- 23. منابع -->
+            <!-- ============================================================ -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📚</span> منابع و مآخذ</div>
+                <ul>
+                    <li>مجموعه آیین‌نامه‌های حفاظت و بهداشت کار</li>
+                    <li>OSHA 3088:2001 - How to plan for workplace emergencies and evacuations</li>
+                    <li>Kobe steel standard 0104030110: Planning for Emergencies</li>
+                    <li>ISO 14001 و OHSAS 18001</li>
+                    <li>دستورالعمل ایزولاسیون فرآیندی و مکانیکی شرکت ملی گاز ایران (IGS-O-SF-005-1)</li>
+                    <li>راهنمای ایزولاسیون فرآیندی و مکانیکی وزارت نفت (MOP-HSED-GL-206)</li>
+                    <li>The safe isolation of plant and equipment</li>
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            تهیه شده توسط <span class="highlight">شرکت معدنی و صنایع معدنی درکاو</span><br>
+            <span style="direction:ltr; display:inline-block;">📞 09178680173</span>
+        </div>
+
+    </div>
+
+    <script>
+        // اضافه کردن قابلیت کپی متن با کلیک
+        document.querySelectorAll('.tip-item, .definition-item, .material-list li, .safety-alert ul li, .safety-alert p, .card ul li, .card ol li, .info-box ul li, .info-box ol li, .warning-box ul li, .danger-box ul li, .success-box ul li').forEach(el => {
+            el.style.cursor = 'pointer';
+            el.addEventListener('click', function() {
+                const text = this.textContent.trim();
+                navigator.clipboard.writeText(text).then(() => {
+                    const origBg = this.style.background;
+                    this.style.background = '#d4edda';
+                    setTimeout(() => {
+                        this.style.background = origBg || '';
+                    }, 400);
+                });
+            });
+        });
+
+        console.log('✅ دوره آموزشی سیستم صدور مجوز کار (PTW) بارگذاری شد.');
+        console.log('📋 کلیک روی هر متن برای کپی کردن');
+        console.log('📚 شامل ۲۳ بخش کامل با استانداردهای OHSAS 18001 و ISO 14001');
+    </script>
+
+<script src="hse-common.js"></script>
+
+<script src="assets/js/sw-register.js"></script>
+</body>
+</html>

@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+
+<script>
+/* ============================================================
+   ★ امنیت: گیت احراز هویت (سمت کلاینت)
+   هیچ صفحه‌ای بدون ورود به سامانه باز نمی‌شود. محتوای صفحه
+   مخفی می‌ماند و کاربر به صفحه ورود هدایت می‌شود.
+   (لایه نمایشی؛ لایه امنیتی واقعی در بکاند اعمال می‌شود.)
+   ============================================================ */
+(function(){
+  var ok = false;
+  try {
+    var _u = JSON.parse(localStorage.getItem('hse_user_activated') || 'null');
+    ok = !!(_u && _u.personnel && _u.fullname);
+  } catch(e) { ok = false; }
+  if (ok) return; // مجاز - ادامه می‌دهد
+
+  // پنهان‌کردن کل محتوا و نمایش قفل
+  var hide = function(){
+    try {
+      var d = document;
+      // مخفی کردن همه عناصر
+      var all = d.body ? d.body.children : [];
+      for (var i=0;i<all.length;i++){ all[i].style.display='none'; }
+      var lock = d.createElement('div');
+      lock.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#0f172a;color:#f8fafc;'
+        +'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+        +'font-family:Tahoma,sans-serif;text-align:center;padding:20px;direction:rtl;';
+      lock.innerHTML = '<div style="font-size:60px;margin-bottom:10px;">🔒</div>'
+        +'<h2 style="margin:0 0 8px;">دسترسی محدود است</h2>'
+        +'<p style="margin:0 0 20px;color:#94a3b8;">لطفاً ابتدا از صفحه اصلی وارد سامانه شوید.</p>'
+        +'<a href="index.html" style="background:#ff6208;color:#fff;padding:10px 26px;'
+        +'border-radius:10px;text-decoration:none;font-weight:bold;">بازگشت به صفحه ورود</a>';
+      d.body.appendChild(lock);
+    } catch(e){}
+  };
+  if (document.body) hide(); else document.addEventListener('DOMContentLoaded', hide);
+  setTimeout(function(){ try{ location.replace('index.html'); }catch(e){} }, 2500);
+})();
+</script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#1e3c5c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HSE درکاو" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+    <title>دوره ایمنی عمومی HSE - آژند همت توس</title>
+
+    <style>
+        :root {
+            --primary: #ff6208;
+            --primary-hover: #e05300;
+            --secondary: #f39c12;
+            --success: #27ae60;
+            --safety: #2c6e4e;
+            --danger: #c0392b;
+            --dark-blue: #1e3c5c;
+            --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #dfe7f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --text-main: #1e2a2e;
+            --text-muted: #64748b;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body { padding-bottom: 75px !important;
+            background: var(--bg-gradient);
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text-main);
+            line-height: 1.8;
+        }
+
+        .main-container {
+            max-width: 1000px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            background: var(--dark-blue);
+            padding: 35px 20px;
+            color: white;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+            position: relative;
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        .header h1 .icon {
+            margin-left: 10px;
+        }
+        .header p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        .header .back-home {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .header .back-home:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+        .card:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        }
+        .card-title {
+            color: var(--dark-blue);
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-right: 4px solid var(--primary);
+            padding-right: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title .icon {
+            font-size: 1.5rem;
+        }
+        .card-subtitle {
+            color: var(--primary);
+            font-size: 1.05rem;
+            font-weight: bold;
+            margin: 18px 0 10px 0;
+            border-bottom: 2px solid rgba(255, 98, 8, 0.15);
+            padding-bottom: 6px;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .tips-grid .tip-item {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 10px 14px;
+            border-radius: var(--border-radius-sm);
+            border-right: 3px solid var(--safety);
+            font-size: 0.9rem;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .tips-grid .tip-item:hover {
+            background: rgba(44, 110, 78, 0.04);
+            transform: translateX(-3px);
+        }
+        .tips-grid .tip-item.danger-tip {
+            border-right-color: var(--danger);
+        }
+        .tips-grid .tip-item.warning-tip {
+            border-right-color: var(--secondary);
+        }
+        .tips-grid .tip-item.primary-tip {
+            border-right-color: var(--primary);
+        }
+        .tips-grid .tip-item.info-tip {
+            border-right-color: #3498db;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+        .spec-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .spec-table th,
+        .spec-table td {
+            padding: 10px 12px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        .spec-table th {
+            background: var(--dark-blue);
+            color: white;
+            font-weight: bold;
+        }
+        .spec-table tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .spec-table tr:hover {
+            background: rgba(255, 98, 8, 0.04);
+        }
+
+        .btn-back {
+            background: #cbd5e1;
+            border: none;
+            padding: 10px 24px;
+            border-radius: var(--border-radius-sm);
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 12px;
+            color: #334155;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .btn-back:hover {
+            background: #b0bec5;
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .footer .highlight {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .badge-standard {
+            display: inline-block;
+            background: var(--safety);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-danger {
+            display: inline-block;
+            background: var(--danger);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-warning {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        .badge-info {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+
+        .safety-alert {
+            background: rgba(192, 57, 43, 0.04);
+            border-right: 4px solid var(--danger);
+            padding: 15px;
+            border-radius: var(--border-radius-sm);
+            margin: 10px 0;
+        }
+        .safety-alert strong {
+            color: var(--danger);
+        }
+        .safety-alert ul {
+            padding-right: 20px;
+            margin-top: 5px;
+        }
+        .safety-alert ul li {
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .highlight-box {
+            background: rgba(44, 110, 78, 0.04);
+            padding: 15px 18px;
+            border-radius: var(--border-radius-sm);
+            border-right: 4px solid var(--safety);
+            margin: 10px 0;
+        }
+        .highlight-box.danger {
+            background: rgba(192, 57, 43, 0.04);
+            border-right-color: var(--danger);
+        }
+        .highlight-box.gold {
+            background: rgba(243, 156, 18, 0.04);
+            border-right-color: var(--secondary);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+
+        .item-box {
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: var(--border-radius-sm);
+            padding: 14px 16px;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .item-box:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+        }
+        .item-box .icon {
+            color: var(--primary);
+            font-size: 1.3rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .item-box .title {
+            color: var(--dark-blue);
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .item-box .desc {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            margin-top: 2px;
+        }
+
+        /* ===== NFPA DIAMOND ===== */
+        .nfpa-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 15px 0;
+        }
+        .nfpa-diamond {
+            display: grid;
+            grid-template-columns: 80px 80px 80px;
+            grid-template-rows: 80px 80px 80px;
+            gap: 2px;
+            background: #222;
+            padding: 4px;
+            border-radius: 8px;
+            max-width: 100%;
+        }
+        .nfpa-diamond .cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #fff;
+            border-radius: 4px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+        .nfpa-diamond .cell.red { background: #d32f2f; }
+        .nfpa-diamond .cell.blue { background: #1976d2; }
+        .nfpa-diamond .cell.yellow { background: #f9a825; color: #222; text-shadow: none; }
+        .nfpa-diamond .cell.white { background: #e0e0e0; color: #222; text-shadow: none; border: 2px solid #999; }
+        .nfpa-diamond .cell.empty { background: transparent; }
+        .nfpa-diamond .cell.small { font-size: 1rem; }
+        .nfpa-diamond .cell .sub {
+            font-size: 0.55rem;
+            display: block;
+            font-weight: 400;
+            opacity: 0.8;
+        }
+
+        .nfpa-legend {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+            width: 100%;
+            max-width: 500px;
+        }
+        .nfpa-legend .leg-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            padding: 4px 8px;
+            background: rgba(0,0,0,0.02);
+            border-radius: 6px;
+        }
+        .nfpa-legend .leg-item .dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            flex-shrink: 0;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        .nfpa-legend .leg-item .dot.red { background: #d32f2f; }
+        .nfpa-legend .leg-item .dot.blue { background: #1976d2; }
+        .nfpa-legend .leg-item .dot.yellow { background: #f9a825; }
+        .nfpa-legend .leg-item .dot.white { background: #e0e0e0; border-color: #999; }
+
+        /* Fire Classes */
+        .fire-class-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            margin: 10px 0;
+        }
+        .fire-class-item {
+            padding: 14px 16px;
+            border-radius: var(--border-radius-sm);
+            border-right: 4px solid var(--primary);
+            background: rgba(0,0,0,0.02);
+        }
+        .fire-class-item .fc-badge {
+            display: inline-block;
+            font-weight: 900;
+            font-size: 1.2rem;
+            padding: 2px 12px;
+            border-radius: 20px;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+        .fire-class-item .fc-badge.a { background: #2ecc71; }
+        .fire-class-item .fc-badge.b { background: #f1c40f; color: #222; }
+        .fire-class-item .fc-badge.c { background: #e67e22; }
+        .fire-class-item .fc-badge.d { background: #9b59b6; }
+        .fire-class-item .fc-badge.e { background: #3498db; }
+        .fire-class-item .fc-badge.f { background: #e74c3c; }
+
+        @media(max-width:700px) {
+            .content { padding: 15px; }
+            .header h1 { font-size: 1.3rem; }
+            .header .back-home { width: 36px; height: 36px; font-size: 1rem; left: 10px; top: 15px; }
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .tips-grid { grid-template-columns: 1fr; }
+            .spec-table { font-size: 0.75rem; }
+            .spec-table th, .spec-table td { padding: 6px 4px; }
+            .nfpa-diamond { grid-template-columns: 60px 60px 60px; grid-template-rows: 60px 60px 60px; }
+            .nfpa-diamond .cell { font-size: 1.2rem; }
+            .nfpa-legend { grid-template-columns: 1fr; }
+            .fire-class-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <a href="index.html" class="back-home" title="بازگشت به صفحه اصلی">🏠</a>
+            <h1><span class="icon">🛡️</span>آموزش ایمنی عمومی</h1>
+            <p>مفاهیم پایه ایمنی، بهداشت، محیط زیست — بر اساس استانداردهای NFPA و ISO</p>
+            <div style="margin-top:8px; display:flex; flex-wrap:wrap; justify-content:center; gap:8px;">
+            </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <!-- ===== اهمیت ایمنی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">❤️</span> اهمیت ایمنی</div>
+                <ul>
+                    <li>✅ پیشگیری از حوادث ناشی از کار که سالیانه موجب صدمه، جراحت و مرگ بسیاری از کارگران می‌شوند.</li>
+                    <li>✅ ایجاد محیط ایمن جهت کار با بهره‌وری بالاتر</li>
+                    <li>✅ حفظ سرمایه صنعت</li>
+                </ul>
+            </div>
+
+            <!-- ===== تعاریف ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📖</span> تعاریف</div>
+                <div class="highlight-box">
+                    <strong>⚠️ خطر (Hazard):</strong> شرایطی است که دارای پتانسیل صدمه به افراد، آسیب به تجهیزات، از بین بردن مواد یا کاهش کارآیی در انجام یک عمل از پیش تعیین شده باشد.
+                </div>
+                <div class="highlight-box danger">
+                    <strong>💥 حادثه (Accident):</strong> واقعه برنامه‌ریزی نشده و اغلب صدمه‌آفرین یا خسارت‌رسان که موجب آسیب به نیروی انسانی، محیط زیست و تجهیزات می‌گردد و باعث ایجاد اختلال در کار می‌شود.
+                </div>
+                <div class="highlight-box" style="border-right-color:var(--success);">
+                    <strong>🛡️ ایمنی (Safety):</strong> میزان یا درجه فرار از خطر
+                </div>
+            </div>
+
+            <!-- ===== مصادیق خطرات ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📋</span> مصادیقی از خطرات</div>
+                <div class="grid-3">
+                    <div class="item-box"><span class="icon">⚙️</span><span class="title">حرکت چرخشی </span><span class="desc">  قطعه ماشین‌آلات، انتقال برق، غلطک</span></div>
+                    <div class="item-box"><span class="icon">🔽</span><span class="title">فشار ذخیره شده  </span><span class="desc">گاز، بخار، مایع، فقر مارپیچ شده</span></div>
+                    <div class="item-box"><span class="icon">🏃</span><span class="title">انرژی جنبشی </span><span class="desc">قطعه متحرک، خودرو، شیء در حال پرواز</span></div>
+                    <div class="item-box"><span class="icon">🔥</span><span class="title">آتش‌سوزی و انفجار  </span><span class="desc">مواد قابل اشتعال، واکنش شیمیایی</span></div>
+                    <div class="item-box"><span class="icon">⚡</span><span class="title">الکتریسیته  </span><span class="desc">ولتاژ، باتری، میدان مغناطیسی</span></div>
+                    <div class="item-box"><span class="icon">🌡️</span><span class="title">گرما و سرما  </span><span class="desc">اشیاء داغ/سرد، بخار، واکنش شیمیایی</span></div>
+                    <div class="item-box"><span class="icon">🚶</span><span class="title">حرکات افراد  </span><span class="desc">لبه‌های تیز، نقاط خطرناک</span></div>
+                    <div class="item-box"><span class="icon">🧪</span><span class="title">تأثیرات شیمیایی  </span><span class="desc">سمی، خورنده، خفه‌کننده</span></div>
+                    <div class="item-box"><span class="icon">☀️</span><span class="title">پرتو  </span><span class="desc">الکترومغناطیسی، مادون قرمز و فرابنفش</span></div>
+                </div>
+            </div>
+
+            <!-- ===== Near Miss ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">👁️</span> تعریف شبه حادثه (Near Miss)</div>
+                <div class="highlight-box gold">
+                    <strong>⚠️ شبه حادثه:</strong> اتفاقی که در آن هیچگونه بیماری، جراحت، خرابی و یا زیانی حادث نشود، اما پتانسیل وقوع حادثه را داشته باشد.
+                </div>
+            </div>
+
+            <!-- ===== عوامل تضعیف کننده ایمنی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">😔</span> عوامل تضعیف‌کننده ایمنی</div>
+                <ul>
+                    <li>❌ انگیزه ایمنی ضعیف در افراد</li>
+                    <li>❌ حمایت‌های نامناسب در برابر اشتباهات افراد</li>
+                    <li>❌ دستورالعمل‌های عملیاتی و نگهداری ضعیف</li>
+                    <li>❌ آموزش نامناسب افراد</li>
+                    <li>❌ عدم برقراری ارتباط</li>
+                    <li>❌ اولویت دادن به اهداف تجاری به جای توجه به مسائل ایمنی</li>
+                </ul>
+            </div>
+
+            <!-- ===== اهمیت حوادث ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📊</span> اهمیت حوادث ناشی از کار</div>
+                <ul>
+                    <li>🌍 بر طبق گزارش سازمان بین‌المللی کار در سال جاری بیش از <strong>دو میلیون و دویست هزار نفر</strong> بعلت حوادث ناشی از کار و بیماری‌های ناشی از کار فوت می‌کنند.</li>
+                    <li>👥 هر سال در جهان بیش از <strong>صد و شصت میلیون نفر</strong> از کارگران دچار حوادث ناشی از کار می‌شوند.</li>
+                    <li>⏰ هر روز <strong>پنج هزار نفر</strong> در جهان بعلت حوادث و بیماری‌های ناشی از کار جان خود را از دست می‌دهند.</li>
+                </ul>
+            </div>
+
+            <!-- ===== عوامل زیان آور ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">☣️</span> عوامل زیان‌آور محیط کار</div>
+                <div class="grid-3">
+                    <div class="item-box"><span class="icon">〰️</span><span class="title">فیزیکی</span></div>
+                    <div class="item-box"><span class="icon">🧪</span><span class="title">شیمیایی</span></div>
+                    <div class="item-box"><span class="icon">🦠</span><span class="title">بیولوژیکی</span></div>
+                    <div class="item-box"><span class="icon">🧠</span><span class="title">روانی</span></div>
+                    <div class="item-box"><span class="icon">🪑</span><span class="title">ارگونومیک</span></div>
+                    <div class="item-box"><span class="icon">🔧</span><span class="title">مکانیکی</span></div>
+                </div>
+            </div>
+
+            <!-- ===== عوامل فیزیکی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">〰️</span> عوامل زیان‌آور فیزیکی</div>
+                <ul>
+                    <li>🔊 سروصدا</li>
+                    <li>📳 ارتعاش</li>
+                    <li>💡 روشنایی</li>
+                    <li>🌡️ حرارت و برودت</li>
+                    <li>☢️ تشعشعات</li>
+                    <li>⚡ میدان‌های الکتریکی و مغناطیسی</li>
+                    <li>⚖️ فشارها</li>
+                </ul>
+            </div>
+
+            <!-- ===== سروصدا ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🔊</span> سروصدا</div>
+                <p>سروصدا عبارتست از ارتعاشات مکانیکی که بصورت ناخوشایند بر سیستم شنوایی انسان تاثیر سوء می‌گذارد. سروصدای صنعتی از مهمترین منابع آسیب رسانی بر شنوایی انسان می‌باشند.</p>
+                <div class="card-subtitle">مهمترین تاثیرات صدا بر انسان</div>
+                <ul>
+                    <li>🦻 تاثیر مستقیم بر گوش (ناشنوایی شغلی)</li>
+                    <li>🔇 اثر پوششی بر روی صداهای دیگر</li>
+                    <li>❤️ بالا رفتن فشار خون</li>
+                    <li>😩 خستگی زودرس</li>
+                    <li>😡 پرخاشگری</li>
+                    <li>🤢 مشکلات گوارشی</li>
+                </ul>
+                <div class="card-subtitle">روش‌های کنترل صدا</div>
+                <ul>
+                    <li>🎤 کنترل در منبع تولید</li>
+                    <li>🛡️ جلوگیری از رسیدن صدا به افراد</li>
+                    <li>🧑‍🚀 حفاظت فردی</li>
+                    <li>⏰ کاهش ساعت کاری</li>
+                </ul>
+            </div>
+
+            <!-- ===== ارتعاش ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📳</span> ارتعاش</div>
+                <ul>
+                    <li>🤚 ارتعاشات دست – بازو</li>
+                    <li>🧍 ارتعاشات تمام بدن</li>
+                    <li>🛡️ کنترل ارتعاش با استفاده از مواد جاذب ارتعاش</li>
+                    <li>🧑‍🚀 حفاظت فردی</li>
+                </ul>
+                <div class="card-subtitle">عوارض ارتعاش</div>
+                <ul>
+                    <li>💧 بروز ناراحتی‌های عروقی</li>
+                    <li>🤚 ضایعه سپید انگشتی (WHITE FINGER / DEAD FINGER)</li>
+                    <li>🦴 بروز ضایعات اسکلتی عضلانی</li>
+                    <li>🧮 فرار کلسیم از استخوان‌ها</li>
+                    <li>🦴 بروز ضایعات در مفاصل</li>
+                </ul>
+            </div>
+
+            <!-- ===== روشنایی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">💡</span> روشنایی</div>
+                <p>کمبود روشنایی یکی از عوامل مهم در کاهش کارایی و افزایش خطرات محیط کار است.</p>
+                <div class="card-subtitle">راه‌های افزایش روشنایی در محیط کار</div>
+                <ul>
+                    <li>🪟 افزایش پنجره‌ها و نورگیرها</li>
+                    <li>💡 افزایش روشنایی‌های مصنوعی</li>
+                    <li>🍃 استفاده از لامپ‌های کم مصرف و پربازده</li>
+                    <li>↕️ استفاده از روشنایی‌های موضعی</li>
+                    <li>⬇️ کم کردن فاصله روشنایی‌ها تا زمین</li>
+                </ul>
+            </div>
+
+            <!-- ===== حرارت و سرما ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🌡️</span> حرارت و سرما</div>
+                <div class="card-subtitle">اثرات گرما</div>
+                <ul>
+                    <li>🤝 ایجاد گرفتگی عضلانی</li>
+                    <li>💧 از دست رفتن آب و املاح بدن</li>
+                    <li>❤️ شوک گرمایی</li>
+                </ul>
+                <div class="card-subtitle">روش‌های مقابله با گرما</div>
+                <ul>
+                    <li>🧂 استفاده از قرص نمک در آب آشامیدنی</li>
+                    <li>👕 پوشش‌های مناسب برای کار گرم</li>
+                    <li>⏰ کاهش زمان کار</li>
+                    <li>🌡️ خنک کردن محیط</li>
+                    <li>✅ تطابق افراد با گرما</li>
+                    <li>🔄 کار دوره‌ای</li>
+                </ul>
+                <div class="card-subtitle">روش‌های مقابله با سرما</div>
+                <ul>
+                    <li>☕ نوشیدن مایعات گرم</li>
+                    <li>👕 پوشیدن لباس‌های گرم</li>
+                    <li>🔥 استفاده از وسایل گرم‌کننده</li>
+                    <li>🔄 کار دوره‌ای</li>
+                </ul>
+            </div>
+
+            <!-- ===== تشعشعات ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">☢️</span> تشعشعات و پرتوهای زیان‌آور</div>
+                <p>درصورت وجود منابع تولید پرتوهای یون‌ساز، از قبیل آلفا، بتا و ...، بایستی در خصوص محافظت ویژه در قبال آن تدابیر خاصی اندیشیده شود.</p>
+                <p>پرتوهای گاما و ایکس: در حال حاضر در بیشتر محیط‌های صنعتی، عمده کاربرد پرتوهای یون‌ساز (جهت رادیوگرافی و سایر کاربردها)، منحصر به پرتوهای گاما و ایکس می‌باشد.</p>
+            </div>
+
+            <!-- ===== عوامل شیمیایی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🧪</span> عوامل زیان‌آور شیمیایی</div>
+                <p>مواد شیمیایی که به هر صورت وارد بدن شوند باعث بروز عوارض مختلف خواهند شد. میزان تحمل بدن انسان برای عناصر و ترکیبات مختلف تفاوت دارد و برای هر ماده شیمیایی حدود مجاز تماس شغلی تعریف می‌شود.</p>
+                <p><strong>راه‌های ورود:</strong> پوست، تنفس، دستگاه گوارش، مخاط چشم. مهمترین راه ورود <strong>تنفس</strong> است.</p>
+                <div class="card-subtitle">تقسیم‌بندی آلاینده‌های شیمیایی</div>
+                <ul>
+                    <li><strong>مواد التهاب‌آور و محرک:</strong> محلول در آب، سریعاً جذب مخاط می‌شوند. مثل آمونیاک، اسیدها و بازها.</li>
+                    <li><strong>مواد خفقان‌آور:</strong> محلول در آب نیستند، در ابتدا قابل تشخیص نیستند و پس از نفوذ در ریه عوارض را نشان می‌دهند.</li>
+                </ul>
+                <div class="card-subtitle">گرد و غبار</div>
+                <p>گرد و غبار یکی از عوامل شیمیایی است که وارد محیط تنفسی شده و به نسبت قطر ذرات در قسمتی از دستگاه تنفسی رسوب کرده و باعث بیماری‌های تنفسی می‌شود.</p>
+                <ul>
+                    <li><strong>گرد و غبار سیلیس:</strong> در دراز مدت باعث بیماری سیلیکوزیس می‌شود.</li>
+                    <li><strong>گرد و غبار اولیه:</strong> در اثر خورد شدن مواد، ریزش از روی نوار نقاله</li>
+                    <li><strong>گرد و غبار ثانویه:</strong> گردش مجدد گرد و غبار در اثر عدم جمع‌آوری، خشک بودن محیط، وزش باد و ...</li>
+                </ul>
+            </div>
+
+            <!-- ===== MSDS ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📄</span> فرم اطلاعات ایمنی مواد (MSDS)</div>
+                <p><strong>MSDS شامل چه مواردی است؟</strong></p>
+                <ul>
+                    <li>ℹ️ اطلاعات محصول</li>
+                    <li>⚠️ اجزای تشکیل دهنده خطرناک</li>
+                    <li>🧊 اطلاعات فیزیکی</li>
+                    <li>🔥 اطلاعات مرتبط با خطرات آتش‌سوزی و انفجار</li>
+                    <li>🧪 اطلاعات واکنش‌پذیری</li>
+                    <li>💀 ویژگی‌های سم‌شناسی</li>
+                    <li>🛡️ اقدامات پیش‌گیرانه</li>
+                    <li>🚑 اقدامات کمک‌های اولیه</li>
+                    <li>📝 اطلاعات آماده‌سازی سند</li>
+                </ul>
+            </div>
+
+            <!-- ===== NFPA DIAMOND (لوزی خطر) ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">💎</span> لوزی شناسایی خطر (NFPA 704)</div>
+                <p>لوزی خطر (NFPA Diamond) نمادی استاندارد است که اطلاعات سریعی درباره خطرات مواد شیمیایی ارائه می‌دهد. این سیستم توسط <strong>انجمن ملی حفاظت از آتش آمریکا (NFPA)</strong> توسعه داده شده است.</p>
+
+                <div class="nfpa-container">
+                    <div class="nfpa-diamond">
+                        <div class="cell empty"></div>
+                        <div class="cell red">4</div>
+                        <div class="cell empty"></div>
+                        <div class="cell blue">2</div>
+                        <div class="cell white small">COR</div>
+                        <div class="cell yellow">1</div>
+                        <div class="cell empty"></div>
+                        <div class="cell empty"></div>
+                        <div class="cell empty"></div>
+                    </div>
+                </div>
+
+                <div class="nfpa-legend">
+                    <div class="leg-item"><span class="dot red"></span> <strong>خطر آتش‌سوزی (قرمز)</strong> — قابلیت اشتعال (۰ تا ۴)</div>
+                    <div class="leg-item"><span class="dot blue"></span> <strong>خطر سلامتی (آبی)</strong> — سمیت و خطرات بهداشتی (۰ تا ۴)</div>
+                    <div class="leg-item"><span class="dot yellow"></span> <strong>خطر واکنش‌پذیری (زرد)</strong> — پایداری و انفجار (۰ تا ۴)</div>
+                    <div class="leg-item"><span class="dot white"></span> <strong>خطرات ویژه (سفید)</strong> — اسید، قلیا، خورنده، اکسیدکننده، آب‌واکنش‌گر</div>
+                </div>
+
+                <div style="margin-top:12px; padding:12px 16px; background:rgba(0,0,0,0.02); border-radius:var(--border-radius-sm);">
+                    <p><strong>🔹 درجه‌بندی اعداد (۰ تا ۴):</strong></p>
+                    <ul>
+                        <li><strong>۰ — بی‌خطر:</strong> هیچ خطری ندارد.</li>
+                        <li><strong>۱ — خطر کم:</strong> در صورت مواجهه، خطر جزئی دارد.</li>
+                        <li><strong>۲ — خطر متوسط:</strong> مواجهه می‌تواند باعث آسیب جدی شود.</li>
+                        <li><strong>۳ — خطر شدید:</strong> مواجهه کوتاه‌مدت می‌تواند باعث آسیب جدی یا مرگ شود.</li>
+                        <li><strong>۴ — خطر بسیار شدید:</strong> مواجهه بسیار کوتاه‌مدت می‌تواند باعث مرگ شود.</li>
+                    </ul>
+                </div>
+
+                <div style="margin-top:10px; padding:12px 16px; background:rgba(192,57,43,0.04); border-radius:var(--border-radius-sm); border-right:3px solid var(--danger);">
+                    <p><strong>⚠️ مثال عملی:</strong> لوزی بالا یک ماده شیمیایی با درجه‌های زیر را نشان می‌دهد:</p>
+                    <ul>
+                        <li><strong>قرمز (۴):</strong> بسیار قابل اشتعال (مثل استیلن، هیدروژن)</li>
+                        <li><strong>آبی (۲):</strong> خطر سلامت متوسط (مثل کلروفرم، آمونیاک)</li>
+                        <li><strong>زرد (۱):</strong> واکنش‌پذیری کم (مثل اسید سولفوریک)</li>
+                        <li><strong>سفید (COR):</strong> خورنده (مثل اسید کلریدریک، سدیم هیدروکسید)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ===== طبقه‌بندی حریق بر اساس NFPA ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🔥</span> طبقه‌بندی حریق بر اساس NFPA</div>
+                <p style="margin-bottom:10px;">بر اساس استاندارد <strong>NFPA 10</strong>، حریق‌ها به ۶ کلاس اصلی تقسیم می‌شوند که هر کدام خاموش‌کننده مخصوص خود را دارند:</p>
+
+                <div class="fire-class-grid">
+                    <div class="fire-class-item">
+                        <span class="fc-badge a">A</span>
+                        <strong>حریق مواد جامد</strong>
+                        <span style="display:block;font-size:0.85rem;color:var(--text-muted);">چوب، کاغذ، پارچه، لاستیک، پلاستیک، فرش</span>
+                        <span style="display:block;font-size:0.8rem;margin-top:4px;background:rgba(39,174,96,0.08);padding:2px 10px;border-radius:12px;">🧯 خاموش‌کننده: آب، پودر چندمنظوره، فوم</span>
+                    </div>
+                    <div class="fire-class-item">
+                        <span class="fc-badge b">B</span>
+                        <strong>حریق مایعات قابل اشتعال</strong>
+                        <span style="display:block;font-size:0.85rem;color:var(--text-muted);">بنزین، گازوئیل، نفت، تینر، گریس، الکل</span>
+                        <span style="display:block;font-size:0.8rem;margin-top:4px;background:rgba(241,196,15,0.1);padding:2px 10px;border-radius:12px;">🧯 خاموش‌کننده: پودر خشک، CO₂، فوم</span>
+                    </div>
+                    <div class="fire-class-item">
+                        <span class="fc-badge c">C</span>
+                        <strong>حریق گازهای قابل اشتعال</strong>
+                        <span style="display:block;font-size:0.85rem;color:var(--text-muted);">متان، اتان، پروپان، استیلن، هیدروژن</span>
+                        <span style="display:block;font-size:0.8rem;margin-top:4px;background:rgba(230,126,34,0.08);padding:2px 10px;border-radius:12px;">🧯 خاموش‌کننده: پودر خشک، CO₂</span>
+                    </div>
+                    <div class="fire-class-item">
+                        <span class="fc-badge d">D</span>
+                        <strong>حریق فلزات قابل اشتعال</strong>
+                        <span style="display:block;font-size:0.85rem;color:var(--text-muted);">لیتیم، سدیم، پتاسیم، منیزیم، تیتانیوم</span>
+                        <span style="display:block;font-size:0.8rem;margin-top:4px;background:rgba(155,89,182,0.08);padding:2px 10px;border-radius:12px;">🧯 خاموش‌کننده: پودر مخصوص کلاس D</span>
+                    </div>
+                    <div class="fire-class-item">
+                        <span class="fc-badge e">E</span>
+                        <strong>حریق برقی و الکتریکی</strong>
+                        <span style="display:block;font-size:0.85rem;color:var(--text-muted);">لوازم برقی، کابل‌ها، تابلوهای برق</span>
+                        <span style="display:block;font-size:0.8rem;margin-top:4px;background:rgba(52,152,219,0.08);padding:2px 10px;border-radius:12px;">🧯 خاموش‌کننده: CO₂، پودر چندمنظوره</span>
+                    </div>
+                    <div class="fire-class-item">
+                        <span class="fc-badge f">F</span>
+                        <strong>حریق روغن‌های خوراکی</strong>
+                        <span style="display:block;font-size:0.85rem;color:var(--text-muted);">روغن مایع، روغن جامد، چربی‌های آشپزی</span>
+                        <span style="display:block;font-size:0.8rem;margin-top:4px;background:rgba(231,76,60,0.08);padding:2px 10px;border-radius:12px;">🧯 خاموش‌کننده: مواد شیمیایی تر (Wet Chemical)</span>
+                    </div>
+                </div>
+
+                <div class="safety-alert" style="margin-top:12px;">
+                    <strong>⚠️ نکات مهم:</strong>
+                    <ul>
+                        <li>هرگز از <strong>آب</strong> برای حریق کلاس B (مایعات قابل اشتعال) استفاده نکنید — آب باعث پخش شدن آتش می‌شود.</li>
+                        <li>هرگز از <strong>آب یا فوم</strong> برای حریق کلاس E (برقی) استفاده نکنید — خطر برق‌گرفتگی.</li>
+                        <li>برای حریق کلاس D (فلزات) فقط از <strong>پودر مخصوص کلاس D</strong> استفاده کنید.</li>
+                        <li>مثلث آتش: <strong>سوخت + حرارت + اکسیژن</strong> = آتش. با حذف هر کدام، آتش خاموش می‌شود.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ===== ایمنی حریق (تکمیلی) ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🧯</span> ایمنی حریق</div>
+                <div class="card-subtitle">مثلث آتش</div>
+                <div class="highlight-box gold">
+                    <strong>🔥 مثلث آتش:</strong> سوخت + حرارت + اکسیژن = آتش
+                </div>
+                <div class="card-subtitle">ساختار خاموش‌کننده دستی</div>
+                <ul>
+                    <li>🧪 لوله تخلیه</li>
+                    <li>🤚 دستگیره حمل</li>
+                    <li>📊 فشارسنج (به جز کپسول‌های CO₂)</li>
+                    <li>🔒 پین و پلمب (ضامن)</li>
+                </ul>
+            </div>
+
+            <!-- ===== عوامل بیولوژیک ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🦠</span> عوامل بیولوژیک</div>
+                <ul>
+                    <li>🦠 ویروس‌ها (کرونا، هاری، ایدز، هپاتیت)</li>
+                    <li>🐛 باکتری‌ها (سیاه‌زخم، سل)</li>
+                    <li>🌱 قارچ‌ها</li>
+                    <li>🐛 انگل‌ها</li>
+                </ul>
+            </div>
+
+            <!-- ===== عوامل روانی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🧠</span> عوامل روانی</div>
+                <ul>
+                    <li>😔 افسردگی، اضطراب، پرخاشگری در کارگران</li>
+                    <li>🤝 ارتباطات سازمانی بین کارگر و کارفرما</li>
+                    <li>👥 ارتباط مابین کارگر و همکاران</li>
+                    <li>🏠 مشکلات خانوادگی</li>
+                    <li>🌙 شب‌کاری</li>
+                </ul>
+            </div>
+
+            <!-- ===== ارگونومی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🪑</span> ارگونومی (ERGONOMICS)</div>
+                <p><strong>ارگونومی چیست؟</strong></p>
+                <ul>
+                    <li>↔️ بررسی روابط بین انسان، ماشین و محیط کار و بهینه‌سازی آن</li>
+                    <li>🔬 دانش جوانی که با استفاده از مجموعه‌ای از علوم، سیستم کار را به گونه‌ای طراحی می‌کند که حداکثر بازدهی و حداقل خطا و خستگی را داشته باشد.</li>
+                    <li>🦴 علم پیشگیری از اختلالات اسکلتی-عضلانی</li>
+                </ul>
+                <div class="card-subtitle">راه‌های پیشگیری از بیماری‌های اسکلتی و عضلانی</div>
+                <ul>
+                    <li>🪑 طراحی ارتفاع میز کار در سطح آرنج</li>
+                    <li>✋ حذف بار اضافی، تکرار، شرایط و پوزیشن نادرست</li>
+                    <li>🏋️ حمل بار سبک با تواتر زیاد</li>
+                    <li>↔️ تنظیم زوایا در ابزار کار و فضای دسترسی</li>
+                    <li>🚫 ممنوعیت کار بالاتر از ارتفاع شانه</li>
+                    <li>🚫 ممنوعیت استفاده از کف دست یا مچ به جای ضربه زدن</li>
+                    <li>⏱️ پرهیز از فعالیت‌های استاتیک و ایستا</li>
+                    <li>🤲 ایجاد تکیه‌گاه‌های مناسب برای مچ و بازو</li>
+                </ul>
+                <div class="card-subtitle">حمل بار سنگین</div>
+                <ul>
+                    <li>⚠️ حمل اشیاء سنگین بصورت نادرست عمده‌ترین عامل بروز کمردردها و ضایعات دیسک بین مهره‌ای</li>
+                    <li>✅ رعایت روش‌های ارگونومیک حمل بار تا حد بسیار زیادی از این عوارض می‌کاهد</li>
+                    <li>🚫 تعداد فعالیت‌هایی که مستلزم بلند کردن بار به صورت دستی هستند را محدود کنید.</li>
+                    <li>✅ بهترین شرایط را برای بلند کردن بار پدید آورید.</li>
+                    <li>🏋️ میزان وزن بار همیشه باید کمتر از <strong>۲۳ کیلوگرم</strong> باشد.</li>
+                    <li>🔧 بار باید دارای دسته‌های مناسب باشد.</li>
+                    <li>👥 بلند کردن بار از زمین باید توسط چند نفر انجام گیرد.</li>
+                </ul>
+            </div>
+
+            <!-- ===== بیماری‌های شغلی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🩺</span> بیماری‌های حرفه‌ای</div>
+                <ul>
+                    <li>⚠️ بیماری‌هایی که بر اثر تماس با عوامل زیان‌آور در محیط کار ایجاد می‌شوند.</li>
+                    <li>🚫 این بیماری‌ها معمولاً درمان‌ناپذیر و یا بسیار صعب‌العلاجند.</li>
+                    <li>✅ همگی با رعایت موازین بهداشت صنعتی قابل پیشگیری هستند.</li>
+                </ul>
+                <div class="card-subtitle">انواع بیماری‌های حرفه‌ای</div>
+                <ul>
+                    <li>〰️ بیماری‌های ناشی از عوامل فیزیکی</li>
+                    <li>🪑 بیماری‌های ناشی از عوامل ارگونومیک</li>
+                    <li>🫁 بیماری‌های ریوی ناشی از کار</li>
+                    <li>🤧 بیماری‌های پوستی ناشی از کار</li>
+                    <li>☢️ سرطان‌های شغلی</li>
+                    <li>🫘 بیماری‌های کلیوی ناشی از کار</li>
+                    <li>🧬 بیماری‌های کبدی ناشی از کار</li>
+                </ul>
+            </div>
+
+            <!-- ===== مثلث حوادث ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🔺</span> مثلث حوادث (Accident Triangle)</div>
+                <div style="background:rgba(0,0,0,0.02); border-radius:var(--border-radius-sm); padding:20px; text-align:center;">
+                    <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:8px;">▼ هرم حوادث ▼</div>
+                    <div style="background:#c0392b; color:#fff; padding:6px 12px; border-radius:8px; display:inline-block; margin:4px;">🔴 مرگ / آسیب‌های ناتوان‌کننده کلی دائمی</div><br />
+                    <div style="background:#f39c12; color:#fff; padding:6px 12px; border-radius:8px; display:inline-block; margin:4px;">🟡 آسیب‌های جزئی / ناتوان‌کننده جزئی</div><br />
+                    <div style="background:#2980b9; color:#fff; padding:6px 12px; border-radius:8px; display:inline-block; margin:4px;">🔵 وقایعی که موجب صدمه به اموال / تاسیسات / تجهیزات می‌شوند</div><br />
+                    <div style="background:#1abc9c; color:#fff; padding:6px 12px; border-radius:8px; display:inline-block; margin:4px;">🟢 وقایعی ظاهراً هیچ آسیب / ضایعه مرئی ندارند (شبه حوادث)</div>
+                </div>
+            </div>
+
+            <!-- ===== اعمال و شرایط ناایمن ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">⚠️</span> اعمال ناایمن و شرایط ناایمن</div>
+                <div class="grid-2">
+                    <div style="background:rgba(192,57,43,0.04); border-radius:var(--border-radius-sm); padding:16px; border-right:4px solid var(--danger);">
+                        <h4 style="color:var(--danger); margin:0 0 8px;">👤 اعمال ناایمن</h4>
+                        <ul style="font-size:0.92rem;">
+                            <li>انجام کار بدون مجوزهای لازم</li>
+                            <li>بی‌توجهی به نکات ایمنی</li>
+                            <li>ترک دستگاه در وضعیت خطرناک</li>
+                            <li>جدا کردن تجهیزات ایمنی</li>
+                            <li>کار با ماشین با سرعت غیرمجاز</li>
+                            <li>عجله هنگام کار</li>
+                            <li>کار هنگام خستگی و خواب‌آلودگی</li>
+                            <li>شوخی هنگام کار</li>
+                            <li>استفاده از ابزار معیوب</li>
+                            <li>عدم توجه به اخطارها</li>
+                            <li>عدم استفاده از وسایل حفاظت فردی</li>
+                        </ul>
+                    </div>
+                    <div style="background:rgba(243,156,18,0.04); border-radius:var(--border-radius-sm); padding:16px; border-right:4px solid var(--secondary);">
+                        <h4 style="color:var(--secondary); margin:0 0 8px;">🏗️ شرایط ناایمن</h4>
+                        <ul style="font-size:0.92rem;">
+                            <li>لبه‌ها و پرتگاه‌های بدون حفاظ</li>
+                            <li>وجود مواد خطرناک</li>
+                            <li>وجود ابزار و دستگاه‌های معیوب</li>
+                            <li>بی‌نظامی و ریخت‌وپاش در کارگاه</li>
+                            <li>دستگاه‌های بدون حفاظ</li>
+                            <li>وجود عوامل زیان‌آور (سر و صدا، روشنایی کم)</li>
+                            <li>فقدان یا نقص در سیستم تهویه</li>
+                            <li>فقدان وسایل خاموش‌کننده حریق</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== بهبود شرایط ایمنی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📈</span> بهبود شرایط ایمنی و بهداشت کار</div>
+                <ul>
+                    <li>🗑️ <strong>حذف:</strong> حذف عامل مخاطره‌آمیز (آزبست، سرب، مواد سرطان‌زا)</li>
+                    <li>🔄 <strong>جایگزینی:</strong> استفاده از مواد کم‌خطر به جای مواد پرخطر</li>
+                    <li>💻 <strong>محدود‌سازی:</strong> محدود کردن دستگاه‌های تولیدکننده سروصدا، گرد و غبار</li>
+                    <li>👥 <strong>جداسازی:</strong> ایجاد فاصله فیزیکی یا زمانی از حضور افراد در محل خطر</li>
+                    <li>🤖 <strong>مهندسی:</strong> اتوماسیون، محصور کردن محل‌های خطرناک، حفاظ‌گذاری</li>
+                    <li>📅 <strong>مدیریتی:</strong> چرخش کاری، کاهش زمان مواجهه، تهویه عمومی و موضعی</li>
+                    <li>⛑️ <strong>وسایل حفاظت فردی:</strong> آخرین راهکار ایمنی</li>
+                </ul>
+                <div class="highlight-box">
+                    <strong>🩺 کنترل‌های پزشکی:</strong> معاینات قبل از استخدام و معاینات دوره‌ای سالانه برای تشخیص اثرات مواد و عوامل زیان‌آور.
+                </div>
+            </div>
+
+            <!-- ===== محیط زیست ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🌿</span> محیط زیست و آلودگی</div>
+                <div class="highlight-box gold">
+                    <strong>⚖️ قانون اساسی (اصل ۵۰):</strong> حفاظت محیط زیست وظیفه عمومی تلقی می‌گردد. فعالیت‌های اقتصادی که با آلودگی محیط زیست یا تخریب غیرقابل‌جبران آن ملازمه پیدا کند ممنوع است.
+                </div>
+                <div class="card-subtitle">آلودگی محیط زیست</div>
+                <p>پخش یا آمیختن مواد خارجی به آب یا هوا یا زمین به میزانی که کیفیت فیزیکی یا شیمیایی یا بیولوژیک آن را به طوریکه زیان‌آور به حال انسان یا سایر موجودات زنده و یا گیاهان و یا آثار و ابنیه باشد تغییر دهد.</p>
+                <div class="card-subtitle">آلودگی هوا</div>
+                <p>هر گونه ماده گازی، بخار، مایع، جامد، تشعشع پرتوزا و غیرپرتوزا که در هوای آزاد پخش و باعث آلودگی هوا یا ایجاد بوهای نامطبوع شود.</p>
+                <p><strong>هوای پاک:</strong> ۷۸٪ نیتروژن، ۲۱٪ اکسیژن، ۰.۹۳٪ آرگون، ۰.۳٪ گاز کربنیک و مقادیر جزئی از گازهای دیگر.</p>
+            </div>
+
+            <!-- ===== منابع آلودگی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🏭</span> منابع آلودگی هوا</div>
+                <div class="card-subtitle">منابع طبیعی</div>
+                <ul>
+                    <li>🌪️ طوفان‌های شن</li>
+                    <li>🔥 آتش‌سوزی جنگل‌ها</li>
+                    <li>🌋 فوران آتشفشان‌ها</li>
+                    <li>🌱 پخش‌کننده گیاهان</li>
+                </ul>
+                <div class="card-subtitle">منابع مصنوعی</div>
+                <ul>
+                    <li>🏭 صنایع</li>
+                    <li>🚗 وسایل نقلیه</li>
+                    <li>🛢️ پالایشگاه‌ها</li>
+                    <li>⚡ نیروگاه‌ها</li>
+                    <li>🏠 منابع تجاری و خانگی</li>
+                    <li>🚜 کشاورزی</li>
+                </ul>
+                <div class="card-subtitle">انواع آلاینده‌های اصلی</div>
+                <ul>
+                    <li>اکسیدهای نیتروژن</li>
+                    <li>اکسیدهای گوگرد</li>
+                    <li>ذرات معلق</li>
+                    <li>ترکیبات آلی فرار</li>
+                    <li>سرب</li>
+                    <li>ازن</li>
+                </ul>
+            </div>
+
+            <!-- ===== فاضلاب ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">💧</span> فاضلاب و فلزات سنگین</div>
+                <p><strong>فاضلاب:</strong> هر آبی که برای مصرف خاص تهیه شده باشد و کیفیت خود را برای آن مصرف از دست بدهد.</p>
+                <div class="card-subtitle">فاضلاب‌ها حاوی:</div>
+                <ul>
+                    <li>مواد معلق</li>
+                    <li>مواد آلی</li>
+                    <li>مواد معدنی</li>
+                    <li>نمک‌های محلول فلزات سنگین</li>
+                    <li>باکتری‌ها</li>
+                    <li>ویروس‌ها</li>
+                </ul>
+                <div class="card-subtitle">اثرات فلزات سنگین</div>
+                <ul>
+                    <li><strong>🧪 جیوه (Hg):</strong> تهوع شدید، طعم فلزی، خطوط سیاه روی لثه، ناراحتی‌های کلیوی، قلبی، ریوی و روانی</li>
+                    <li><strong>🧪 کادمیم (Cd):</strong> مشکلات کلیوی، نفوذ در استخوان، اختلالات تنفسی</li>
+                    <li><strong>🧪 نیکل (Ni):</strong> سردرد، گیجی، استفراغ، سرطان ریه و سینوس</li>
+                </ul>
+            </div>
+
+            <!-- ===== فاضلاب صنعتی و کشاورزی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🏭</span> فاضلاب صنعتی و کشاورزی</div>
+                <div class="card-subtitle">فاضلاب صنعتی</div>
+                <ul>
+                    <li>مواد آلی تجزیه‌پذیر که به اکسیژن زیادی نیاز دارند</li>
+                    <li>مواد معدنی جامد</li>
+                    <li>باقیمانده شیمیایی (اسیدها و قلیایی‌ها)</li>
+                    <li>یون‌های فلزات</li>
+                </ul>
+                <div class="card-subtitle">فاضلاب کشاورزی</div>
+                <ul>
+                    <li>فسفات‌ها و نیترات‌ها</li>
+                    <li>سموم کشاورزی</li>
+                </ul>
+            </div>
+
+            <!-- ===== پالایشگاه ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">🛢️</span> منابع آلودگی هوا در پالایشگاه‌ها</div>
+                <ul>
+                    <li>🔥 آلودگی‌های احتراقی (سوزاندن سوخت برای تولید برق)</li>
+                    <li>💧 مواد منتشره ناشی از نشتی دستگاه‌ها (شیرها، پمپ‌ها)</li>
+                    <li>🌬️ مواد منتشره ناشی از فرآیند تهویه</li>
+                    <li>🛢️ مواد منتشره از تانک‌های ذخیره‌سازی</li>
+                    <li>💧 مواد منتشره از سیستم هرزآب</li>
+                </ul>
+            </div>
+
+            <!-- ===== راه‌های کاهش آلودگی ===== -->
+            <div class="card">
+                <div class="card-title"><span class="icon">✅</span> راه‌های کاهش آلودگی هوا</div>
+                <ul>
+                    <li>🚗 ارتقاء تکنولوژی خودروها</li>
+                    <li>⛽ بهبود کیفیت سوخت</li>
+                    <li>🚌 استفاده از حمل و نقل عمومی</li>
+                    <li>♻️ از رده خارج کردن خودروهای فرسوده</li>
+                    <li>✅ گسترش معاینه فنی</li>
+                    <li>🛣️ مدیریت مناسب ترافیک</li>
+                    <li>🏭 استفاده از تکنولوژی‌های کنترل آلودگی در صنایع</li>
+                    <li>📊 گسترش سیستم پایش مستمر</li>
+                    <li>📢 اطلاع‌رسانی و افزایش آگاهی‌های مردم</li>
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            تهیه شده توسط <span class="highlight">شرکت معدنی و صنایع معدنی درکاو</span><br>
+            <span style="direction:ltr; display:inline-block;">📞 09178680173</span>
+        </div>
+
+    </div>
+
+    <script>
+        // اضافه کردن قابلیت کپی متن با کلیک
+        document.querySelectorAll('.card .item-box, .highlight-box, .fire-class-item, .safety-alert, .card ul li, .card ol li, .nfpa-legend .leg-item, .measure-item').forEach(el => {
+            el.style.cursor = 'pointer';
+            el.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') return;
+                const text = this.textContent.trim();
+                navigator.clipboard.writeText(text).then(() => {
+                    const origBg = this.style.background;
+                    this.style.background = '#d4edda';
+                    setTimeout(() => {
+                        this.style.background = origBg || '';
+                    }, 400);
+                });
+            });
+        });
+
+        console.log('✅ دوره ایمنی عمومی HSE (کامل) بارگذاری شد.');
+        console.log('📋 کلیک روی هر متن برای کپی کردن');
+        console.log('🔥 شامل طبقه‌بندی کامل حریق NFPA و لوزی خطر NFPA 704');
+    </script>
+
+<script src="hse-common.js"></script>
+
+<script src="assets/js/sw-register.js"></script>
+</body>
+</html>
