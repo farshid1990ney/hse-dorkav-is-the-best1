@@ -5,7 +5,17 @@
       "namespace": "android_app",
       "package_name": "io.github.farshid1990ney.twa",
       "sha256_cert_fingerprints": [
-        "EB:C2:48:EC:01:28:3F:66:30:C8:8B:FD:4B:4A:CD:F2:3C:D8:F3:CF:74:B3:B4:C9:85:65:E7:6C:7F:BD:C6:22"
+        "56:35:35:48:E0:CB:55:6C:4A:7F:35:4A:4F:F7:28:4E:A6:34:65:9B:09:36:FB:DB:CC:D5:D8:1F:5A:A1:9D:68"
+      ]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "cafebazaar_twa",
+      "package_name": "io.github.farshid1990ney.twa",
+      "sha256_cert_fingerprints": [
+        "56:35:35:48:E0:CB:55:6C:4A:7F:35:4A:4F:F7:28:4E:A6:34:65:9B:09:36:FB:DB:CC:D5:D8:1F:5A:A1:9D:68"
       ]
     }
   }
