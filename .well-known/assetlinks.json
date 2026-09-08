@@ -3,9 +3,9 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.farshid.hsedorkav",
+      "package_name": "io.github.farshid1990ney.twa",
       "sha256_cert_fingerprints": [
-        "5A:44:3B:AD:30:79:62:F5:B1:C1:C7:EF:B7:3C:A8:3E:57:38:88:05:D7:F5:55:90:2D:96:73:A6:26:46:DD:15"
+        "EB:C2:48:EC:01:28:3F:66:30:C8:8B:FD:4B:4A:CD:F2:3C:D8:F3:CF:74:B3:B4:C9:85:65:E7:6C:7F:BD:C6:22"
       ]
     }
   }
